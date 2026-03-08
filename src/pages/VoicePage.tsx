@@ -4,7 +4,7 @@ import { useAppContext } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Mic, MicOff, ChevronRight } from "lucide-react";
+import { Mic, MicOff, ChevronRight, Volume2, Zap, Target, TrendingUp } from "lucide-react";
 
 const prompts = [
   "Tell me about yourself.",
@@ -67,20 +67,12 @@ export default function VoicePage() {
     const words = transcript.trim().split(/\s+/).length;
     const wpm = Math.round((words / durationSec) * 60);
 
-    // Speed score: 120-160 wpm is ideal
     const speedScore = wpm >= 120 && wpm <= 160 ? 90 : wpm > 80 && wpm < 200 ? 70 : 40;
-
-    // Fluency: based on word count and filler detection
     const fillers = (transcript.match(/\b(um|uh|like|you know|basically|actually)\b/gi) || []).length;
     const fluencyScore = Math.max(20, Math.min(100, 90 - fillers * 10));
-
-    // Clarity: based on average word length and vocabulary
     const avgWordLen = transcript.replace(/\s+/g, "").length / words;
     const clarityScore = Math.min(100, Math.round(avgWordLen * 15 + words * 0.5));
-
-    // Confidence: longer responses with fewer fillers = more confident
     const confidenceScore = Math.min(100, Math.round((words / 20) * 30 + (1 - fillers / words) * 50 + 20));
-
     const overall = Math.round((speedScore + fluencyScore + clarityScore + confidenceScore) / 4);
 
     const result = { speaking_speed: wpm, fluency_score: fluencyScore, clarity_score: clarityScore, confidence_score: confidenceScore, overall_score: overall, transcript };
@@ -96,71 +88,100 @@ export default function VoicePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-10 max-w-2xl">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl gradient-warm flex items-center justify-center">
-          <Mic className="w-5 h-5 text-warning-foreground" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Voice Communication Analyzer</h1>
-          <p className="text-sm text-muted-foreground">Record your answer to assess communication skills</p>
-        </div>
-      </div>
-
-      <div className="bg-card rounded-xl border border-border p-6 space-y-6">
-        <div className="bg-primary/5 rounded-xl p-5 border border-primary/10">
-          <p className="text-sm text-muted-foreground mb-1">Interview Prompt:</p>
-          <p className="text-lg font-display font-semibold text-foreground">"{prompt}"</p>
-        </div>
-
-        <div className="flex justify-center">
-          <button
-            onClick={isRecording ? stopRecording : startRecording}
-            className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
-              isRecording ? "bg-destructive animate-pulse-glow" : "gradient-primary shadow-glow hover:opacity-90"
-            }`}
-          >
-            {isRecording ? <MicOff className="w-10 h-10 text-destructive-foreground" /> : <Mic className="w-10 h-10 text-primary-foreground" />}
-          </button>
-        </div>
-        <p className="text-center text-sm text-muted-foreground">
-          {isRecording ? "Recording... Click to stop" : "Click to start recording"}
-        </p>
-
-        {transcript && (
-          <div className="bg-secondary/50 rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Transcript:</p>
-            <p className="text-foreground text-sm">{transcript}</p>
+    <div className="min-h-screen bg-pattern">
+      <div className="container mx-auto px-4 lg:px-8 py-10 max-w-2xl">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-2xl gradient-warm flex items-center justify-center">
+            <Mic className="w-7 h-7 text-white" />
           </div>
-        )}
+          <div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Voice Analyzer</h1>
+            <p className="text-muted-foreground">Assess your communication skills</p>
+          </div>
+        </div>
 
-        {transcript && !isRecording && !analyzed && (
-          <Button onClick={analyzeVoice} className="w-full gradient-accent text-accent-foreground">Analyze Communication</Button>
-        )}
-
-        {analyzed && (
-          <div className="space-y-4 animate-fade-in">
-            <h3 className="font-display font-semibold text-foreground">Analysis Results</h3>
-            {[
-              { label: "Speaking Speed", value: `${scores.speaking_speed} WPM`, score: scores.speaking_speed > 80 ? 80 : 40 },
-              { label: "Fluency", value: `${scores.fluency_score}%`, score: scores.fluency_score },
-              { label: "Clarity", value: `${scores.clarity_score}%`, score: scores.clarity_score },
-              { label: "Confidence", value: `${scores.confidence_score}%`, score: scores.confidence_score },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
-                <span className="text-sm font-medium text-foreground">{item.label}</span>
-                <span className={`font-bold ${item.score >= 70 ? "text-success" : item.score >= 40 ? "text-warning" : "text-destructive"}`}>{item.value}</span>
-              </div>
-            ))}
-            <div className="bg-primary/5 rounded-xl p-4 text-center border border-primary/10">
-              <p className="text-sm text-muted-foreground">Overall Communication Score</p>
-              <p className="text-4xl font-display font-bold text-primary">{scores.overall_score}%</p>
+        <div className="card-elevated p-6 md:p-8 space-y-8">
+          {/* Prompt */}
+          <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10">
+            <div className="flex items-center gap-2 mb-2">
+              <Volume2 className="w-5 h-5 text-primary" />
+              <p className="text-sm font-medium text-muted-foreground">Interview Prompt</p>
             </div>
-            <Button onClick={() => navigate("/dashboard")} className="w-full gradient-primary text-primary-foreground">
-              View Dashboard <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+            <p className="text-xl font-display font-semibold text-foreground">"{prompt}"</p>
           </div>
-        )}
+
+          {/* Recording button */}
+          <div className="flex flex-col items-center py-6">
+            <button
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 ${
+                isRecording 
+                  ? "bg-destructive animate-pulse scale-110" 
+                  : "gradient-primary shadow-glow hover:scale-105"
+              }`}
+            >
+              {isRecording 
+                ? <MicOff className="w-12 h-12 text-white" /> 
+                : <Mic className="w-12 h-12 text-white" />
+              }
+            </button>
+            <p className="text-sm text-muted-foreground mt-4 font-medium">
+              {isRecording ? "🔴 Recording... Click to stop" : "Click to start recording"}
+            </p>
+          </div>
+
+          {/* Transcript */}
+          {transcript && (
+            <div className="bg-secondary/50 rounded-2xl p-5">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Transcript</p>
+              <p className="text-foreground leading-relaxed">{transcript}</p>
+            </div>
+          )}
+
+          {/* Analyze button */}
+          {transcript && !isRecording && !analyzed && (
+            <Button onClick={analyzeVoice} className="w-full gradient-accent text-accent-foreground h-14 text-lg rounded-xl shadow-glow-accent">
+              <Zap className="w-5 h-5 mr-2" /> Analyze Communication
+            </Button>
+          )}
+
+          {/* Results */}
+          {analyzed && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                <h3 className="font-display font-semibold text-lg text-foreground">Analysis Results</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "Speaking Speed", value: `${scores.speaking_speed}`, unit: "WPM", score: scores.speaking_speed > 80 ? 80 : 40 },
+                  { label: "Fluency", value: `${scores.fluency_score}`, unit: "%", score: scores.fluency_score },
+                  { label: "Clarity", value: `${scores.clarity_score}`, unit: "%", score: scores.clarity_score },
+                  { label: "Confidence", value: `${scores.confidence_score}`, unit: "%", score: scores.confidence_score },
+                ].map((item) => (
+                  <div key={item.label} className="bg-secondary/50 rounded-2xl p-5 text-center">
+                    <p className="text-sm text-muted-foreground mb-1">{item.label}</p>
+                    <p className={`text-3xl font-bold ${item.score >= 70 ? "text-success" : item.score >= 40 ? "text-warning" : "text-destructive"}`}>
+                      {item.value}<span className="text-lg">{item.unit}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Overall score */}
+              <div className="bg-primary/5 rounded-2xl p-6 text-center border border-primary/10">
+                <p className="text-sm text-muted-foreground mb-2">Overall Communication Score</p>
+                <p className="text-6xl font-display font-bold text-gradient">{scores.overall_score}%</p>
+              </div>
+
+              <Button onClick={() => navigate("/dashboard")} className="w-full gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow">
+                <TrendingUp className="w-5 h-5 mr-2" /> View Dashboard <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useAppContext } from "@/context/AppContext";
-import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb } from "lucide-react";
+import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import SkillBar from "@/components/SkillBar";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ function calculatePlacement(profile: any, quizScores: any[], commScore: number) 
   const projectNorm = Math.min(100, profile.num_projects * 15);
   const internshipNorm = Math.min(100, profile.internship_experience * 30);
 
-  // Use quiz scores if available, otherwise use self-assessment
   const dsaQuiz = quizScores.find(s => s.category === "Data Structures");
   const dsaScore = dsaQuiz ? (dsaQuiz.score / dsaQuiz.total_questions) * 100 : profile.dsa_score;
 
@@ -86,16 +85,18 @@ export default function DashboardPage() {
 
   if (!profile) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-md mx-auto space-y-6 animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-            <AlertTriangle className="w-8 h-8 text-primary" />
+      <div className="min-h-screen bg-pattern flex items-center justify-center">
+        <div className="container mx-auto px-4 py-20 text-center">
+          <div className="max-w-md mx-auto space-y-6 animate-fade-in">
+            <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-10 h-10 text-primary" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">No Data Yet</h1>
+            <p className="text-muted-foreground">Complete your profile to see your placement prediction. Quiz and voice analysis are optional.</p>
+            <Button asChild className="gradient-primary text-primary-foreground shadow-glow h-12 px-8 rounded-xl">
+              <Link to="/profile">Create Profile <ArrowRight className="w-4 h-4 ml-2" /></Link>
+            </Button>
           </div>
-          <h1 className="text-2xl font-display font-bold text-foreground">No Data Yet</h1>
-          <p className="text-muted-foreground">Complete your profile to see your placement prediction. Quiz and voice analysis are optional.</p>
-          <Button asChild className="gradient-primary text-primary-foreground">
-            <Link to="/profile">Create Profile</Link>
-          </Button>
         </div>
       </div>
     );
@@ -106,7 +107,6 @@ export default function DashboardPage() {
   const placed = placementProb >= 60;
   const gaps = getSkillGaps(profile, quizScores, commScore);
 
-  // Compute actual displayed scores
   const dsaQuiz = quizScores.find(s => s.category === "Data Structures");
   const dsaDisplayScore = dsaQuiz ? Math.round((dsaQuiz.score / dsaQuiz.total_questions) * 100) : profile.dsa_score;
   const dsaSource = dsaQuiz ? "Quiz" : "Self-assessed";
@@ -120,125 +120,140 @@ export default function DashboardPage() {
     : 0;
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-          <Brain className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Dashboard — {profile.name}</h1>
-          <p className="text-sm text-muted-foreground">Your placement analysis and recommendations</p>
-        </div>
-      </div>
-
-      {/* Placement Prediction Banner */}
-      <div className={`rounded-xl p-6 mb-8 animate-fade-in ${placed ? "bg-success/10 border border-success/20" : "bg-destructive/10 border border-destructive/20"}`}>
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center ${placed ? "bg-success" : "bg-destructive"}`}>
-              {placed ? <CheckCircle2 className="w-7 h-7 text-success-foreground" /> : <AlertTriangle className="w-7 h-7 text-destructive-foreground" />}
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Placement Prediction</p>
-              <p className={`text-2xl font-display font-bold ${placed ? "text-success" : "text-destructive"}`}>{placed ? "Likely Placed" : "Needs Improvement"}</p>
-            </div>
+    <div className="min-h-screen bg-pattern">
+      <div className="container mx-auto px-4 lg:px-8 py-10">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-2xl gradient-primary shadow-glow flex items-center justify-center">
+            <Brain className="w-7 h-7 text-primary-foreground" />
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Probability</p>
-            <p className={`text-4xl font-display font-bold ${placed ? "text-success" : "text-destructive"}`}>{placementProb}%</p>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground">Welcome back, {profile.name}</p>
           </div>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard title="CGPA" value={profile.cgpa.toFixed(1)} subtitle="out of 10" icon={<TrendingUp className="w-5 h-5" />} variant="primary" />
-        <StatCard title="Quiz Score" value={quizScores.length > 0 ? `${totalQuizPct}%` : "—"} subtitle={quizScores.length > 0 ? `${quizScores.length} categories` : "Not taken"} icon={<BookOpen className="w-5 h-5" />} variant="accent" />
-        <StatCard title="Communication" value={`${commScore}%`} icon={<Mic className="w-5 h-5" />} variant="warning" />
-        <StatCard title="Projects" value={profile.num_projects} subtitle={`${profile.internship_experience} internships`} icon={<Brain className="w-5 h-5" />} />
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Skill Levels */}
-        <div className="bg-card rounded-xl border border-border p-6 animate-fade-in">
-          <h2 className="font-display font-semibold text-lg mb-5 text-foreground">Skill Levels</h2>
-          <div className="space-y-4">
-            <SkillBar label="CGPA" value={profile.cgpa} max={10} color={profile.cgpa >= 7 ? "success" : profile.cgpa >= 5 ? "warning" : "destructive"} />
-            <div>
-              <SkillBar label={`DSA Knowledge (${dsaSource})`} value={dsaDisplayScore} max={100} color={dsaDisplayScore >= 60 ? "success" : dsaDisplayScore >= 40 ? "warning" : "destructive"} />
+        {/* Placement Prediction Banner */}
+        <div className={`card-elevated p-6 md:p-8 mb-8 animate-fade-in relative overflow-hidden ${
+          placed ? "border-success/30" : "border-destructive/30"
+        }`}>
+          <div className={`absolute inset-0 ${placed ? "bg-success/5" : "bg-destructive/5"}`} />
+          <div className="relative flex items-center justify-between flex-wrap gap-6">
+            <div className="flex items-center gap-5">
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${placed ? "gradient-accent shadow-glow-accent" : "gradient-warm"}`}>
+                {placed ? <CheckCircle2 className="w-8 h-8 text-white" /> : <AlertTriangle className="w-8 h-8 text-white" />}
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">AI Placement Prediction</p>
+                <p className={`text-2xl md:text-3xl font-display font-bold ${placed ? "text-success" : "text-destructive"}`}>
+                  {placed ? "Likely Placed" : "Needs Improvement"}
+                </p>
+              </div>
             </div>
-            <div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Probability</p>
+              <p className={`text-5xl md:text-6xl font-display font-bold ${placed ? "text-gradient-accent" : "text-gradient"}`}>
+                {placementProb}%
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StatCard title="CGPA" value={profile.cgpa.toFixed(1)} subtitle="out of 10" icon={<TrendingUp className="w-5 h-5" />} variant="primary" />
+          <StatCard title="Quiz Score" value={quizScores.length > 0 ? `${totalQuizPct}%` : "—"} subtitle={quizScores.length > 0 ? `${quizScores.length} categories` : "Not taken"} icon={<BookOpen className="w-5 h-5" />} variant="accent" />
+          <StatCard title="Communication" value={`${commScore}%`} icon={<Mic className="w-5 h-5" />} variant="warning" />
+          <StatCard title="Projects" value={profile.num_projects} subtitle={`${profile.internship_experience} internships`} icon={<Target className="w-5 h-5" />} />
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Skill Levels */}
+          <div className="card-elevated p-6 animate-fade-in">
+            <div className="flex items-center gap-2 mb-6">
+              <Zap className="w-5 h-5 text-primary" />
+              <h2 className="font-display font-semibold text-lg text-foreground">Skill Levels</h2>
+            </div>
+            <div className="space-y-5">
+              <SkillBar label="CGPA" value={profile.cgpa} max={10} color={profile.cgpa >= 7 ? "success" : profile.cgpa >= 5 ? "warning" : "destructive"} />
+              <SkillBar label={`DSA (${dsaSource})`} value={dsaDisplayScore} max={100} color={dsaDisplayScore >= 60 ? "success" : dsaDisplayScore >= 40 ? "warning" : "destructive"} />
               <SkillBar label={`Aptitude (${aptSource})`} value={aptDisplayScore} max={100} color={aptDisplayScore >= 60 ? "success" : aptDisplayScore >= 40 ? "warning" : "destructive"} />
+              <SkillBar label="Communication" value={commScore} max={100} color={commScore >= 60 ? "accent" : commScore >= 40 ? "warning" : "destructive"} />
+              {quizScores.length > 0 && (
+                <SkillBar label="Quiz Average" value={totalQuizPct} max={100} color={totalQuizPct >= 60 ? "primary" : totalQuizPct >= 40 ? "warning" : "destructive"} />
+              )}
             </div>
-            <SkillBar label="Communication" value={commScore} max={100} color={commScore >= 60 ? "accent" : commScore >= 40 ? "warning" : "destructive"} />
-            {quizScores.length > 0 && (
-              <SkillBar label="Quiz Average" value={totalQuizPct} max={100} color={totalQuizPct >= 60 ? "primary" : totalQuizPct >= 40 ? "warning" : "destructive"} />
+          </div>
+
+          {/* Quiz Breakdown */}
+          <div className="card-elevated p-6 animate-fade-in">
+            <div className="flex items-center gap-2 mb-6">
+              <BookOpen className="w-5 h-5 text-accent" />
+              <h2 className="font-display font-semibold text-lg text-foreground">Quiz Breakdown</h2>
+            </div>
+            {quizScores.length > 0 ? (
+              <div className="space-y-5">
+                {quizScores.map((s) => (
+                  <SkillBar key={s.category} label={s.category} value={s.score} max={s.total_questions} color={(s.score / s.total_questions) >= 0.66 ? "success" : (s.score / s.total_questions) >= 0.33 ? "warning" : "destructive"} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground mb-4">No quiz data yet</p>
+                <Button asChild variant="outline" size="sm" className="rounded-xl">
+                  <Link to="/quiz">Take Quiz</Link>
+                </Button>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Quiz Breakdown */}
-        <div className="bg-card rounded-xl border border-border p-6 animate-fade-in">
-          <h2 className="font-display font-semibold text-lg mb-5 text-foreground">Quiz Breakdown</h2>
-          {quizScores.length > 0 ? (
-            <div className="space-y-4">
-              {quizScores.map((s) => (
-                <SkillBar key={s.category} label={s.category} value={s.score} max={s.total_questions} color={(s.score / s.total_questions) >= 0.66 ? "success" : (s.score / s.total_questions) >= 0.33 ? "warning" : "destructive"} />
+        {/* Skill Gap Analysis */}
+        {gaps.length > 0 && (
+          <div className="mt-8 card-elevated p-6 md:p-8 animate-fade-in">
+            <div className="flex items-center gap-2 mb-6">
+              <Lightbulb className="w-5 h-5 text-warning" />
+              <h2 className="font-display font-semibold text-lg text-foreground">Skill Gap Analysis & Recommendations</h2>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {gaps.map((gap, i) => (
+                <div key={i} className={`rounded-2xl p-5 border-2 ${
+                  gap.severity === "high" ? "bg-destructive/5 border-destructive/20" :
+                  gap.severity === "medium" ? "bg-warning/5 border-warning/20" :
+                  "bg-info/5 border-info/20"
+                }`}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full ${
+                        gap.severity === "high" ? "bg-destructive/10 text-destructive" :
+                        gap.severity === "medium" ? "bg-warning/10 text-warning" :
+                        "bg-info/10 text-info"
+                      }`}>{gap.severity} priority</span>
+                      <h3 className="font-semibold text-foreground mt-2">{gap.skill}</h3>
+                    </div>
+                    <span className="text-sm font-mono text-muted-foreground bg-secondary px-2 py-1 rounded-lg">{gap.level}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">💡 {gap.suggestion}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {gap.resources.map((r) => (
+                      <span key={r} className="text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-lg font-medium">{r}</span>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-3">No quiz data yet — take the quiz for accurate scores</p>
-              <Button asChild variant="outline" size="sm"><Link to="/quiz">Take Quiz</Link></Button>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {gaps.length === 0 && (
+          <div className="mt-8 card-elevated bg-success/5 border-success/20 p-8 text-center animate-fade-in">
+            <CheckCircle2 className="w-16 h-16 text-success mx-auto mb-4" />
+            <h2 className="font-display font-semibold text-xl text-foreground">Excellent Profile!</h2>
+            <p className="text-muted-foreground mt-2">No major skill gaps detected. Keep up the great work!</p>
+          </div>
+        )}
       </div>
-
-      {/* Skill Gap Analysis */}
-      {gaps.length > 0 && (
-        <div className="mt-8 bg-card rounded-xl border border-border p-6 animate-fade-in">
-          <div className="flex items-center gap-2 mb-5">
-            <Lightbulb className="w-5 h-5 text-warning" />
-            <h2 className="font-display font-semibold text-lg text-foreground">Skill Gap Analysis & Recommendations</h2>
-          </div>
-          <div className="space-y-4">
-            {gaps.map((gap, i) => (
-              <div key={i} className={`rounded-xl p-4 border ${
-                gap.severity === "high" ? "bg-destructive/5 border-destructive/15" :
-                gap.severity === "medium" ? "bg-warning/5 border-warning/15" :
-                "bg-info/5 border-info/15"
-              }`}>
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full ${
-                      gap.severity === "high" ? "bg-destructive/10 text-destructive" :
-                      gap.severity === "medium" ? "bg-warning/10 text-warning" :
-                      "bg-info/10 text-info"
-                    }`}>{gap.severity} priority</span>
-                    <h3 className="font-semibold text-foreground mt-1">{gap.skill}</h3>
-                  </div>
-                  <span className="text-sm font-mono text-muted-foreground">{gap.level}</span>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">💡 {gap.suggestion}</p>
-                <div className="flex flex-wrap gap-2">
-                  {gap.resources.map((r) => (
-                    <span key={r} className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-md">{r}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {gaps.length === 0 && (
-        <div className="mt-8 bg-success/5 rounded-xl border border-success/20 p-6 text-center animate-fade-in">
-          <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-3" />
-          <h2 className="font-display font-semibold text-lg text-foreground">Excellent Profile!</h2>
-          <p className="text-muted-foreground">No major skill gaps detected. Keep up the great work!</p>
-        </div>
-      )}
     </div>
   );
 }

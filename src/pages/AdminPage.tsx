@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, Users, TrendingUp, TrendingDown, RefreshCw, Lock, Eye, EyeOff } from "lucide-react";
+import { Shield, Users, TrendingUp, TrendingDown, RefreshCw, Lock, Eye, EyeOff, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -80,32 +80,38 @@ export default function AdminPage() {
   // ========== LOGIN SCREEN ==========
   if (!authenticated) {
     return (
-      <div className="container mx-auto px-4 py-20 max-w-md">
-        <div className="bg-card rounded-xl border border-border p-8 space-y-6 animate-fade-in">
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full gradient-warm flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-8 h-8 text-primary-foreground" />
+      <div className="min-h-screen bg-pattern flex items-center justify-center">
+        <div className="container mx-auto px-4 py-20 max-w-md">
+          <div className="card-elevated p-8 md:p-10 space-y-8 animate-fade-in">
+            <div className="text-center">
+              <div className="w-20 h-20 rounded-2xl gradient-warm flex items-center justify-center mx-auto mb-6">
+                <Lock className="w-10 h-10 text-white" />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Admin Access</h1>
+              <p className="text-muted-foreground mt-2">Enter password to access the admin panel</p>
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Admin Access</h1>
-            <p className="text-sm text-muted-foreground mt-1">Enter password to access the admin panel</p>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter admin password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-12 h-12 text-base rounded-xl"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)} 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground h-12 rounded-xl shadow-glow">
+                <Shield className="w-5 h-5 mr-2" /> Login
+              </Button>
+            </form>
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter admin password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pr-10"
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground">
-              <Shield className="w-4 h-4 mr-2" /> Login
-            </Button>
-          </form>
         </div>
       </div>
     );
@@ -115,94 +121,109 @@ export default function AdminPage() {
   const placedCount = students.filter((s) => (s.placement_probability ?? 0) >= 60).length;
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-warm flex items-center justify-center">
-            <Shield className="w-5 h-5 text-primary-foreground" />
+    <div className="min-h-screen bg-pattern">
+      <div className="container mx-auto px-4 lg:px-8 py-10">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl gradient-warm flex items-center justify-center">
+              <Shield className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Admin Panel</h1>
+              <p className="text-muted-foreground">Student placement predictions overview</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Admin Panel</h1>
-            <p className="text-sm text-muted-foreground">All students who checked placement prediction</p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={fetchStudents} disabled={loading} className="rounded-xl">
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setAuthenticated(false)} className="rounded-xl">
+              <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={fetchStudents} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setAuthenticated(false)}>
-            Logout
-          </Button>
-        </div>
-      </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-card rounded-xl border border-border p-4 text-center">
-          <Users className="w-5 h-5 text-primary mx-auto mb-1" />
-          <p className="text-2xl font-display font-bold text-foreground">{students.length}</p>
-          <p className="text-xs text-muted-foreground">Total Students</p>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="card-elevated p-6 text-center">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <Users className="w-6 h-6 text-primary" />
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{students.length}</p>
+            <p className="text-sm text-muted-foreground">Total Students</p>
+          </div>
+          <div className="card-elevated p-6 text-center">
+            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-3">
+              <TrendingUp className="w-6 h-6 text-success" />
+            </div>
+            <p className="text-3xl font-display font-bold text-success">{placedCount}</p>
+            <p className="text-sm text-muted-foreground">Likely Placed</p>
+          </div>
+          <div className="card-elevated p-6 text-center">
+            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center mx-auto mb-3">
+              <TrendingDown className="w-6 h-6 text-destructive" />
+            </div>
+            <p className="text-3xl font-display font-bold text-destructive">{students.length - placedCount}</p>
+            <p className="text-sm text-muted-foreground">Needs Improvement</p>
+          </div>
         </div>
-        <div className="bg-card rounded-xl border border-border p-4 text-center">
-          <TrendingUp className="w-5 h-5 text-success mx-auto mb-1" />
-          <p className="text-2xl font-display font-bold text-success">{placedCount}</p>
-          <p className="text-xs text-muted-foreground">Likely Placed</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-4 text-center">
-          <TrendingDown className="w-5 h-5 text-destructive mx-auto mb-1" />
-          <p className="text-2xl font-display font-bold text-destructive">{students.length - placedCount}</p>
-          <p className="text-xs text-muted-foreground">Needs Improvement</p>
-        </div>
-      </div>
 
-      {/* Student Table */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-secondary/50">
-                <th className="text-left p-3 font-semibold text-foreground">#</th>
-                <th className="text-left p-3 font-semibold text-foreground">Name</th>
-                <th className="text-center p-3 font-semibold text-foreground">CGPA</th>
-                <th className="text-center p-3 font-semibold text-foreground">DSA</th>
-                <th className="text-center p-3 font-semibold text-foreground">Aptitude</th>
-                <th className="text-center p-3 font-semibold text-foreground">Projects</th>
-                <th className="text-center p-3 font-semibold text-foreground">Internships</th>
-                <th className="text-center p-3 font-semibold text-foreground">Prediction</th>
-                <th className="text-center p-3 font-semibold text-foreground">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s, i) => {
-                const placed = (s.placement_probability ?? 0) >= 60;
-                return (
-                  <tr key={s.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="p-3 text-muted-foreground">{i + 1}</td>
-                    <td className="p-3 font-medium text-foreground">{s.name}</td>
-                    <td className="p-3 text-center text-foreground">{s.cgpa}</td>
-                    <td className="p-3 text-center text-foreground">{s.dsa_score}%</td>
-                    <td className="p-3 text-center text-foreground">{s.aptitude_score}%</td>
-                    <td className="p-3 text-center text-foreground">{s.num_projects}</td>
-                    <td className="p-3 text-center text-foreground">{s.internship_experience}</td>
-                    <td className="p-3 text-center font-bold">
-                      <span className={placed ? "text-success" : "text-destructive"}>{s.placement_probability}%</span>
-                    </td>
-                    <td className="p-3 text-center">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${placed ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                        {placed ? "Likely Placed" : "Needs Work"}
-                      </span>
+        {/* Student Table */}
+        <div className="card-elevated overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-secondary/50">
+                  <th className="text-left p-4 font-semibold text-foreground">#</th>
+                  <th className="text-left p-4 font-semibold text-foreground">Name</th>
+                  <th className="text-center p-4 font-semibold text-foreground">CGPA</th>
+                  <th className="text-center p-4 font-semibold text-foreground">DSA</th>
+                  <th className="text-center p-4 font-semibold text-foreground">Aptitude</th>
+                  <th className="text-center p-4 font-semibold text-foreground">Projects</th>
+                  <th className="text-center p-4 font-semibold text-foreground">Internships</th>
+                  <th className="text-center p-4 font-semibold text-foreground">Prediction</th>
+                  <th className="text-center p-4 font-semibold text-foreground">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((s, i) => {
+                  const placed = (s.placement_probability ?? 0) >= 60;
+                  return (
+                    <tr key={s.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                      <td className="p-4 text-muted-foreground">{i + 1}</td>
+                      <td className="p-4 font-medium text-foreground">{s.name}</td>
+                      <td className="p-4 text-center text-foreground">{s.cgpa}</td>
+                      <td className="p-4 text-center text-foreground">{s.dsa_score}%</td>
+                      <td className="p-4 text-center text-foreground">{s.aptitude_score}%</td>
+                      <td className="p-4 text-center text-foreground">{s.num_projects}</td>
+                      <td className="p-4 text-center text-foreground">{s.internship_experience}</td>
+                      <td className="p-4 text-center">
+                        <span className={`text-lg font-bold ${placed ? "text-success" : "text-destructive"}`}>
+                          {s.placement_probability}%
+                        </span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${
+                          placed ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                        }`}>
+                          {placed ? "Likely Placed" : "Needs Work"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {students.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={9} className="p-12 text-center text-muted-foreground">
+                      No students have checked their placement yet.
                     </td>
                   </tr>
-                );
-              })}
-              {students.length === 0 && !loading && (
-                <tr>
-                  <td colSpan={9} className="p-8 text-center text-muted-foreground">No students have checked their placement yet.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
