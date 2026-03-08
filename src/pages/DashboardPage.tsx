@@ -80,7 +80,7 @@ export default function DashboardPage() {
             <AlertTriangle className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-2xl font-display font-bold text-foreground">No Data Yet</h1>
-          <p className="text-muted-foreground">Complete your profile, take the quiz, and record a voice sample to see your dashboard.</p>
+          <p className="text-muted-foreground">Complete your profile to see your placement prediction. Quiz and voice analysis are optional.</p>
           <Button asChild className="gradient-primary text-primary-foreground">
             <Link to="/profile">Create Profile</Link>
           </Button>
