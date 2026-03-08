@@ -106,6 +106,16 @@ export default function Navbar() {
                 <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Back</span>
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="rounded-xl border-primary/50 bg-primary/10 hover:bg-primary/20 gap-1.5 font-bold text-primary"
+            >
+              <Link to="/career">
+                <Route className="w-4 h-4" /> <span className="hidden sm:inline">AI Career Roadmap</span>
+              </Link>
+            </Button>
           </div>
 
           {/* Desktop Nav */}
