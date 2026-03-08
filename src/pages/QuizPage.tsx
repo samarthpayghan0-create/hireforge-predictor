@@ -227,11 +227,11 @@ export default function QuizPage() {
         <Button variant="outline" onClick={() => { setStarted(false); setAnswers({}); setCurrentIndex({ "Aptitude": 0, "Programming": 0, "Data Structures": 0, "Core Subjects": 0 }); }} className="w-full">
           <ChevronLeft className="w-4 h-4 mr-1" /> Back to Setup
         </Button>
-        <Button onClick={finishQuiz} disabled={!allAnswered} className="w-full gradient-primary text-primary-foreground text-lg py-6">
+        <Button onClick={finishQuiz} disabled={answeredCount === 0} className="w-full gradient-primary text-primary-foreground text-lg py-6">
           <CheckCircle2 className="w-5 h-5 mr-2" />
-          Finish Quiz ({Object.values(answers).length}/{allQuestions.length} answered)
+          Finish Quiz ({answeredCount}/{allQuestions.length} answered)
         </Button>
-        {!allAnswered && <p className="text-xs text-muted-foreground text-center mt-2">Answer all questions across selected sections to submit</p>}
+        {answeredCount < allQuestions.length && <p className="text-xs text-muted-foreground text-center mt-2">You can skip questions — unanswered ones will be marked incorrect</p>}
       </div>
     </div>
   );
