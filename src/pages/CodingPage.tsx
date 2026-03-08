@@ -602,10 +602,22 @@ export default function CodingPage() {
               />
             </div>
 
+            {/* Run output */}
+            {runOutput && (
+              <div className={`px-3 py-2 border-t border-border text-xs font-mono ${runOutput.passed ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                <span className="font-semibold">{runOutput.passed ? "✅ Passed" : "❌ Failed"}</span>
+                <span className="ml-3 text-muted-foreground">Expected: <span className="text-foreground">{runOutput.expected}</span></span>
+                <span className="ml-3 text-muted-foreground">Got: <span className="text-foreground">{runOutput.actual}</span></span>
+              </div>
+            )}
+
             {/* Action bar */}
             <div className="p-3 border-t border-border bg-secondary/20 flex items-center gap-3">
-              <Button onClick={submitCode} disabled={evaluating || !code.trim() || timeExpired} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
-                {evaluating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Evaluating...</> : <><Play className="w-4 h-4 mr-2" /> Submit Solution</>}
+              <Button onClick={runCode} disabled={running || evaluating || !code.trim() || timeExpired} variant="outline" className="h-11 rounded-xl font-semibold gap-2">
+                {running ? <><Loader2 className="w-4 h-4 animate-spin" /> Running...</> : <><Play className="w-4 h-4" /> Run Code</>}
+              </Button>
+              <Button onClick={submitCode} disabled={evaluating || running || !code.trim() || timeExpired} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
+                {evaluating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Evaluating...</> : <><CheckCircle2 className="w-4 h-4 mr-2" /> Submit Solution</>}
               </Button>
               {showNextProblem && (
                 <Button onClick={goToNextProblem} className="gradient-primary text-primary-foreground h-11 rounded-xl font-semibold animate-fade-in">
