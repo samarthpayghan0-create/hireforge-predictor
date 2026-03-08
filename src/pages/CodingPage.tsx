@@ -90,6 +90,8 @@ export default function CodingPage() {
   const [totalScore, setTotalScore] = useState(0);
   const [solvedCount, setSolvedCount] = useState(0);
   const [startTime, setStartTime] = useState<number>(0);
+  const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({});
+  const [showSolution, setShowSolution] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   // Load problems
@@ -146,6 +148,7 @@ export default function CodingPage() {
   const selectProblem = (p: Problem) => {
     setSelectedProblem(p);
     setResult(null);
+    setShowSolution(false);
     const lang = LANGUAGES.find((l) => l.id === language);
     setCode(lang?.template || "");
     setStartTime(Date.now());
@@ -183,7 +186,14 @@ export default function CodingPage() {
         setSolvedCount((s) => s + 1);
         toast.success(`🎉 Correct! +${data.points_earned || 0} points${data.time_bonus ? ` (includes ${data.time_bonus} speed bonus!)` : ""}`);
       } else {
-        toast.error("Not quite right. Check the feedback below.");
+        const problemId = selectedProblem!.id;
+        setFailedAttempts((prev) => ({ ...prev, [problemId]: (prev[problemId] || 0) + 1 }));
+        const attempts = (failedAttempts[problemId] || 0) + 1;
+        if (attempts >= 2) {
+          toast.error("Not quite right. Solution is now unlocked! 🔓");
+        } else {
+          toast.error(`Not quite right. ${2 - attempts} more attempt(s) to unlock the solution.`);
+        }
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to evaluate code");
@@ -435,6 +445,31 @@ export default function CodingPage() {
                 </div>
               </div>
             )}
+
+            {/* View Solution - unlocked after 2 failed attempts */}
+            {selectedProblem && (failedAttempts[selectedProblem.id] || 0) >= 2 && (
+              <div className="mt-4 animate-fade-in">
+                {!showSolution ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSolution(true)}
+                    className="w-full rounded-xl gap-2 border-warning/30 text-warning hover:bg-warning/10"
+                  >
+                    <Zap className="w-4 h-4" /> 🔓 View Solution
+                  </Button>
+                ) : (
+                  <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-warning flex items-center gap-2">
+                        <Zap className="w-4 h-4" /> Reference Solution ({LANGUAGES.find(l => l.id === language)?.label})
+                      </p>
+                      <Button variant="ghost" size="sm" onClick={() => setShowSolution(false)} className="text-xs text-muted-foreground">Hide</Button>
+                    </div>
+                    <SolutionBlock problem={selectedProblem} language={language} />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Code editor panel */}
@@ -491,6 +526,61 @@ export default function CodingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ========== SOLUTION BLOCK COMPONENT ==========
+const SOLUTION_TEMPLATES: Record<string, string> = {};
+
+function SolutionBlock({ problem, language }: { problem: Problem; language: string }) {
+  const [solution, setSolution] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cacheKey = `${problem.id}_${language}`;
+    if (SOLUTION_TEMPLATES[cacheKey]) {
+      setSolution(SOLUTION_TEMPLATES[cacheKey]);
+      setLoading(false);
+      return;
+    }
+
+    const generateSolution = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("evaluate-code", {
+          body: {
+            mode: "generate-solution",
+            language,
+            problemTitle: problem.title,
+            problemDescription: problem.description,
+            sampleInput: problem.sample_input,
+            sampleOutput: problem.sample_output,
+          },
+        });
+        if (error) throw error;
+        const sol = data?.solution || "// Solution could not be generated";
+        SOLUTION_TEMPLATES[cacheKey] = sol;
+        setSolution(sol);
+      } catch {
+        setSolution("// Failed to generate solution. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    generateSolution();
+  }, [problem.id, language]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 py-4 justify-center text-muted-foreground text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" /> Generating solution...
+      </div>
+    );
+  }
+
+  return (
+    <pre className="text-sm text-foreground font-mono bg-background/80 rounded-lg p-4 overflow-x-auto whitespace-pre-wrap max-h-[400px] overflow-y-auto">
+      {solution}
+    </pre>
   );
 }
 

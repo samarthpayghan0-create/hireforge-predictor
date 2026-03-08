@@ -9,9 +9,35 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { code, language, problemTitle, problemDescription, sampleInput, sampleOutput, testCases, problemId, profileId, userId, username, difficulty, points } = await req.json();
+    const body = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    // ===== GENERATE SOLUTION MODE =====
+    if (body.mode === "generate-solution") {
+      const { language, problemTitle, problemDescription, sampleInput, sampleOutput } = body;
+      const solRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${LOVABLE_API_KEY}` },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: `You are an expert programmer. Write a clean, well-commented solution in ${language} for the given coding problem. Return ONLY the code, no markdown fences, no explanation outside code comments.` },
+            { role: "user", content: `Problem: ${problemTitle}\n${problemDescription}\n\nSample Input: ${sampleInput}\nExpected Output: ${sampleOutput}` },
+          ],
+          temperature: 0.3,
+          max_tokens: 2000,
+        }),
+      });
+      if (!solRes.ok) throw new Error("Failed to generate solution");
+      const solData = await solRes.json();
+      let solution = solData.choices?.[0]?.message?.content || "// No solution generated";
+      solution = solution.replace(/^```[\w]*\n?/gm, "").replace(/```$/gm, "").trim();
+      return new Response(JSON.stringify({ solution }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ===== EVALUATE CODE MODE =====
+    const { code, language, problemTitle, problemDescription, sampleInput, sampleOutput, testCases, problemId, profileId, userId, username, difficulty, points } = body;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
