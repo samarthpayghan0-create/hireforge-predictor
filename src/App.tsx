@@ -10,6 +10,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import QuizPage from "@/pages/QuizPage";
 import VoicePage from "@/pages/VoicePage";
 import DashboardPage from "@/pages/DashboardPage";
+import AdminPage from "@/pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
