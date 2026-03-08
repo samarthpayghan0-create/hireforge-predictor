@@ -37,17 +37,22 @@ const features = [
 
 export default function HomePage() {
   const [studentCount, setStudentCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
   const [avgRating, setAvgRating] = useState<number | null>(null);
 
   const fetchStats = async () => {
-    const [countRes, ratingRes] = await Promise.all([
+    const [countRes, ratingRes, usersRes] = await Promise.all([
       supabase.from("student_profiles").select("*", { count: "exact", head: true }),
       supabase.from("app_ratings").select("rating"),
+      supabase.functions.invoke("list-users"),
     ]);
     setStudentCount(countRes.count ?? 0);
     if (ratingRes.data && ratingRes.data.length > 0) {
       const avg = ratingRes.data.reduce((sum, r) => sum + r.rating, 0) / ratingRes.data.length;
       setAvgRating(Math.round(avg * 10) / 10);
+    }
+    if (usersRes.data && Array.isArray(usersRes.data)) {
+      setUserCount(usersRes.data.length);
     }
   };
 
@@ -56,8 +61,8 @@ export default function HomePage() {
 
     const channel = supabase
       .channel("homepage-stats")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "student_profiles" }, () => fetchStats())
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "app_ratings" }, () => fetchStats())
+      .on("postgres_changes", { event: "*", schema: "public", table: "student_profiles" }, () => fetchStats())
+      .on("postgres_changes", { event: "*", schema: "public", table: "app_ratings" }, () => fetchStats())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -65,6 +70,7 @@ export default function HomePage() {
 
   const stats = [
     { value: "90%", label: "Prediction Accuracy" },
+    { value: `${userCount}`, label: "Registered Users" },
     { value: `${studentCount}+`, label: "Students Analyzed" },
     { value: avgRating ? `${avgRating}★` : "—", label: "User Rating" },
   ];
