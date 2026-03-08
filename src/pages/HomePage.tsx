@@ -188,65 +188,73 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 md:py-28 bg-secondary/30">
+      <section className="py-24 md:py-32 bg-secondary/30 border-y border-border/40">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-sm font-semibold text-accent uppercase tracking-wider">Process</span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-3">
-              Your Journey to Success
+            <span className="inline-block text-xs font-semibold text-accent uppercase tracking-widest mb-4 px-3 py-1 bg-accent/10 rounded-full">Methodology</span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+              Structured Assessment Process
             </h2>
+            <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
+              A systematic approach to career readiness evaluation
+            </p>
           </div>
           
-          <div className="max-w-3xl mx-auto space-y-4">
-            {[
-              { step: "01", title: "Create Your Profile", desc: "Enter your academic and skill details", icon: User },
-              { step: "02", title: "Take Skill Assessment", desc: "Optional quizzes to measure your abilities", icon: BookOpen },
-              { step: "03", title: "Voice Analysis", desc: "Record a sample to assess communication", icon: Mic },
-              { step: "04", title: "Get AI Predictions", desc: "Receive personalized recommendations", icon: TrendingUp },
-            ].map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <div 
-                  key={i} 
-                  className="flex items-center gap-5 card-interactive p-5 animate-slide-in" 
-                  style={{ animationDelay: `${i * 150}ms` }}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-4xl font-display font-bold text-gradient">{item.step}</span>
-                    <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0">
-                      <Icon className="w-6 h-6 text-primary-foreground" />
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-6">
+              {[
+                { step: "01", title: "Profile Creation", desc: "Input academic credentials and professional experience", icon: User },
+                { step: "02", title: "Skills Assessment", desc: "Complete domain-specific competency evaluations", icon: BookOpen },
+                { step: "03", title: "Communication Analysis", desc: "Voice-based assessment of presentation skills", icon: Mic },
+                { step: "04", title: "AI-Powered Insights", desc: "Receive data-driven recommendations and roadmaps", icon: TrendingUp },
+              ].map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div 
+                    key={i} 
+                    className="flex items-start gap-5 p-6 rounded-2xl bg-card border border-border hover:border-primary/20 transition-all animate-fade-in" 
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  >
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-foreground text-background flex items-center justify-center font-display font-bold text-lg">
+                        {item.step}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Icon className="w-5 h-5 text-primary flex-shrink-0" />
+                        <h3 className="font-display font-semibold text-foreground">{item.title}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-display font-semibold text-foreground">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                  <CheckCircle2 className="w-6 h-6 text-success shrink-0" />
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 md:py-28">
+      <section className="py-24 md:py-32">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="card-elevated gradient-dark p-10 md:p-16 text-center relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
+          <div className="max-w-4xl mx-auto rounded-3xl bg-foreground p-12 md:p-16 text-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-[100px]" />
             
             <div className="relative z-10">
-              <Zap className="w-12 h-12 text-warning mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
-                Ready to Predict Your Future?
+              <div className="w-14 h-14 rounded-2xl bg-background/10 flex items-center justify-center mx-auto mb-8">
+                <Zap className="w-7 h-7 text-background" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-background mb-4">
+                Ready to Accelerate Your Career?
               </h2>
-              <p className="text-white/70 max-w-xl mx-auto mb-8">
-                Join thousands of students who've already improved their placement chances with our AI-powered platform.
+              <p className="text-background/60 max-w-xl mx-auto mb-10 text-lg">
+                Join thousands of professionals who've optimized their career trajectory with our AI-powered analytics platform.
               </p>
-              <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90 text-base px-8 py-6 rounded-xl">
+              <Button asChild size="lg" className="bg-background text-foreground hover:bg-background/90 text-base px-10 py-6 rounded-lg font-medium">
                 <Link to="/profile">
-                  Start Your Analysis <ArrowRight className="w-5 h-5 ml-2" />
+                  Begin Assessment <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
             </div>
@@ -255,11 +263,19 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-border/50">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            © 2026 HireForge. Built with ❤️ for students.
-          </p>
+      <footer className="py-12 border-t border-border">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+                <Zap className="w-4 h-4 text-background" />
+              </div>
+              <span className="font-display font-semibold text-foreground">HireForge</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2026 HireForge. Built with precision for aspiring professionals.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
