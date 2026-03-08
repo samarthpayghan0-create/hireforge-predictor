@@ -51,7 +51,7 @@ export default function HomePage() {
   const stats = [
     { value: "95%", label: "Prediction Accuracy" },
     { value: `${studentCount}+`, label: "Students Analyzed" },
-    { value: "500+", label: "Companies" },
+    
     { value: "4.9★", label: "User Rating" },
   ];
 
