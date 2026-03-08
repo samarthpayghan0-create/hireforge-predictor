@@ -1,13 +1,30 @@
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight, Star } from "lucide-react";
+import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight, Star, Sparkles, Loader2, Calendar, Rocket, ExternalLink } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import SkillBar from "@/components/SkillBar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+
+interface AIRecommendation {
+  summary: string;
+  top_skills_to_learn: {
+    skill: string;
+    why: string;
+    priority: "critical" | "high" | "medium";
+    time_to_learn: string;
+    resources: { name: string; type: string; url?: string }[];
+    action_steps: string[];
+  }[];
+  quick_wins: string[];
+  thirty_day_plan: { week1: string; week2: string; week3: string; week4: string };
+  target_companies: string[];
+  estimated_improvement: string;
+}
 
 function calculatePlacement(profile: any, quizScores: any[], commScore: number) {
   const cgpaWeight = 0.2;
