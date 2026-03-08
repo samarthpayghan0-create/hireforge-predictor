@@ -34,7 +34,8 @@ const STEPS = [
   { key: "communication", label: "Communication", icon: MessageSquare },
 ] as const;
 
-type StepKey = typeof STEPS[number]["key"];
+const NAME_REGEX = /^[A-Za-z\s.'-]+$/;
+const isValidName = (name: string) => name.trim().length >= 2 && NAME_REGEX.test(name.trim());
 
 export default function ProfilePage() {
   const { setProfile, setProfileId } = useAppContext();
@@ -79,7 +80,7 @@ export default function ProfilePage() {
   const { user } = useAuth();
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) { toast.error("Please enter your name"); return; }
+    if (!isValidName(form.name)) { toast.error("Please enter a valid name (letters only, at least 2 characters)"); return; }
     setLoading(true);
     try {
       const { data, error } = await supabase.from("student_profiles").insert({
@@ -107,8 +108,8 @@ export default function ProfilePage() {
   };
 
   const nextStep = () => {
-    if (currentStep === 0 && !form.name.trim()) {
-      toast.error("Please enter your name");
+    if (currentStep === 0 && !isValidName(form.name)) {
+      toast.error("Please enter a valid name (letters only, at least 2 characters)");
       return;
     }
     if (currentStep < STEPS.length - 1) setCurrentStep(currentStep + 1);
@@ -155,11 +156,19 @@ export default function ProfilePage() {
                 <Input 
                   id="name" 
                   value={form.name} 
-                  onChange={(e) => setForm({ ...form, name: e.target.value })} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || NAME_REGEX.test(val)) {
+                      setForm({ ...form, name: val });
+                    }
+                  }} 
                   placeholder="Enter your full name" 
                   maxLength={100}
                   className="h-12 text-base rounded-xl"
                 />
+                {form.name.length > 0 && !isValidName(form.name) && (
+                  <p className="text-sm text-destructive">Name must be at least 2 characters, letters only</p>
+                )}
               </div>
               <div className="space-y-4">
                 <Label className="text-base font-semibold">CGPA</Label>
