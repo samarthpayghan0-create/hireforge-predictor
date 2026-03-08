@@ -85,7 +85,45 @@ function getSkillGaps(profile: any, quizScores: any[], commScore: number) {
 }
 
 export default function DashboardPage() {
-  const { profile, quizScores, commResult } = useAppContext();
+  const { profile, profileId, quizScores, commResult } = useAppContext();
+  const [showRating, setShowRating] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [hasRated, setHasRated] = useState(false);
+  const [submittingRating, setSubmittingRating] = useState(false);
+
+  useEffect(() => {
+    if (!profileId) return;
+    // Check if user already rated
+    supabase.from("app_ratings").select("id").eq("profile_id", profileId).maybeSingle().then(({ data }) => {
+      if (data) {
+        setHasRated(true);
+      } else {
+        // Show rating dialog after 2 seconds
+        const timer = setTimeout(() => setShowRating(true), 2000);
+        return () => clearTimeout(timer);
+      }
+    });
+  }, [profileId]);
+
+  const submitRating = async () => {
+    if (!selectedRating || !profileId) return;
+    setSubmittingRating(true);
+    try {
+      const { error } = await supabase.from("app_ratings").insert({
+        profile_id: profileId,
+        rating: selectedRating,
+      });
+      if (error) throw error;
+      setHasRated(true);
+      setShowRating(false);
+      toast.success("Thank you for your rating!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to submit rating");
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
 
   if (!profile) {
     return (
