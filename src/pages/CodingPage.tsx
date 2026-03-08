@@ -186,7 +186,14 @@ export default function CodingPage() {
         setSolvedCount((s) => s + 1);
         toast.success(`🎉 Correct! +${data.points_earned || 0} points${data.time_bonus ? ` (includes ${data.time_bonus} speed bonus!)` : ""}`);
       } else {
-        toast.error("Not quite right. Check the feedback below.");
+        const problemId = selectedProblem!.id;
+        setFailedAttempts((prev) => ({ ...prev, [problemId]: (prev[problemId] || 0) + 1 }));
+        const attempts = (failedAttempts[problemId] || 0) + 1;
+        if (attempts >= 2) {
+          toast.error("Not quite right. Solution is now unlocked! 🔓");
+        } else {
+          toast.error(`Not quite right. ${2 - attempts} more attempt(s) to unlock the solution.`);
+        }
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to evaluate code");
