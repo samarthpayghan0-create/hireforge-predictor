@@ -32,7 +32,7 @@ export default function Navbar() {
     if (!user) return;
     supabase
       .from("student_profiles")
-      .select("name, cgpa, dsa_score, aptitude_score, num_projects, internship_experience, communication_rating")
+      .select("name, cgpa, dsa_score, aptitude_score, num_projects, internship_experience, communication_rating, avatar_url")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
