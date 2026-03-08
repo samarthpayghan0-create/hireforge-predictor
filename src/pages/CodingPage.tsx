@@ -377,9 +377,10 @@ export default function CodingPage() {
               <span key={t} className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full hidden sm:inline">{t}</span>
             ))}
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className={`flex items-center gap-2 text-sm font-semibold ${remainingTime <= 60 ? "text-destructive animate-pulse" : remainingTime <= 120 ? "text-warning" : "text-muted-foreground"}`}>
             <Timer className="w-4 h-4" />
-            <span className="font-mono">{formatTime(elapsedTime)}</span>
+            <span className="font-mono">{formatTime(remainingTime)}</span>
+            {timeExpired && <span className="text-xs text-destructive">(Expired)</span>}
           </div>
           <div className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 rounded-xl">
             <Star className="w-4 h-4 text-primary" />
