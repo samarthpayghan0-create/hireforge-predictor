@@ -148,6 +148,7 @@ export default function CodingPage() {
   const selectProblem = (p: Problem) => {
     setSelectedProblem(p);
     setResult(null);
+    setShowSolution(false);
     const lang = LANGUAGES.find((l) => l.id === language);
     setCode(lang?.template || "");
     setStartTime(Date.now());
