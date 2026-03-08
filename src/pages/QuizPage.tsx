@@ -223,7 +223,10 @@ export default function QuizPage() {
         })}
       </Tabs>
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-3">
+        <Button variant="outline" onClick={() => { setStarted(false); setAnswers({}); setCurrentIndex({ "Aptitude": 0, "Programming": 0, "Data Structures": 0, "Core Subjects": 0 }); }} className="w-full">
+          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Setup
+        </Button>
         <Button onClick={finishQuiz} disabled={!allAnswered} className="w-full gradient-primary text-primary-foreground text-lg py-6">
           <CheckCircle2 className="w-5 h-5 mr-2" />
           Finish Quiz ({Object.values(answers).length}/{allQuestions.length} answered)
