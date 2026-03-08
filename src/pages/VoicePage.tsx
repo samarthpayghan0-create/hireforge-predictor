@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
   Mic, MicOff, ChevronRight, ArrowRight, Briefcase, MessageSquare,
-  CheckCircle2, Loader2, PenLine, RefreshCw, Target, Zap, AlertTriangle
+  CheckCircle2, Loader2, RefreshCw, Target, Zap, AlertTriangle
 } from "lucide-react";
 
 interface PerQuestion { relevance: number; clarity: number; completeness: number; feedback: string }
