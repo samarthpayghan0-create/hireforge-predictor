@@ -124,43 +124,91 @@ export default function MockInterviewPage() {
   const startRecording = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Speech recognition not supported. Use Chrome."); return; }
+    
+    // Clean up any previous instance
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    
     const recognition = new SR();
-    recognition.continuous = true;
+    recognition.continuous = false; // single utterance to prevent loops
     recognition.interimResults = true;
     recognition.lang = "en-US";
-    let finalT = "";
+    finalTranscriptRef.current = currentAnswer; // preserve existing text
+    stoppedManuallyRef.current = false;
     let localPauses = 0;
 
     recognition.onresult = (e: any) => {
+      if (stoppedManuallyRef.current) return;
+      
       // Reset pause timer on each result
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
       pauseTimerRef.current = setTimeout(() => {
         localPauses++;
         setPauseCount(prev => prev + 1);
-      }, 2000); // 2s silence = pause
+      }, 2000);
 
+      let final = "";
       let interim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) finalT += e.results[i][0].transcript + " ";
+      for (let i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
         else interim += e.results[i][0].transcript;
       }
-      setCurrentAnswer(finalT + interim);
+      
+      const fullText = finalTranscriptRef.current + final + interim;
+      setCurrentAnswer(fullText);
     };
-    recognition.onerror = (e: any) => { toast.error("Error: " + e.error); setIsRecording(false); };
-    recognition.onend = () => {
+    
+    recognition.onerror = (e: any) => {
+      if (e.error === "no-speech" || e.error === "aborted") return;
+      toast.error("Speech error: " + e.error);
       setIsRecording(false);
-      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
     };
+    
+    recognition.onend = () => {
+      // Update the final transcript ref with what we have
+      const currentText = currentAnswer;
+      
+      // Only auto-restart if not manually stopped and still recording
+      if (!stoppedManuallyRef.current) {
+        // Capture final results before restarting
+        try {
+          const newRecognition = new SR();
+          newRecognition.continuous = false;
+          newRecognition.interimResults = true;
+          newRecognition.lang = "en-US";
+          finalTranscriptRef.current = currentText;
+          
+          newRecognition.onresult = recognition.onresult;
+          newRecognition.onerror = recognition.onerror;
+          newRecognition.onend = recognition.onend;
+          
+          recognitionRef.current = newRecognition;
+          newRecognition.start();
+        } catch {
+          setIsRecording(false);
+        }
+      } else {
+        setIsRecording(false);
+        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      }
+    };
+    
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
     setRecordingStartTime(Date.now());
     setPauseCount(0);
     setUsedVoice(true);
-  }, []);
+  }, [currentAnswer]);
 
   const stopRecording = useCallback(() => {
-    recognitionRef.current?.stop();
+    stoppedManuallyRef.current = true;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
     setIsRecording(false);
     if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
   }, []);
