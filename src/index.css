@@ -202,3 +202,18 @@
     box-shadow: var(--shadow-xl);
   }
 }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-20px) translateX(10px); }
+  50% { transform: translateY(-10px) translateX(-15px); }
+  75% { transform: translateY(-25px) translateX(5px); }
+}
+
+@keyframes particle {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10% { opacity: 0.3; }
+  50% { transform: translateY(-80px) translateX(40px) scale(1.5); opacity: 0.2; }
+  90% { opacity: 0.1; }
+  100% { transform: translateY(-160px) translateX(-20px) scale(0.5); opacity: 0; }
+}
