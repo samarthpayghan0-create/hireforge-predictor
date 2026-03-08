@@ -40,6 +40,7 @@ export default function Navbar() {
       .then(({ data }) => {
         if (data) {
           setProfileName(data.name);
+          setAvatarUrl((data as any).avatar_url || null);
           // Simple prediction calc
           const cgpaNorm = (data.cgpa / 10) * 100;
           const projectNorm = Math.min(100, data.num_projects * 15);
