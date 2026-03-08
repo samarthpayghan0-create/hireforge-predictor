@@ -255,7 +255,7 @@ export default function AdminPage() {
                       <th className="text-center p-4 font-semibold text-foreground">Last Sign In</th>
                       <th className="text-center p-4 font-semibold text-foreground">Profile</th>
                       <th className="text-center p-4 font-semibold text-foreground">Prediction</th>
-                    </tr>
+                      <th className="text-center p-4 font-semibold text-foreground">Actions</th>
                   </thead>
                   <tbody>
                     {authUsers.map((u, i) => {
