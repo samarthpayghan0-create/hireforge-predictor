@@ -260,7 +260,7 @@ export default function HomePage() {
       <footer className="py-8 border-t border-border/50">
         <div className="container mx-auto px-4 lg:px-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 HireForge. Built with ❤️ for students.
+            © 2026 HireForge. Built with ❤️ for students.
           </p>
         </div>
       </footer>
