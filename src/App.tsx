@@ -14,6 +14,8 @@ import QuizPage from "@/pages/QuizPage";
 import VoicePage from "@/pages/VoicePage";
 import DashboardPage from "@/pages/DashboardPage";
 import ResumePage from "@/pages/ResumePage";
+import CodingPage from "@/pages/CodingPage";
+import CareerPage from "@/pages/CareerPage";
 import AdminPage from "@/pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
