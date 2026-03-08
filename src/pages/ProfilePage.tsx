@@ -125,7 +125,8 @@ export default function ProfilePage() {
         technical_skills: form.technical_skills,
         communication_rating: form.communication_rating,
         user_id: user?.id || null,
-      }).select().single();
+        avatar_url: avatarUrl,
+      } as any).select().single();
       if (error) throw error;
       setProfile(form);
       setProfileId(data.id);
