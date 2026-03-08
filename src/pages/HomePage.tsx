@@ -36,6 +36,25 @@ const features = [
 ];
 
 export default function HomePage() {
+  const [studentCount, setStudentCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("student_profiles")
+        .select("*", { count: "exact", head: true });
+      setStudentCount(count ?? 0);
+    };
+    fetchCount();
+  }, []);
+
+  const stats = [
+    { value: "95%", label: "Prediction Accuracy" },
+    { value: `${studentCount}+`, label: "Students Analyzed" },
+    { value: "500+", label: "Companies" },
+    { value: "4.9★", label: "User Rating" },
+  ];
+
   return (
     <div className="min-h-screen bg-pattern">
       {/* Hero Section */}
