@@ -108,6 +108,7 @@ export default function QuizPage() {
         sectionCounts={sectionCounts} setSectionCounts={setSectionCounts}
         selectedSections={selectedSections} setSelectedSections={setSelectedSections}
         onStart={handleStart}
+        onBack={() => navigate("/profile")}
       />
     );
   }
