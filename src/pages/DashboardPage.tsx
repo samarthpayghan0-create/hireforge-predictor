@@ -145,7 +145,28 @@ export default function DashboardPage() {
     }
   };
 
-  if (!profile) {
+  const fetchAIRecommendations = async () => {
+    if (!profile || loadingRecs) return;
+    setLoadingRecs(true);
+    setRecsError(null);
+    try {
+      const commScoreVal = commResult?.overall_score ?? profile.communication_rating * 10;
+      const prob = calculatePlacement(profile, quizScores, commScoreVal);
+      const gapsList = getSkillGaps(profile, quizScores, commScoreVal);
+      const { data, error } = await supabase.functions.invoke("ai-skill-recommendations", {
+        body: { profile, quizScores, commScore: commScoreVal, placementProb: prob, gaps: gapsList },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiRecs(data);
+    } catch (err: any) {
+      setRecsError(err.message || "Failed to get recommendations");
+      toast.error(err.message || "Failed to get AI recommendations");
+    } finally {
+      setLoadingRecs(false);
+    }
+  };
+
     return (
       <div className="min-h-screen bg-pattern flex items-center justify-center">
         <div className="container mx-auto px-4 py-20 text-center">
