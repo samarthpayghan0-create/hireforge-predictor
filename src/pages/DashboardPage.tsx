@@ -167,6 +167,7 @@ export default function DashboardPage() {
     }
   };
 
+  if (!profile) {
     return (
       <div className="min-h-screen bg-pattern flex items-center justify-center">
         <div className="container mx-auto px-4 py-20 text-center">
