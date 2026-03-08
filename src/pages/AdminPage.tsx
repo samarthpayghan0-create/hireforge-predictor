@@ -369,6 +369,7 @@ export default function AdminPage() {
                       <th className="text-center p-4 font-semibold text-foreground">Internships</th>
                       <th className="text-center p-4 font-semibold text-foreground">Prediction</th>
                       <th className="text-center p-4 font-semibold text-foreground">Status</th>
+                      <th className="text-center p-4 font-semibold text-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -395,12 +396,35 @@ export default function AdminPage() {
                               {placed ? "Likely Placed" : "Needs Work"}
                             </span>
                           </td>
+                          <td className="p-4 text-center">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Profile</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete <strong>{s.name}</strong>'s profile? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteProfile(s.id, s.name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </td>
                         </tr>
                       );
                     })}
                     {students.length === 0 && !loading && (
                       <tr>
-                        <td colSpan={9} className="p-12 text-center text-muted-foreground">
+                        <td colSpan={10} className="p-12 text-center text-muted-foreground">
                           No students have checked their placement yet.
                         </td>
                       </tr>
