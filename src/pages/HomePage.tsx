@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Brain, BookOpen, Mic, BarChart3, Sparkles, CheckCircle2, Zap, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const features = [
   { 
@@ -31,13 +33,6 @@ const features = [
     color: "gradient-primary",
     shadowColor: "shadow-glow"
   },
-];
-
-const stats = [
-  { value: "95%", label: "Prediction Accuracy" },
-  { value: "10K+", label: "Students Analyzed" },
-  { value: "500+", label: "Companies" },
-  { value: "4.9★", label: "User Rating" },
 ];
 
 export default function HomePage() {
