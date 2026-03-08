@@ -81,8 +81,32 @@ export default function HomePage() {
       <section className="relative overflow-hidden py-20 md:py-32 lg:py-40">
         {/* Background effects */}
         <div className="absolute inset-0 gradient-hero opacity-[0.03]" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse]" />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-primary/5 rounded-full blur-2xl animate-[float_12s_ease-in-out_infinite_2s]" />
+
+        {/* Floating particles */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 rounded-full bg-primary/20 animate-[particle_var(--dur)_linear_infinite]"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              '--dur': `${6 + Math.random() * 10}s`,
+              animationDelay: `${Math.random() * 8}s`,
+              width: `${2 + Math.random() * 3}px`,
+              height: `${2 + Math.random() * 3}px`,
+              opacity: 0.15 + Math.random() * 0.25,
+            } as React.CSSProperties}
+          />
+        ))}
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }} />
         
         <div className="container mx-auto px-4 lg:px-8 relative">
           <div className="max-w-4xl mx-auto text-center space-y-8">
