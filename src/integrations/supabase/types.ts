@@ -439,6 +439,7 @@ export type Database = {
       student_profiles: {
         Row: {
           aptitude_score: number
+          avatar_url: string | null
           cgpa: number
           communication_rating: number
           created_at: string
@@ -455,6 +456,7 @@ export type Database = {
         }
         Insert: {
           aptitude_score: number
+          avatar_url?: string | null
           cgpa: number
           communication_rating: number
           created_at?: string
@@ -471,6 +473,7 @@ export type Database = {
         }
         Update: {
           aptitude_score?: number
+          avatar_url?: string | null
           cgpa?: number
           communication_rating?: number
           created_at?: string
