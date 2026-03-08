@@ -21,8 +21,8 @@ const features = [
   },
   { 
     icon: Mic, 
-    title: "Voice Analyzer", 
-    desc: "Assess communication skills with real-time speech analysis",
+    title: "Mock Interview", 
+    desc: "Practice with AI-powered interview questions and get scored on communication",
     color: "gradient-warm",
     shadowColor: ""
   },
