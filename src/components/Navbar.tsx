@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, Brain, BarChart3, BookOpen, Mic, Shield, Sun, Moon, LogIn, LogOut, TrendingUp, Mail, FileText } from "lucide-react";
+import { User, Brain, BarChart3, BookOpen, Mic, Shield, Sun, Moon, LogIn, LogOut, TrendingUp, Mail, FileText, Code, Compass } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
 import { useAppContext } from "@/context/AppContext";
@@ -14,7 +14,9 @@ const navItems = [
   { path: "/profile", label: "Profile", icon: User },
   { path: "/quiz", label: "Quiz", icon: BookOpen },
   { path: "/voice", label: "Interview", icon: Mic },
+  { path: "/coding", label: "Coding", icon: Code },
   { path: "/resume", label: "Resume", icon: FileText },
+  { path: "/career", label: "Career", icon: Compass },
   { path: "/dashboard", label: "Dashboard", icon: Brain },
   { path: "/admin", label: "Admin", icon: Shield },
 ];
