@@ -21,7 +21,7 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
               <Brain className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-lg text-foreground">PlacePredict</span>
+            <span className="font-display font-bold text-lg text-foreground">PlaceMind AI</span>
           </Link>
           <div className="flex items-center gap-1">
             {navItems.map((item) => {
