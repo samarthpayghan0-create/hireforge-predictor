@@ -34,7 +34,8 @@ const STEPS = [
   { key: "communication", label: "Communication", icon: MessageSquare },
 ] as const;
 
-type StepKey = typeof STEPS[number]["key"];
+const NAME_REGEX = /^[A-Za-z\s.'-]+$/;
+const isValidName = (name: string) => name.trim().length >= 2 && NAME_REGEX.test(name.trim());
 
 export default function ProfilePage() {
   const { setProfile, setProfileId } = useAppContext();
