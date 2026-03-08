@@ -97,6 +97,8 @@ export default function MockInterviewPage() {
 
   const recognitionRef = useRef<any>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finalTranscriptRef = useRef<string>("");
+  const stoppedManuallyRef = useRef(false);
 
   const generateQuestions = async () => {
     setPhase("loading");
@@ -122,43 +124,91 @@ export default function MockInterviewPage() {
   const startRecording = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Speech recognition not supported. Use Chrome."); return; }
+    
+    // Clean up any previous instance
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    
     const recognition = new SR();
-    recognition.continuous = true;
+    recognition.continuous = false; // single utterance to prevent loops
     recognition.interimResults = true;
     recognition.lang = "en-US";
-    let finalT = "";
+    finalTranscriptRef.current = currentAnswer; // preserve existing text
+    stoppedManuallyRef.current = false;
     let localPauses = 0;
 
     recognition.onresult = (e: any) => {
+      if (stoppedManuallyRef.current) return;
+      
       // Reset pause timer on each result
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
       pauseTimerRef.current = setTimeout(() => {
         localPauses++;
         setPauseCount(prev => prev + 1);
-      }, 2000); // 2s silence = pause
+      }, 2000);
 
+      let final = "";
       let interim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) finalT += e.results[i][0].transcript + " ";
+      for (let i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
         else interim += e.results[i][0].transcript;
       }
-      setCurrentAnswer(finalT + interim);
+      
+      const fullText = finalTranscriptRef.current + final + interim;
+      setCurrentAnswer(fullText);
     };
-    recognition.onerror = (e: any) => { toast.error("Error: " + e.error); setIsRecording(false); };
-    recognition.onend = () => {
+    
+    recognition.onerror = (e: any) => {
+      if (e.error === "no-speech" || e.error === "aborted") return;
+      toast.error("Speech error: " + e.error);
       setIsRecording(false);
-      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
     };
+    
+    recognition.onend = () => {
+      // Update the final transcript ref with what we have
+      const currentText = currentAnswer;
+      
+      // Only auto-restart if not manually stopped and still recording
+      if (!stoppedManuallyRef.current) {
+        // Capture final results before restarting
+        try {
+          const newRecognition = new SR();
+          newRecognition.continuous = false;
+          newRecognition.interimResults = true;
+          newRecognition.lang = "en-US";
+          finalTranscriptRef.current = currentText;
+          
+          newRecognition.onresult = recognition.onresult;
+          newRecognition.onerror = recognition.onerror;
+          newRecognition.onend = recognition.onend;
+          
+          recognitionRef.current = newRecognition;
+          newRecognition.start();
+        } catch {
+          setIsRecording(false);
+        }
+      } else {
+        setIsRecording(false);
+        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      }
+    };
+    
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
     setRecordingStartTime(Date.now());
     setPauseCount(0);
     setUsedVoice(true);
-  }, []);
+  }, [currentAnswer]);
 
   const stopRecording = useCallback(() => {
-    recognitionRef.current?.stop();
+    stoppedManuallyRef.current = true;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
     setIsRecording(false);
     if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
   }, []);
@@ -362,49 +412,67 @@ export default function MockInterviewPage() {
               <p className="text-xs text-muted-foreground mt-1">Speak your answer clearly. AI will analyze your speaking speed, filler words, pauses, and confidence.</p>
             </div>
 
-            {/* Answer input with mic */}
-            <div className="space-y-3">
-              <div className="relative">
-                <Textarea
-                  value={currentAnswer}
-                  onChange={(e) => setCurrentAnswer(e.target.value)}
-                  placeholder={isRecording ? "🎙️ Listening... speak your answer" : "Click the mic button to speak, or type your answer..."}
-                  className={`min-h-[150px] rounded-xl text-base pr-16 transition-all ${isRecording ? "border-destructive/50 bg-destructive/5" : ""}`}
-                />
-                <button
+            {/* Voice Controls */}
+            <div className="flex gap-3">
+              {!isRecording ? (
+                <Button
                   type="button"
-                  onClick={isRecording ? stopRecording : startRecording}
-                  className={`absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center transition-all ${isRecording ? "bg-destructive animate-pulse scale-110" : "bg-foreground hover:bg-foreground/90 hover:scale-105"}`}
-                  title={isRecording ? "Stop recording" : "Start recording"}
+                  onClick={startRecording}
+                  className="flex-1 h-14 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-base font-semibold"
                 >
-                  {isRecording ? <MicOff className="w-5 h-5 text-background" /> : <Mic className="w-5 h-5 text-background" />}
-                </button>
-              </div>
-              {isRecording && (
-                <p className="text-xs text-destructive font-medium animate-pulse">🔴 Recording — your speech is being transcribed in real-time</p>
-              )}
-              
-              {/* Live speech stats */}
-              {currentAnswer.trim().length > 0 && (
-                <div className="flex gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <BarChart3 className="w-3 h-3" /> {currentWordCount} words
-                  </span>
-                  {currentFillers.count > 0 && (
-                    <span className="flex items-center gap-1 text-warning">
-                      <AlertTriangle className="w-3 h-3" /> {currentFillers.count} filler words
-                    </span>
-                  )}
-                  {usedVoice && (
-                    <span className="flex items-center gap-1">
-                      <Mic className="w-3 h-3 text-success" /> Voice input
-                    </span>
-                  )}
-                </div>
+                  <Mic className="w-5 h-5 mr-2" /> Start Speaking
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={stopRecording}
+                  variant="destructive"
+                  className="flex-1 h-14 rounded-xl text-base font-semibold animate-pulse"
+                >
+                  <MicOff className="w-5 h-5 mr-2" /> Stop Speaking
+                </Button>
               )}
             </div>
 
-            <Button onClick={submitAnswer} disabled={!currentAnswer.trim()} className="w-full bg-foreground text-background hover:bg-foreground/90 h-12 rounded-xl">
+            {isRecording && (
+              <div className="flex items-center gap-3 p-4 bg-destructive/5 border border-destructive/20 rounded-xl">
+                <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                <p className="text-sm text-destructive font-medium">Recording — speak your answer clearly</p>
+              </div>
+            )}
+
+            {/* Live Transcript */}
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-foreground">Your Answer</p>
+              <Textarea
+                value={currentAnswer}
+                onChange={(e) => { if (!isRecording) setCurrentAnswer(e.target.value); }}
+                placeholder={isRecording ? "🎙️ Listening... your speech will appear here" : "Your transcript will appear here, or type your answer..."}
+                className={`min-h-[150px] rounded-xl text-base transition-all ${isRecording ? "border-destructive/50 bg-destructive/5 cursor-not-allowed" : ""}`}
+                readOnly={isRecording}
+              />
+            </div>
+              
+            {/* Live speech stats */}
+            {currentAnswer.trim().length > 0 && (
+              <div className="flex gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <BarChart3 className="w-3 h-3" /> {currentWordCount} words
+                </span>
+                {currentFillers.count > 0 && (
+                  <span className="flex items-center gap-1 text-warning">
+                    <AlertTriangle className="w-3 h-3" /> {currentFillers.count} filler words
+                  </span>
+                )}
+                {usedVoice && (
+                  <span className="flex items-center gap-1">
+                    <Mic className="w-3 h-3 text-success" /> Voice input
+                  </span>
+                )}
+              </div>
+            )}
+
+            <Button onClick={submitAnswer} disabled={!currentAnswer.trim() || isRecording} className="w-full bg-foreground text-background hover:bg-foreground/90 h-12 rounded-xl">
               {currentQ < questions.length - 1 ? <>Next Question <ChevronRight className="w-4 h-4 ml-1" /></> : <>Submit & Analyze <CheckCircle2 className="w-4 h-4 ml-1" /></>}
             </Button>
           </div>
