@@ -18,10 +18,8 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
-              <Brain className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-lg text-foreground">PlaceMind AI</span>
+            <img src="/logo.png" alt="HireForge" className="w-9 h-9 rounded-lg" />
+            <span className="font-display font-bold text-lg text-foreground">HireForge</span>
           </Link>
           <div className="flex items-center gap-1">
             {navItems.map((item) => {
