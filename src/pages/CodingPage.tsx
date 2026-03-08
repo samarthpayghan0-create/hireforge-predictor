@@ -548,9 +548,14 @@ export default function CodingPage() {
 
             {/* Action bar */}
             <div className="p-3 border-t border-border bg-secondary/20 flex items-center gap-3">
-              <Button onClick={submitCode} disabled={evaluating || !code.trim()} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
+              <Button onClick={submitCode} disabled={evaluating || !code.trim() || timeExpired} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
                 {evaluating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Evaluating...</> : <><Play className="w-4 h-4 mr-2" /> Submit Solution</>}
               </Button>
+              {showNextProblem && (
+                <Button onClick={goToNextProblem} className="gradient-primary text-primary-foreground h-11 rounded-xl font-semibold animate-fade-in">
+                  Next Problem <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
