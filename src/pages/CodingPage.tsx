@@ -63,7 +63,8 @@ const DIFF_COLORS: Record<string, string> = {
   hard: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
-const DIFF_POINTS: Record<string, number> = { easy: 10, medium: 20, hard: 30 };
+const DIFF_POINTS: Record<string, number> = { easy: 10, medium: 10, hard: 10 };
+const TIME_LIMIT_SECONDS = 5 * 60; // 5 minutes
 
 const RANK_ICONS = [
   <Crown className="w-5 h-5 text-warning" />,
@@ -93,6 +94,7 @@ export default function CodingPage() {
   const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({});
   const [showSolution, setShowSolution] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [timeExpired, setTimeExpired] = useState(false);
 
   // Load problems
   useEffect(() => {
@@ -133,10 +135,18 @@ export default function CodingPage() {
     });
   }, [user]);
 
-  // Timer
+  // Countdown timer (5 minutes)
   useEffect(() => {
     if (phase !== "solve" || !startTime) return;
-    const interval = setInterval(() => setElapsedTime(Math.floor((Date.now() - startTime) / 1000)), 1000);
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      setElapsedTime(elapsed);
+      if (elapsed >= TIME_LIMIT_SECONDS) {
+        setTimeExpired(true);
+        clearInterval(interval);
+        toast.error("⏰ Time's up! You ran out of time for this problem.");
+      }
+    }, 1000);
     return () => clearInterval(interval);
   }, [phase, startTime]);
 
@@ -149,6 +159,7 @@ export default function CodingPage() {
     setSelectedProblem(p);
     setResult(null);
     setShowSolution(false);
+    setTimeExpired(false);
     const lang = LANGUAGES.find((l) => l.id === language);
     setCode(lang?.template || "");
     setStartTime(Date.now());
@@ -158,6 +169,7 @@ export default function CodingPage() {
 
   const submitCode = async () => {
     if (!selectedProblem || !code.trim()) return;
+    if (timeExpired) { toast.error("⏰ Time expired! Pick another problem."); return; }
     setEvaluating(true);
     setResult(null);
     try {
@@ -202,6 +214,7 @@ export default function CodingPage() {
     }
   };
 
+  const remainingTime = Math.max(0, TIME_LIMIT_SECONDS - elapsedTime);
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
   const categories = [...new Set(problems.map((p) => p.category))];
@@ -364,9 +377,10 @@ export default function CodingPage() {
               <span key={t} className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full hidden sm:inline">{t}</span>
             ))}
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className={`flex items-center gap-2 text-sm font-semibold ${remainingTime <= 60 ? "text-destructive animate-pulse" : remainingTime <= 120 ? "text-warning" : "text-muted-foreground"}`}>
             <Timer className="w-4 h-4" />
-            <span className="font-mono">{formatTime(elapsedTime)}</span>
+            <span className="font-mono">{formatTime(remainingTime)}</span>
+            {timeExpired && <span className="text-xs text-destructive">(Expired)</span>}
           </div>
           <div className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 rounded-xl">
             <Star className="w-4 h-4 text-primary" />
