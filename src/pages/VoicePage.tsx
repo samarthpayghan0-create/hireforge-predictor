@@ -199,6 +199,27 @@ export default function MockInterviewPage() {
     if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
   }, []);
 
+  const generateQuestions = async () => {
+    setPhase("loading");
+    try {
+      const { data, error } = await supabase.functions.invoke("mock-interview", {
+        body: { action: "generate", category },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.questions?.length) throw new Error("No questions generated");
+      setQuestions(data.questions.slice(0, 5));
+      setAnswers([]);
+      setSpeechMetrics([]);
+      setCurrentQ(0);
+      setCurrentAnswer("");
+      setPhase("interview");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate questions");
+      setPhase("setup");
+    }
+  };
+
   const submitAnswer = () => {
     if (!currentAnswer.trim()) { toast.error("Please provide an answer"); return; }
     
