@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
 import {
   Code, Play, CheckCircle2, XCircle, Loader2, ChevronLeft,
-  Zap, Trophy, Medal, Crown, Star, Timer, ArrowRight, Users, Lock
+  Zap, Trophy, Medal, Crown, Star, Timer, ArrowRight, Users, Lock, LogOut
 } from "lucide-react";
 
 interface Problem {
@@ -393,6 +393,22 @@ export default function CodingPage() {
             <Star className="w-4 h-4 text-primary" />
             <span className="font-bold text-sm text-foreground">{totalScore}</span>
           </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="rounded-xl gap-1.5"
+            onClick={() => {
+              setPhase("select-lang");
+              setResult(null);
+              setSelectedProblem(null);
+              setCode("");
+              setElapsedTime(0);
+              setTimeExpired(false);
+              toast.success(`Exam ended! Final score: ${totalScore} points, ${solvedCount} problem(s) solved.`);
+            }}
+          >
+            <LogOut className="w-4 h-4" /> End Exam
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-4" style={{ height: "calc(100vh - 120px)" }}>
