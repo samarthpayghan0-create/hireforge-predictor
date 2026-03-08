@@ -530,7 +530,7 @@ export default function CodingPage() {
 }
 
 // ========== SOLUTION BLOCK COMPONENT ==========
-const SOLUTION_TEMPLATES: Record<string, Record<string, string>> = {};
+const SOLUTION_TEMPLATES: Record<string, string> = {};
 
 function SolutionBlock({ problem, language }: { problem: Problem; language: string }) {
   const [solution, setSolution] = useState("");
