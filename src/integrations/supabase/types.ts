@@ -46,6 +46,134 @@ export type Database = {
           },
         ]
       }
+      career_recommendations: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string | null
+          recommendations: Json
+          roadmap: Json
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+          recommendations?: Json
+          roadmap?: Json
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+          recommendations?: Json
+          roadmap?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_recommendations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coding_problems: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string
+          difficulty: string
+          id: string
+          sample_input: string | null
+          sample_output: string | null
+          test_cases: Json
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description: string
+          difficulty?: string
+          id?: string
+          sample_input?: string | null
+          sample_output?: string | null
+          test_cases?: Json
+          title: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string
+          difficulty?: string
+          id?: string
+          sample_input?: string | null
+          sample_output?: string | null
+          test_cases?: Json
+          title?: string
+        }
+        Relationships: []
+      }
+      coding_submissions: {
+        Row: {
+          ai_feedback: string | null
+          code: string
+          created_at: string
+          execution_time_ms: number | null
+          id: string
+          is_correct: boolean | null
+          language: string
+          problem_id: string | null
+          profile_id: string | null
+          score: number | null
+          user_id: string | null
+        }
+        Insert: {
+          ai_feedback?: string | null
+          code: string
+          created_at?: string
+          execution_time_ms?: number | null
+          id?: string
+          is_correct?: boolean | null
+          language: string
+          problem_id?: string | null
+          profile_id?: string | null
+          score?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          ai_feedback?: string | null
+          code?: string
+          created_at?: string
+          execution_time_ms?: number | null
+          id?: string
+          is_correct?: boolean | null
+          language?: string
+          problem_id?: string | null
+          profile_id?: string | null
+          score?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coding_submissions_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "coding_problems"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coding_submissions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communication_scores: {
         Row: {
           clarity_score: number | null
@@ -83,6 +211,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "communication_scores_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_interviews: {
+        Row: {
+          answers: Json
+          category: string
+          created_at: string
+          feedback: Json
+          id: string
+          overall_score: number | null
+          profile_id: string | null
+          questions: Json
+          scores: Json
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json
+          category?: string
+          created_at?: string
+          feedback?: Json
+          id?: string
+          overall_score?: number | null
+          profile_id?: string | null
+          questions?: Json
+          scores?: Json
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json
+          category?: string
+          created_at?: string
+          feedback?: Json
+          id?: string
+          overall_score?: number | null
+          profile_id?: string | null
+          questions?: Json
+          scores?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interviews_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "student_profiles"
