@@ -339,9 +339,14 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
           <p>📝 Select the sections you want to attempt. Medium-level aptitude questions are based on <strong>TCS NQT</strong> pattern. Total questions: <strong>{totalQuestions}</strong></p>
         </div>
 
-        <Button onClick={onStart} disabled={selectedSections.size === 0} className="w-full gradient-primary text-primary-foreground text-lg py-6">
-          Start Quiz ({selectedSections.size} section{selectedSections.size !== 1 ? "s" : ""}) <ChevronRight className="w-5 h-5 ml-2" />
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onBack} className="flex-1">
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back
+          </Button>
+          <Button onClick={onStart} disabled={selectedSections.size === 0} className="flex-1 gradient-primary text-primary-foreground text-lg py-6">
+            Start Quiz ({selectedSections.size} section{selectedSections.size !== 1 ? "s" : ""}) <ChevronRight className="w-5 h-5 ml-2" />
+          </Button>
+        </div>
       </div>
     </div>
   );
