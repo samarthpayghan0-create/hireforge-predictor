@@ -26,12 +26,13 @@ export default function Navbar() {
   const { profile } = useAppContext();
   const [lastPrediction, setLastPrediction] = useState<number | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("student_profiles")
-      .select("name, cgpa, dsa_score, aptitude_score, num_projects, internship_experience, communication_rating")
+      .select("name, cgpa, dsa_score, aptitude_score, num_projects, internship_experience, communication_rating, avatar_url")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -39,6 +40,7 @@ export default function Navbar() {
       .then(({ data }) => {
         if (data) {
           setProfileName(data.name);
+          setAvatarUrl((data as any).avatar_url || null);
           // Simple prediction calc
           const cgpaNorm = (data.cgpa / 10) * 100;
           const projectNorm = Math.min(100, data.num_projects * 15);
@@ -107,8 +109,12 @@ export default function Navbar() {
                 {user ? (
                   <div className="gradient-primary p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-5 h-5 text-white" />
+                        )}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-white truncate">

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare, BookOpen, Sparkles } from "lucide-react";
+import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare, BookOpen, Sparkles, Camera, ImageIcon } from "lucide-react";
 
 const programmingOptions = [
   "Python", "Java", "C++", "C", "JavaScript", "TypeScript", "React", "Angular", "Vue.js",
@@ -44,6 +44,10 @@ export default function ProfilePage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [customProgramming, setCustomProgramming] = useState("");
   const [customTechnical, setCustomTechnical] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -56,6 +60,33 @@ export default function ProfilePage() {
     technical_skills: [] as string[],
     communication_rating: 5,
   });
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const fileName = `${user?.id || Date.now()}-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
+      setAvatarUrl(urlData.publicUrl);
+      toast.success("Photo uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const toggleSkill = (skill: string, field: "programming_skills" | "technical_skills") => {
     setForm((f) => ({
@@ -94,7 +125,8 @@ export default function ProfilePage() {
         technical_skills: form.technical_skills,
         communication_rating: form.communication_rating,
         user_id: user?.id || null,
-      }).select().single();
+        avatar_url: avatarUrl,
+      } as any).select().single();
       if (error) throw error;
       setProfile(form);
       setProfileId(data.id);
@@ -151,6 +183,45 @@ export default function ProfilePage() {
           {/* Step 1: Basic Info */}
           {currentStep === 0 && (
             <>
+              {/* Profile Photo */}
+              <div className="flex flex-col items-center gap-3 mb-2">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-secondary/50 border-2 border-border flex items-center justify-center">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-10 h-10 text-muted-foreground" />
+                  )}
+                  {uploadingAvatar && (
+                    <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+                  />
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="user"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+                  />
+                  <Button type="button" variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar}>
+                    <ImageIcon className="w-4 h-4" /> Gallery
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => cameraInputRef.current?.click()} disabled={uploadingAvatar}>
+                    <Camera className="w-4 h-4" /> Camera
+                  </Button>
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
                 <Input 
