@@ -202,8 +202,8 @@ export default function QuizPage() {
                     Previous
                   </Button>
                   {secIdx < secQs.length - 1 ? (
-                    <Button onClick={() => setCurrentIndex({ ...currentIndex, [section.key]: secIdx + 1 })} disabled={answers[secQ.id] === undefined} className="flex-1 gradient-primary text-primary-foreground">
-                      Next <ChevronRight className="w-4 h-4 ml-1" />
+                    <Button onClick={() => setCurrentIndex({ ...currentIndex, [section.key]: secIdx + 1 })} className="flex-1 gradient-primary text-primary-foreground">
+                      {answers[secQ.id] === undefined ? "Skip" : "Next"} <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   ) : (
                     <Button onClick={() => {
@@ -212,7 +212,7 @@ export default function QuizPage() {
                         setActiveSection(nextSection.key);
                         toast.info(`Moving to ${nextSection.label}`);
                       }
-                    }} disabled={answers[secQ.id] === undefined} variant="outline" className="flex-1">
+                    }} variant="outline" className="flex-1">
                       Section Done ✓
                     </Button>
                   )}
