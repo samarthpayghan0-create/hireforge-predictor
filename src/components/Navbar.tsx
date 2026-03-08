@@ -18,7 +18,6 @@ const navItems = [
   { path: "/resume", label: "Resume", icon: FileText },
   { path: "/career", label: "Career", icon: Compass },
   { path: "/dashboard", label: "Dashboard", icon: Brain },
-  { path: "/admin", label: "Admin", icon: Shield },
 ];
 
 export default function Navbar() {

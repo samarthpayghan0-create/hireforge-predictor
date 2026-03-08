@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Brain, BookOpen, Mic, BarChart3, Sparkles, CheckCircle2, Zap, Target, TrendingUp } from "lucide-react";
+import { ArrowRight, Brain, BookOpen, Mic, BarChart3, Sparkles, CheckCircle2, Zap, Target, TrendingUp, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -272,9 +272,14 @@ export default function HomePage() {
               </div>
               <span className="font-display font-semibold text-foreground">HireForge</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2026 HireForge. Built with precision for aspiring professionals.
-            </p>
+            <div className="flex items-center gap-6">
+              <Link to="/admin" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Shield className="w-4 h-4" /> Admin
+              </Link>
+              <p className="text-sm text-muted-foreground">
+                © 2026 HireForge. Built with precision for aspiring professionals.
+              </p>
+            </div>
           </div>
         </div>
       </footer>
