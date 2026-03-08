@@ -17,6 +17,7 @@ import ResumePage from "@/pages/ResumePage";
 import CodingPage from "@/pages/CodingPage";
 import CareerPage from "@/pages/CareerPage";
 import AdminPage from "@/pages/AdminPage";
+import AiRoadmapPage from "@/pages/AiRoadmapPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => {
                   <Route path="/career" element={<CareerPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AppProvider>
