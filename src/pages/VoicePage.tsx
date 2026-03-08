@@ -8,17 +8,52 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
   Mic, MicOff, ChevronRight, ArrowRight, Briefcase, MessageSquare,
-  CheckCircle2, Loader2, RefreshCw, Target, Zap, AlertTriangle
+  CheckCircle2, Loader2, RefreshCw, Target, Zap, AlertTriangle,
+  Volume2, Clock, BarChart3, TrendingUp
 } from "lucide-react";
 
 interface PerQuestion { relevance: number; clarity: number; completeness: number; feedback: string }
+interface CommunicationAnalysis {
+  overall_communication_score: number;
+  speaking_speed_score: number;
+  speaking_speed_wpm: number;
+  speaking_speed_feedback: string;
+  clarity_score: number;
+  clarity_feedback: string;
+  confidence_score: number;
+  confidence_feedback: string;
+  filler_word_score: number;
+  filler_word_count: number;
+  filler_words_detected: string[];
+  filler_feedback: string;
+  pause_score: number;
+  pause_feedback: string;
+  sentence_structure_score: number;
+  sentence_structure_feedback: string;
+  strengths: string[];
+  areas_to_improve: string[];
+  tips: string[];
+}
 interface EvalResult {
   per_question: PerQuestion[];
   overall_score: number;
   overall_feedback: string[];
   strengths: string[];
   improvements: string[];
+  communication_analysis: CommunicationAnalysis | null;
 }
+
+interface SpeechMetric {
+  wordCount: number;
+  durationSec: number;
+  wpm: number;
+  fillerCount: number;
+  fillers: string[];
+  pauseCount: number;
+  inputMethod: "voice" | "text";
+}
+
+const FILLER_WORDS = ["um", "uh", "like", "you know", "basically", "actually", "so", "right", "well", "i mean", "kind of", "sort of"];
 
 const CATEGORIES = [
   { id: "mixed", label: "Mixed", desc: "HR + Technical + Behavioral" },
@@ -26,6 +61,21 @@ const CATEGORIES = [
   { id: "Technical", label: "Technical", desc: "Tech concepts & problem solving" },
   { id: "Behavioral", label: "Behavioral", desc: "Past experiences & scenarios" },
 ];
+
+function countFillers(text: string): { count: number; found: string[] } {
+  const lower = text.toLowerCase();
+  const found: string[] = [];
+  let count = 0;
+  for (const filler of FILLER_WORDS) {
+    const regex = new RegExp(`\\b${filler}\\b`, "gi");
+    const matches = lower.match(regex);
+    if (matches) {
+      count += matches.length;
+      found.push(`${filler} (${matches.length})`);
+    }
+  }
+  return { count, found };
+}
 
 export default function MockInterviewPage() {
   const { profileId, setCommResult } = useAppContext();
@@ -37,11 +87,16 @@ export default function MockInterviewPage() {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState("");
+  const [speechMetrics, setSpeechMetrics] = useState<SpeechMetric[]>([]);
   
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
+  const [pauseCount, setPauseCount] = useState(0);
+  const [usedVoice, setUsedVoice] = useState(false);
   const [result, setResult] = useState<EvalResult | null>(null);
 
   const recognitionRef = useRef<any>(null);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const generateQuestions = async () => {
     setPhase("loading");
@@ -54,6 +109,7 @@ export default function MockInterviewPage() {
       if (!data?.questions?.length) throw new Error("No questions generated");
       setQuestions(data.questions.slice(0, 5));
       setAnswers([]);
+      setSpeechMetrics([]);
       setCurrentQ(0);
       setCurrentAnswer("");
       setPhase("interview");
@@ -71,7 +127,16 @@ export default function MockInterviewPage() {
     recognition.interimResults = true;
     recognition.lang = "en-US";
     let finalT = "";
+    let localPauses = 0;
+
     recognition.onresult = (e: any) => {
+      // Reset pause timer on each result
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      pauseTimerRef.current = setTimeout(() => {
+        localPauses++;
+        setPauseCount(prev => prev + 1);
+      }, 2000); // 2s silence = pause
+
       let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) finalT += e.results[i][0].transcript + " ";
@@ -80,31 +145,66 @@ export default function MockInterviewPage() {
       setCurrentAnswer(finalT + interim);
     };
     recognition.onerror = (e: any) => { toast.error("Error: " + e.error); setIsRecording(false); };
-    recognition.onend = () => setIsRecording(false);
+    recognition.onend = () => {
+      setIsRecording(false);
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+    };
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
+    setRecordingStartTime(Date.now());
+    setPauseCount(0);
+    setUsedVoice(true);
   }, []);
 
   const stopRecording = useCallback(() => {
     recognitionRef.current?.stop();
     setIsRecording(false);
+    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
   }, []);
 
   const submitAnswer = () => {
     if (!currentAnswer.trim()) { toast.error("Please provide an answer"); return; }
-    const newAnswers = [...answers, currentAnswer.trim()];
+    
+    const answerText = currentAnswer.trim();
+    const words = answerText.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+    
+    // Calculate speech metrics for this answer
+    let durationSec = 30; // default for typed
+    if (usedVoice && recordingStartTime) {
+      durationSec = Math.max(1, (Date.now() - recordingStartTime) / 1000);
+    }
+    const wpm = (wordCount / durationSec) * 60;
+    const { count: fillerCount, found: fillers } = countFillers(answerText);
+
+    const metric: SpeechMetric = {
+      wordCount,
+      durationSec,
+      wpm,
+      fillerCount,
+      fillers,
+      pauseCount,
+      inputMethod: usedVoice ? "voice" : "text",
+    };
+
+    const newAnswers = [...answers, answerText];
+    const newMetrics = [...speechMetrics, metric];
     setAnswers(newAnswers);
+    setSpeechMetrics(newMetrics);
 
     if (currentQ < questions.length - 1) {
       setCurrentQ(currentQ + 1);
       setCurrentAnswer("");
+      setRecordingStartTime(null);
+      setPauseCount(0);
+      setUsedVoice(false);
     } else {
-      evaluateInterview(newAnswers);
+      evaluateInterview(newAnswers, newMetrics);
     }
   };
 
-  const evaluateInterview = async (allAnswers: string[]) => {
+  const evaluateInterview = async (allAnswers: string[], allMetrics: SpeechMetric[]) => {
     setPhase("evaluating");
     try {
       const { data, error } = await supabase.functions.invoke("mock-interview", {
@@ -115,25 +215,30 @@ export default function MockInterviewPage() {
           answers: allAnswers,
           profileId: profileId || null,
           userId: user?.id || null,
+          speechMetrics: allMetrics,
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setResult(data);
 
-      // Update comm result in context
-      const overallPct = Math.round((data.overall_score || 0) * 10);
+      // Update comm result in context with detailed analysis
+      const commAnalysis = data.communication_analysis;
+      const overallPct = commAnalysis 
+        ? Math.round(commAnalysis.overall_communication_score * 10)
+        : Math.round((data.overall_score || 0) * 10);
+      
       setCommResult({
-        speaking_speed: 0,
-        fluency_score: overallPct,
-        clarity_score: overallPct,
-        confidence_score: overallPct,
+        speaking_speed: commAnalysis?.speaking_speed_wpm || 0,
+        fluency_score: commAnalysis ? Math.round(commAnalysis.speaking_speed_score * 10) : overallPct,
+        clarity_score: commAnalysis ? Math.round(commAnalysis.clarity_score * 10) : overallPct,
+        confidence_score: commAnalysis ? Math.round(commAnalysis.confidence_score * 10) : overallPct,
         overall_score: overallPct,
         transcript: allAnswers.join("\n\n"),
       });
 
       setPhase("results");
-      toast.success("Interview evaluated!");
+      toast.success("Interview evaluated with communication analysis!");
     } catch (err: any) {
       toast.error(err.message || "Failed to evaluate");
       setPhase("interview");
@@ -141,23 +246,24 @@ export default function MockInterviewPage() {
   };
 
   const getScoreColor = (s: number) => s >= 7 ? "text-success" : s >= 5 ? "text-warning" : "text-destructive";
+  const getScoreBg = (s: number) => s >= 7 ? "bg-success/10" : s >= 5 ? "bg-warning/10" : "bg-destructive/10";
 
   // SETUP
   if (phase === "setup") {
     return (
-      <div className="min-h-screen bg-pattern">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 lg:px-8 py-10 max-w-2xl">
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-14 h-14 rounded-2xl gradient-warm flex items-center justify-center">
-              <Briefcase className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center">
+              <Briefcase className="w-7 h-7 text-background" />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">AI Mock Interview</h1>
-              <p className="text-muted-foreground">Practice with AI-generated questions & feedback</p>
+              <p className="text-muted-foreground">Practice with AI-generated questions & voice analysis</p>
             </div>
           </div>
 
-          <div className="card-elevated p-6 md:p-8 space-y-6 animate-fade-in">
+          <div className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-6 animate-fade-in">
             <div className="bg-primary/5 rounded-2xl p-5 border border-primary/10">
               <div className="flex items-start gap-3">
                 <MessageSquare className="w-5 h-5 text-primary shrink-0 mt-0.5" />
@@ -165,9 +271,9 @@ export default function MockInterviewPage() {
                   <h3 className="font-semibold text-foreground">How it works</h3>
                   <ul className="text-sm text-muted-foreground mt-2 space-y-1">
                     <li>• AI generates 5 interview questions for your chosen category</li>
-                    <li>• Answer via text or voice recording</li>
-                    <li>• AI evaluates relevance, clarity, and completeness</li>
-                    <li>• Get a score out of 10 with detailed feedback</li>
+                    <li>• Answer via <strong>voice recording</strong> for communication analysis</li>
+                    <li>• AI evaluates relevance, clarity, completeness & <strong>speaking style</strong></li>
+                    <li>• Get detailed communication scores: speed, filler words, confidence & more</li>
                   </ul>
                 </div>
               </div>
@@ -191,7 +297,7 @@ export default function MockInterviewPage() {
               </div>
             </div>
 
-            <Button onClick={generateQuestions} className="w-full gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow">
+            <Button onClick={generateQuestions} className="w-full bg-foreground text-background hover:bg-foreground/90 h-14 text-lg rounded-xl">
               Generate Questions <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </div>
@@ -203,11 +309,11 @@ export default function MockInterviewPage() {
   // LOADING
   if (phase === "loading" || phase === "evaluating") {
     return (
-      <div className="min-h-screen bg-pattern flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4 animate-fade-in">
           <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
           <p className="text-lg font-semibold text-foreground">
-            {phase === "loading" ? "Generating interview questions..." : "AI is evaluating your answers..."}
+            {phase === "loading" ? "Generating interview questions..." : "AI is analyzing your answers & communication style..."}
           </p>
           <p className="text-sm text-muted-foreground">This may take a few seconds</p>
         </div>
@@ -218,12 +324,15 @@ export default function MockInterviewPage() {
   // INTERVIEW
   if (phase === "interview") {
     const q = questions[currentQ];
+    const currentWordCount = currentAnswer.trim().split(/\s+/).filter(Boolean).length;
+    const currentFillers = countFillers(currentAnswer);
+    
     return (
-      <div className="min-h-screen bg-pattern">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 lg:px-8 py-10 max-w-2xl">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 rounded-2xl gradient-warm flex items-center justify-center">
-              <Briefcase className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center">
+              <Briefcase className="w-7 h-7 text-background" />
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-display font-bold text-foreground">Mock Interview</h1>
@@ -233,15 +342,24 @@ export default function MockInterviewPage() {
 
           <div className="flex gap-2 mb-6">
             {questions.map((_, i) => (
-              <div key={i} className={`flex-1 h-2 rounded-full ${i < currentQ ? "gradient-accent" : i === currentQ ? "gradient-primary" : "bg-secondary"}`} />
+              <div key={i} className={`flex-1 h-2 rounded-full ${i < currentQ ? "bg-success" : i === currentQ ? "bg-primary" : "bg-secondary"}`} />
             ))}
           </div>
 
-          <div className="card-elevated p-6 md:p-8 space-y-6 animate-fade-in">
+          <div className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-6 animate-fade-in">
             <div>
               <span className="text-xs font-bold uppercase text-primary px-3 py-1 bg-primary/10 rounded-full">{q?.category || category}</span>
               <h2 className="text-xl md:text-2xl font-display font-bold text-foreground mt-3">"{q?.question}"</h2>
               {q?.tip && <p className="text-sm text-muted-foreground mt-2">💡 {q.tip}</p>}
+            </div>
+
+            {/* Voice-first prompt */}
+            <div className="bg-accent/5 border border-accent/20 rounded-xl p-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-accent">
+                <Volume2 className="w-4 h-4" />
+                Use voice recording for communication analysis
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Speak your answer clearly. AI will analyze your speaking speed, filler words, pauses, and confidence.</p>
             </div>
 
             {/* Answer input with mic */}
@@ -250,25 +368,44 @@ export default function MockInterviewPage() {
                 <Textarea
                   value={currentAnswer}
                   onChange={(e) => setCurrentAnswer(e.target.value)}
-                  placeholder={isRecording ? "🎙️ Listening... speak your answer" : "Type your answer or click the mic to speak..."}
+                  placeholder={isRecording ? "🎙️ Listening... speak your answer" : "Click the mic button to speak, or type your answer..."}
                   className={`min-h-[150px] rounded-xl text-base pr-16 transition-all ${isRecording ? "border-destructive/50 bg-destructive/5" : ""}`}
                 />
                 <button
                   type="button"
                   onClick={isRecording ? stopRecording : startRecording}
-                  className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all ${isRecording ? "bg-destructive animate-pulse scale-110" : "gradient-primary shadow-glow hover:scale-105"}`}
+                  className={`absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center transition-all ${isRecording ? "bg-destructive animate-pulse scale-110" : "bg-foreground hover:bg-foreground/90 hover:scale-105"}`}
                   title={isRecording ? "Stop recording" : "Start recording"}
                 >
-                  {isRecording ? <MicOff className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
+                  {isRecording ? <MicOff className="w-5 h-5 text-background" /> : <Mic className="w-5 h-5 text-background" />}
                 </button>
               </div>
               {isRecording && (
-                <p className="text-xs text-destructive font-medium animate-pulse">🔴 Recording — your speech is being auto-typed above</p>
+                <p className="text-xs text-destructive font-medium animate-pulse">🔴 Recording — your speech is being transcribed in real-time</p>
+              )}
+              
+              {/* Live speech stats */}
+              {currentAnswer.trim().length > 0 && (
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <BarChart3 className="w-3 h-3" /> {currentWordCount} words
+                  </span>
+                  {currentFillers.count > 0 && (
+                    <span className="flex items-center gap-1 text-warning">
+                      <AlertTriangle className="w-3 h-3" /> {currentFillers.count} filler words
+                    </span>
+                  )}
+                  {usedVoice && (
+                    <span className="flex items-center gap-1">
+                      <Mic className="w-3 h-3 text-success" /> Voice input
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
-            <Button onClick={submitAnswer} disabled={!currentAnswer.trim()} className="w-full gradient-accent text-accent-foreground h-12 rounded-xl">
-              {currentQ < questions.length - 1 ? <>Next Question <ChevronRight className="w-4 h-4 ml-1" /></> : <>Submit & Get Feedback <CheckCircle2 className="w-4 h-4 ml-1" /></>}
+            <Button onClick={submitAnswer} disabled={!currentAnswer.trim()} className="w-full bg-foreground text-background hover:bg-foreground/90 h-12 rounded-xl">
+              {currentQ < questions.length - 1 ? <>Next Question <ChevronRight className="w-4 h-4 ml-1" /></> : <>Submit & Analyze <CheckCircle2 className="w-4 h-4 ml-1" /></>}
             </Button>
           </div>
         </div>
@@ -277,40 +414,148 @@ export default function MockInterviewPage() {
   }
 
   // RESULTS
+  const commAnalysis = result?.communication_analysis;
+
   return (
-    <div className="min-h-screen bg-pattern">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 lg:px-8 py-10 max-w-3xl">
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-2xl gradient-accent shadow-glow-accent flex items-center justify-center">
-            <CheckCircle2 className="w-7 h-7 text-white" />
+          <div className="w-14 h-14 rounded-2xl bg-success/10 border border-success/20 flex items-center justify-center">
+            <CheckCircle2 className="w-7 h-7 text-success" />
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Interview Results</h1>
-            <p className="text-muted-foreground">AI-powered feedback on your performance</p>
+            <p className="text-muted-foreground">AI-powered feedback with communication analysis</p>
           </div>
         </div>
 
         <div className="space-y-6 animate-fade-in">
-          {/* Overall Score */}
-          <div className={`card-elevated p-8 text-center ${(result?.overall_score || 0) >= 6 ? "border-success/30" : "border-warning/30"}`}>
-            <p className="text-sm text-muted-foreground mb-2">Overall Score</p>
-            <p className={`text-7xl font-display font-bold ${getScoreColor(result?.overall_score || 0)}`}>
-              {result?.overall_score || 0}<span className="text-2xl text-muted-foreground">/10</span>
-            </p>
+          {/* Score Cards */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className={`rounded-2xl border border-border bg-card p-6 text-center`}>
+              <p className="text-sm text-muted-foreground mb-2">Interview Score</p>
+              <p className={`text-5xl font-display font-bold ${getScoreColor(result?.overall_score || 0)}`}>
+                {result?.overall_score || 0}<span className="text-xl text-muted-foreground">/10</span>
+              </p>
+            </div>
+            {commAnalysis && (
+              <div className={`rounded-2xl border border-border bg-card p-6 text-center`}>
+                <p className="text-sm text-muted-foreground mb-2">Communication Score</p>
+                <p className={`text-5xl font-display font-bold ${getScoreColor(commAnalysis.overall_communication_score)}`}>
+                  {commAnalysis.overall_communication_score}<span className="text-xl text-muted-foreground">/10</span>
+                </p>
+              </div>
+            )}
           </div>
 
+          {/* Communication Analysis */}
+          {commAnalysis && (
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="font-display font-semibold text-lg text-foreground mb-5 flex items-center gap-2">
+                <Volume2 className="w-5 h-5 text-primary" /> Communication Style Analysis
+              </h2>
+              
+              {/* Metric bars */}
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                {[
+                  { label: "Speaking Speed", score: commAnalysis.speaking_speed_score, feedback: commAnalysis.speaking_speed_feedback, extra: `${commAnalysis.speaking_speed_wpm} WPM` },
+                  { label: "Clarity", score: commAnalysis.clarity_score, feedback: commAnalysis.clarity_feedback },
+                  { label: "Confidence", score: commAnalysis.confidence_score, feedback: commAnalysis.confidence_feedback },
+                  { label: "Filler Words", score: commAnalysis.filler_word_score, feedback: commAnalysis.filler_feedback, extra: `${commAnalysis.filler_word_count} found` },
+                  { label: "Pause Pattern", score: commAnalysis.pause_score, feedback: commAnalysis.pause_feedback },
+                  { label: "Sentence Structure", score: commAnalysis.sentence_structure_score, feedback: commAnalysis.sentence_structure_feedback },
+                ].map((m, i) => (
+                  <div key={i} className={`rounded-xl p-4 ${getScoreBg(m.score)}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-foreground">{m.label}</span>
+                      <div className="flex items-center gap-2">
+                        {m.extra && <span className="text-xs text-muted-foreground font-mono">{m.extra}</span>}
+                        <span className={`text-lg font-bold ${getScoreColor(m.score)}`}>{m.score}/10</span>
+                      </div>
+                    </div>
+                    <Progress value={m.score * 10} className="h-2 mb-2" />
+                    <p className="text-xs text-muted-foreground">{m.feedback}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Filler words detected */}
+              {commAnalysis.filler_words_detected?.length > 0 && (
+                <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 mb-4">
+                  <p className="text-sm font-semibold text-foreground mb-2">Filler Words Detected</p>
+                  <div className="flex flex-wrap gap-2">
+                    {commAnalysis.filler_words_detected.map((w, i) => (
+                      <span key={i} className="text-xs bg-warning/10 text-warning px-3 py-1.5 rounded-full font-medium">"{w}"</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Communication Strengths & Improvements */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-success/5 border border-success/20 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="w-4 h-4 text-success" /> Strengths
+                  </h4>
+                  <ul className="space-y-1.5">
+                    {(commAnalysis.strengths || []).map((s, i) => (
+                      <li key={i} className="text-xs text-muted-foreground">• {s}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-warning/5 border border-warning/20 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-4 h-4 text-warning" /> Areas to Improve
+                  </h4>
+                  <ul className="space-y-1.5">
+                    {(commAnalysis.areas_to_improve || []).map((s, i) => (
+                      <li key={i} className="text-xs text-muted-foreground">• {s}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Tips */}
+              {commAnalysis.tips?.length > 0 && (
+                <div className="mt-4 bg-primary/5 border border-primary/10 rounded-xl p-4">
+                  <p className="text-sm font-semibold text-foreground mb-2">💡 Improvement Tips</p>
+                  <ul className="space-y-1.5">
+                    {commAnalysis.tips.map((t, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                        <span className="text-primary font-bold shrink-0">{i + 1}.</span> {t}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Per Question */}
-          <div className="card-elevated p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="font-display font-semibold text-lg text-foreground mb-4 flex items-center gap-2">
               <Target className="w-5 h-5 text-primary" /> Question-by-Question
             </h2>
             <div className="space-y-4">
               {questions.map((q, i) => {
                 const pq = result?.per_question?.[i];
+                const metric = speechMetrics[i];
                 return (
                   <div key={i} className="bg-secondary/30 rounded-xl p-4">
                     <p className="text-sm font-semibold text-foreground mb-1">Q{i + 1}: {q.question}</p>
-                    <p className="text-xs text-muted-foreground mb-3 italic">Your answer: "{answers[i]?.substring(0, 100)}..."</p>
+                    <p className="text-xs text-muted-foreground mb-2 italic">"{answers[i]?.substring(0, 120)}..."</p>
+                    
+                    {/* Speech stats for this answer */}
+                    {metric && (
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-3 p-2 bg-secondary/50 rounded-lg">
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {metric.durationSec.toFixed(0)}s</span>
+                        <span className="flex items-center gap-1"><BarChart3 className="w-3 h-3" /> {metric.wpm.toFixed(0)} WPM</span>
+                        <span className="flex items-center gap-1">{metric.wordCount} words</span>
+                        {metric.fillerCount > 0 && <span className="text-warning">{metric.fillerCount} fillers</span>}
+                        <span className="capitalize">{metric.inputMethod}</span>
+                      </div>
+                    )}
+                    
                     {pq && (
                       <>
                         <div className="grid grid-cols-3 gap-3 mb-3">
@@ -337,7 +582,7 @@ export default function MockInterviewPage() {
 
           {/* Strengths & Improvements */}
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="card-elevated p-6">
+            <div className="rounded-2xl border border-border bg-card p-6">
               <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
                 <Zap className="w-5 h-5 text-success" /> Strengths
               </h3>
@@ -349,7 +594,7 @@ export default function MockInterviewPage() {
                 ))}
               </ul>
             </div>
-            <div className="card-elevated p-6">
+            <div className="rounded-2xl border border-border bg-card p-6">
               <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-5 h-5 text-warning" /> Improvements
               </h3>
@@ -364,7 +609,7 @@ export default function MockInterviewPage() {
           </div>
 
           {/* Overall Feedback */}
-          <div className="card-elevated p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h3 className="font-semibold text-foreground mb-3">📝 Overall Feedback</h3>
             <div className="space-y-2">
               {(result?.overall_feedback || []).map((f, i) => (
@@ -377,7 +622,7 @@ export default function MockInterviewPage() {
           </div>
 
           <div className="text-center">
-            <Button onClick={() => { setPhase("setup"); setResult(null); }} variant="outline" className="rounded-xl h-12 px-8">
+            <Button onClick={() => { setPhase("setup"); setResult(null); setSpeechMetrics([]); }} variant="outline" className="rounded-xl h-12 px-8">
               <RefreshCw className="w-4 h-4 mr-2" /> Try Another Interview
             </Button>
           </div>
