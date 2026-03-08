@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User, Brain, BarChart3, BookOpen, Mic, Sun, Moon, LogIn, LogOut,
   TrendingUp, Mail, FileText, Code, Compass, Settings, Menu, X, Briefcase, Map,
-  Home, ArrowLeft
+  Home, ArrowLeft, Route
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
@@ -106,6 +106,16 @@ export default function Navbar() {
                 <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Back</span>
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="rounded-xl border-primary/50 bg-primary/10 hover:bg-primary/20 gap-1.5 font-bold text-primary"
+            >
+              <Link to="/career">
+                <Route className="w-4 h-4" /> <span className="hidden sm:inline">AI Career Roadmap</span>
+              </Link>
+            </Button>
           </div>
 
           {/* Desktop Nav */}
