@@ -311,12 +311,37 @@ export default function AdminPage() {
                               <span className="text-muted-foreground">—</span>
                             )}
                           </td>
+                          <td className="p-4 text-center">
+                            {profile && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Profile</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete <strong>{profile.name}</strong>'s profile? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => deleteProfile(profile.id, profile.name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </td>
                         </tr>
                       );
                     })}
                     {authUsers.length === 0 && !loading && (
                       <tr>
-                        <td colSpan={7} className="p-12 text-center text-muted-foreground">
+                        <td colSpan={8} className="p-12 text-center text-muted-foreground">
                           No registered users yet.
                         </td>
                       </tr>
