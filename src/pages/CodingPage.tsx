@@ -135,10 +135,18 @@ export default function CodingPage() {
     });
   }, [user]);
 
-  // Timer
+  // Countdown timer (5 minutes)
   useEffect(() => {
     if (phase !== "solve" || !startTime) return;
-    const interval = setInterval(() => setElapsedTime(Math.floor((Date.now() - startTime) / 1000)), 1000);
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      setElapsedTime(elapsed);
+      if (elapsed >= TIME_LIMIT_SECONDS) {
+        setTimeExpired(true);
+        clearInterval(interval);
+        toast.error("⏰ Time's up! You ran out of time for this problem.");
+      }
+    }, 1000);
     return () => clearInterval(interval);
   }, [phase, startTime]);
 
