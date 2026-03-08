@@ -26,6 +26,7 @@ export default function Navbar() {
   const { profile } = useAppContext();
   const [lastPrediction, setLastPrediction] = useState<number | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
