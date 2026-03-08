@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, Brain, BarChart3, BookOpen, Mic, Sun, Moon, LogIn, LogOut, TrendingUp, Mail, FileText, Code, Compass, Settings } from "lucide-react";
+import {
+  User, Brain, BarChart3, BookOpen, Mic, Sun, Moon, LogIn, LogOut,
+  TrendingUp, Mail, FileText, Code, Compass, Settings, Menu, X, Briefcase, Map
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
 import { useAppContext } from "@/context/AppContext";
@@ -11,13 +14,13 @@ import { toast } from "sonner";
 
 const navItems = [
   { path: "/", label: "Home", icon: BarChart3 },
+  { path: "/resume", label: "Resume Analyzer", icon: FileText },
+  { path: "/voice", label: "AI Mock Interview", icon: Mic },
+  { path: "/coding", label: "Coding Challenge", icon: Code },
+  { path: "/career", label: "Career Paths", icon: Compass },
+  { path: "/quiz", label: "Learning Roadmap", icon: Map },
   { path: "/profile", label: "Predictor", icon: TrendingUp },
-  { path: "/quiz", label: "Quiz", icon: BookOpen },
-  { path: "/voice", label: "Interview", icon: Mic },
-  { path: "/coding", label: "Coding", icon: Code },
-  { path: "/resume", label: "Resume", icon: FileText },
-  { path: "/career", label: "Career", icon: Compass },
-  { path: "/dashboard", label: "Dashboard", icon: Brain },
+  { path: "/dashboard", label: "Progress Dashboard", icon: Brain },
 ];
 
 export default function Navbar() {
@@ -28,6 +31,7 @@ export default function Navbar() {
   const [lastPrediction, setLastPrediction] = useState<number | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -42,7 +46,6 @@ export default function Navbar() {
         if (data) {
           setProfileName(data.name);
           setAvatarUrl((data as any).avatar_url || null);
-          // Simple prediction calc
           const cgpaNorm = (data.cgpa / 10) * 100;
           const projectNorm = Math.min(100, data.num_projects * 15);
           const internshipNorm = Math.min(100, data.internship_experience * 30);
@@ -54,6 +57,11 @@ export default function Navbar() {
       });
   }, [user, profile]);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out successfully");
@@ -63,7 +71,8 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 glass-strong border-b border-border/30">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-3 group">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative">
               <img src="/logo.png" alt="HireForge" className="w-10 h-10 rounded-xl shadow-md transition-transform group-hover:scale-105" />
               <div className="absolute inset-0 rounded-xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -72,29 +81,35 @@ export default function Navbar() {
               HireForge
             </span>
           </Link>
-          
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-0.5 bg-secondary/50 p-1 rounded-xl overflow-x-auto">
-              {navItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                      isActive
-                        ? "gradient-primary text-primary-foreground shadow-glow"
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/80"
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <span className="hidden lg:inline">{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-            
-            {/* Settings Dropdown */}
+
+          {/* Desktop Nav */}
+          <div className="hidden xl:flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`relative flex items-center gap-2 px-3 py-2 rounded-lg text-[15px] font-semibold transition-all duration-200 whitespace-nowrap group ${
+                    isActive
+                      ? "gradient-primary text-primary-foreground shadow-glow"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                  {/* Hover underline animation */}
+                  {!isActive && (
+                    <span className="absolute bottom-0.5 left-3 right-3 h-[2px] bg-primary rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Right side: Settings + Mobile hamburger */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Settings Popover */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -106,7 +121,6 @@ export default function Navbar() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-80 p-0 rounded-2xl overflow-hidden">
-                {/* User info header */}
                 {user ? (
                   <div className="gradient-primary p-4">
                     <div className="flex items-center gap-3">
@@ -133,7 +147,6 @@ export default function Navbar() {
                 )}
 
                 <div className="p-3 space-y-2">
-                  {/* Theme Toggle */}
                   <button
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors text-left"
@@ -146,7 +159,6 @@ export default function Navbar() {
                     <span className="text-xs text-muted-foreground">Toggle</span>
                   </button>
 
-                  {/* Profile link */}
                   {user && (
                     <>
                       <Link
@@ -202,9 +214,44 @@ export default function Navbar() {
                 </div>
               </PopoverContent>
             </Popover>
+
+            {/* Mobile hamburger */}
+            <Button
+              variant="outline"
+              size="icon"
+              className="xl:hidden rounded-xl w-10 h-10 border-border/50 bg-secondary/50 hover:bg-secondary shrink-0"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileOpen && (
+        <div className="xl:hidden border-t border-border/30 bg-background/95 backdrop-blur-xl animate-fade-in">
+          <div className="container mx-auto px-4 py-3 space-y-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold transition-all duration-200 ${
+                    isActive
+                      ? "gradient-primary text-primary-foreground shadow-glow"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
