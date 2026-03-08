@@ -137,6 +137,7 @@ export type Database = {
           name: string
           num_projects: number
           programming_skills: string[] | null
+          resume_url: string | null
           technical_skills: string[] | null
           updated_at: string
           user_id: string | null
@@ -152,6 +153,7 @@ export type Database = {
           name: string
           num_projects?: number
           programming_skills?: string[] | null
+          resume_url?: string | null
           technical_skills?: string[] | null
           updated_at?: string
           user_id?: string | null
@@ -167,6 +169,7 @@ export type Database = {
           name?: string
           num_projects?: number
           programming_skills?: string[] | null
+          resume_url?: string | null
           technical_skills?: string[] | null
           updated_at?: string
           user_id?: string | null
