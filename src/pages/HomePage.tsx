@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Brain, BookOpen, Mic, BarChart3, Sparkles, CheckCircle2, Zap, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const features = [
   { 
@@ -33,14 +35,26 @@ const features = [
   },
 ];
 
-const stats = [
-  { value: "95%", label: "Prediction Accuracy" },
-  { value: "10K+", label: "Students Analyzed" },
-  { value: "500+", label: "Companies" },
-  { value: "4.9★", label: "User Rating" },
-];
-
 export default function HomePage() {
+  const [studentCount, setStudentCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("student_profiles")
+        .select("*", { count: "exact", head: true });
+      setStudentCount(count ?? 0);
+    };
+    fetchCount();
+  }, []);
+
+  const stats = [
+    { value: "95%", label: "Prediction Accuracy" },
+    { value: `${studentCount}+`, label: "Students Analyzed" },
+    { value: "500+", label: "Companies" },
+    { value: "4.9★", label: "User Rating" },
+  ];
+
   return (
     <div className="min-h-screen bg-pattern">
       {/* Hero Section */}
