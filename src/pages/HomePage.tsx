@@ -143,13 +143,13 @@ export default function HomePage() {
       </section>
 
       {/* Stats Bar */}
-      <section className="py-8 border-y border-border/50 bg-card/50 backdrop-blur-sm">
+      <section className="py-12 bg-secondary/50">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {stats.map((stat, i) => (
               <div key={i} className="text-center animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                <p className="text-3xl md:text-4xl font-display font-bold text-gradient">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                <p className="text-3xl md:text-4xl font-display font-bold text-foreground">{stat.value}</p>
+                <p className="text-sm text-muted-foreground mt-2 font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -157,15 +157,15 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="py-20 md:py-28">
+      <section className="py-24 md:py-32">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-sm font-semibold text-primary uppercase tracking-wider">Features</span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-3">
-              Everything You Need to Succeed
+            <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest mb-4 px-3 py-1 bg-primary/10 rounded-full">Capabilities</span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+              Comprehensive Assessment Suite
             </h2>
-            <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
-              Comprehensive tools designed to analyze, improve, and predict your placement success
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto text-lg">
+              Advanced tools engineered to evaluate, enhance, and forecast your career trajectory
             </p>
           </div>
           
@@ -173,13 +173,13 @@ export default function HomePage() {
             {features.map((f, i) => (
               <div 
                 key={i} 
-                className="card-interactive p-6 animate-fade-in" 
+                className="group p-8 rounded-2xl border border-border bg-card hover:border-primary/20 hover:shadow-lg transition-all duration-300 animate-fade-in" 
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className={`w-14 h-14 rounded-2xl ${f.color} ${f.shadowColor} flex items-center justify-center mb-5`}>
-                  <f.icon className="w-7 h-7 text-primary-foreground" />
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/15 transition-colors">
+                  <f.icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="font-display font-semibold text-lg mb-2 text-foreground">{f.title}</h3>
+                <h3 className="font-display font-semibold text-lg mb-3 text-foreground">{f.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
