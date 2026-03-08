@@ -84,39 +84,49 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Quick Actions: Home & Back */}
-          <div className="flex items-center gap-1.5 ml-2">
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="rounded-xl border-border/50 bg-secondary/50 hover:bg-secondary gap-1.5 font-bold"
-            >
-              <Link to="/">
-                <Home className="w-4 h-4" /> <span className="hidden sm:inline">Home</span>
-              </Link>
-            </Button>
-            {location.pathname !== "/" && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="rounded-xl border-border/50 bg-secondary/50 hover:bg-secondary gap-1.5 font-bold"
-              >
-                <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Back</span>
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="rounded-xl border-primary/50 bg-primary/10 hover:bg-primary/20 gap-1.5 font-bold text-primary"
-            >
-              <Link to="/ai-roadmap">
-                <Route className="w-4 h-4" /> <span className="hidden sm:inline">AI Career Roadmap</span>
-              </Link>
-            </Button>
-          </div>
+           {/* Quick Actions: Home & Back */}
+           <div className="flex items-center gap-1.5 ml-2">
+             <Button
+               variant="outline"
+               size="sm"
+               asChild
+               className="rounded-xl border-border/50 bg-secondary/50 hover:bg-secondary gap-1.5 font-bold"
+             >
+               <Link to="/">
+                 <Home className="w-4 h-4" /> <span className="hidden sm:inline">Home</span>
+               </Link>
+             </Button>
+             {location.pathname !== "/" && (
+               <Button
+                 variant="outline"
+                 size="sm"
+                 onClick={() => navigate(-1)}
+                 className="rounded-xl border-border/50 bg-secondary/50 hover:bg-secondary gap-1.5 font-bold"
+               >
+                 <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Back</span>
+               </Button>
+             )}
+             <Button
+               variant="outline"
+               size="sm"
+               asChild
+               className="rounded-xl border-border/50 bg-secondary/50 hover:bg-secondary gap-1.5 font-bold"
+             >
+               <Link to="/profile">
+                 <TrendingUp className="w-4 h-4" /> <span className="hidden sm:inline">Predictor</span>
+               </Link>
+             </Button>
+             <Button
+               variant="outline"
+               size="sm"
+               asChild
+               className="rounded-xl border-primary/50 bg-primary/10 hover:bg-primary/20 gap-1.5 font-bold text-primary"
+             >
+               <Link to="/ai-roadmap">
+                 <Route className="w-4 h-4" /> <span className="hidden sm:inline">AI Career Roadmap</span>
+               </Link>
+             </Button>
+           </div>
 
           {/* Desktop Nav */}
           <div className="hidden xl:flex items-center gap-1">
