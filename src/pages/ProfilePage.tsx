@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { User, Save, Plus, X } from "lucide-react";
+import { User, Save, Plus, X, Brain, Code, Cpu } from "lucide-react";
 
 const programmingOptions = ["Python", "Java", "C++", "JavaScript", "React", "SQL", "Machine Learning", "Cloud", "DevOps", "Git"];
 const technicalOptions = ["Web Development", "Mobile Development", "Data Science", "AI/ML", "Cybersecurity", "Blockchain"];
