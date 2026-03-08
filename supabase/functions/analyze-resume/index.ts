@@ -25,9 +25,17 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { resumeText, profileId, userId, resumeUrl } = await req.json();
+    const rawBody = await req.json();
+    // Sanitize resumeText: remove invalid Unicode and non-printable chars
+    const resumeText = (rawBody.resumeText || "")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, " ")
+      .replace(/\\u[0-9a-fA-F]{0,3}(?![0-9a-fA-F])/g, " ")
+      .replace(/\uFFFD/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const { profileId, userId, resumeUrl } = rawBody;
 
-    if (!resumeText || resumeText.trim().length < 50) {
+    if (!resumeText || resumeText.length < 50) {
       return new Response(JSON.stringify({ error: "Resume text too short or empty" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
