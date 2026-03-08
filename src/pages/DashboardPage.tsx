@@ -108,6 +108,9 @@ export default function DashboardPage() {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [hasRated, setHasRated] = useState(false);
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [aiRecs, setAiRecs] = useState<AIRecommendation | null>(null);
+  const [loadingRecs, setLoadingRecs] = useState(false);
+  const [recsError, setRecsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profileId) return;
