@@ -244,40 +244,28 @@ export default function MockInterviewPage() {
               {q?.tip && <p className="text-sm text-muted-foreground mt-2">💡 {q.tip}</p>}
             </div>
 
-            {/* Input mode toggle */}
-            <div className="flex gap-2 bg-secondary/50 p-1 rounded-xl">
-              <button onClick={() => setInputMode("text")} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${inputMode === "text" ? "gradient-primary text-primary-foreground" : "text-muted-foreground"}`}>
-                <PenLine className="w-4 h-4" /> Text
-              </button>
-              <button onClick={() => setInputMode("voice")} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${inputMode === "voice" ? "gradient-primary text-primary-foreground" : "text-muted-foreground"}`}>
-                <Mic className="w-4 h-4" /> Voice
-              </button>
-            </div>
-
-            {inputMode === "text" ? (
-              <Textarea
-                value={currentAnswer}
-                onChange={(e) => setCurrentAnswer(e.target.value)}
-                placeholder="Type your answer here..."
-                className="min-h-[150px] rounded-xl text-base"
-              />
-            ) : (
-              <div className="flex flex-col items-center py-4">
+            {/* Answer input with mic */}
+            <div className="space-y-3">
+              <div className="relative">
+                <Textarea
+                  value={currentAnswer}
+                  onChange={(e) => setCurrentAnswer(e.target.value)}
+                  placeholder={isRecording ? "🎙️ Listening... speak your answer" : "Type your answer or click the mic to speak..."}
+                  className={`min-h-[150px] rounded-xl text-base pr-16 transition-all ${isRecording ? "border-destructive/50 bg-destructive/5" : ""}`}
+                />
                 <button
+                  type="button"
                   onClick={isRecording ? stopRecording : startRecording}
-                  className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isRecording ? "bg-destructive animate-pulse scale-110" : "gradient-primary shadow-glow hover:scale-105"}`}
+                  className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all ${isRecording ? "bg-destructive animate-pulse scale-110" : "gradient-primary shadow-glow hover:scale-105"}`}
+                  title={isRecording ? "Stop recording" : "Start recording"}
                 >
-                  {isRecording ? <MicOff className="w-8 h-8 text-white" /> : <Mic className="w-8 h-8 text-white" />}
+                  {isRecording ? <MicOff className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
                 </button>
-                <p className="text-sm text-muted-foreground mt-3">{isRecording ? "🔴 Recording... Click to stop" : "Click to record"}</p>
-                {currentAnswer && (
-                  <div className="w-full bg-secondary/50 rounded-xl p-4 mt-4">
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Transcript</p>
-                    <p className="text-sm text-foreground">{currentAnswer}</p>
-                  </div>
-                )}
               </div>
-            )}
+              {isRecording && (
+                <p className="text-xs text-destructive font-medium animate-pulse">🔴 Recording — your speech is being auto-typed above</p>
+              )}
+            </div>
 
             <Button onClick={submitAnswer} disabled={!currentAnswer.trim()} className="w-full gradient-accent text-accent-foreground h-12 rounded-xl">
               {currentQ < questions.length - 1 ? <>Next Question <ChevronRight className="w-4 h-4 ml-1" /></> : <>Submit & Get Feedback <CheckCircle2 className="w-4 h-4 ml-1" /></>}
