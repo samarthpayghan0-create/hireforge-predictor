@@ -90,6 +90,8 @@ export default function CodingPage() {
   const [totalScore, setTotalScore] = useState(0);
   const [solvedCount, setSolvedCount] = useState(0);
   const [startTime, setStartTime] = useState<number>(0);
+  const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({});
+  const [showSolution, setShowSolution] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   // Load problems
