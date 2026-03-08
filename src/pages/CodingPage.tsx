@@ -164,6 +164,7 @@ export default function CodingPage() {
     setTimeExpired(false);
     const lang = LANGUAGES.find((l) => l.id === language);
     setCode(lang?.template || "");
+    setRunOutput(null);
     setStartTime(Date.now());
     setElapsedTime(0);
     setPhase("solve");
