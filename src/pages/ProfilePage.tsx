@@ -156,11 +156,19 @@ export default function ProfilePage() {
                 <Input 
                   id="name" 
                   value={form.name} 
-                  onChange={(e) => setForm({ ...form, name: e.target.value })} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || NAME_REGEX.test(val)) {
+                      setForm({ ...form, name: val });
+                    }
+                  }} 
                   placeholder="Enter your full name" 
                   maxLength={100}
                   className="h-12 text-base rounded-xl"
                 />
+                {form.name.length > 0 && !isValidName(form.name) && (
+                  <p className="text-sm text-destructive">Name must be at least 2 characters, letters only</p>
+                )}
               </div>
               <div className="space-y-4">
                 <Label className="text-base font-semibold">CGPA</Label>
