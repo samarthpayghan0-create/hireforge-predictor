@@ -73,7 +73,7 @@ export default function Navbar() {
             {/* Auth Button */}
             {user ? (
               <div className="flex items-center gap-2">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl">
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
                     <User className="w-3.5 h-3.5 text-white" />
                   </div>
