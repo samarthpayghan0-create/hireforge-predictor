@@ -92,46 +92,68 @@ export default function Navbar() {
               })}
             </div>
             
-            {/* Theme Toggle */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-xl w-10 h-10 border-border/50 bg-secondary/50 hover:bg-secondary shrink-0"
-            >
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            </Button>
-
-            {/* Auth Button */}
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl hover:bg-primary/20 transition-colors cursor-pointer">
-                      <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center">
-                        <User className="w-4 h-4 text-white" />
+            {/* Settings Dropdown */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-xl w-10 h-10 border-border/50 bg-secondary/50 hover:bg-secondary shrink-0"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 p-0 rounded-2xl overflow-hidden">
+                {/* User info header */}
+                {user ? (
+                  <div className="gradient-primary p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <User className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-xs font-medium text-foreground truncate max-w-[120px] hidden sm:inline">
-                        {profileName || user.user_metadata?.full_name || user.email?.split("@")[0]}
-                      </span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-72 p-0 rounded-2xl overflow-hidden">
-                    <div className="gradient-primary p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                          <User className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-white truncate">
-                            {profileName || user.user_metadata?.full_name || "Student"}
-                          </p>
-                          <p className="text-xs text-white/70 truncate">{user.email}</p>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">
+                          {profileName || user.user_metadata?.full_name || "Student"}
+                        </p>
+                        <p className="text-xs text-white/70 truncate">{user.email}</p>
                       </div>
                     </div>
-                    <div className="p-3 space-y-2">
+                  </div>
+                ) : (
+                  <div className="gradient-primary p-4">
+                    <p className="text-sm font-semibold text-white">Settings</p>
+                    <p className="text-xs text-white/70">Customize your experience</p>
+                  </div>
+                )}
+
+                <div className="p-3 space-y-2">
+                  {/* Theme Toggle */}
+                  <button
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors text-left"
+                  >
+                    {theme === "dark" ? <Moon className="w-4 h-4 text-muted-foreground shrink-0" /> : <Sun className="w-4 h-4 text-muted-foreground shrink-0" />}
+                    <div className="flex-1">
+                      <p className="text-[10px] uppercase text-muted-foreground font-semibold">Theme</p>
+                      <p className="text-sm text-foreground">{theme === "dark" ? "Dark Mode" : "Light Mode"}</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">Toggle</span>
+                  </button>
+
+                  {/* Profile link */}
+                  {user && (
+                    <>
+                      <Link
+                        to="/profile"
+                        className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors"
+                      >
+                        <User className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-[10px] uppercase text-muted-foreground font-semibold">Profile</p>
+                          <p className="text-sm text-foreground">View & edit your profile</p>
+                        </div>
+                      </Link>
+
                       <div className="flex items-center gap-3 p-2.5 rounded-xl bg-secondary/50">
                         <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
                         <div className="min-w-0">
@@ -139,6 +161,7 @@ export default function Navbar() {
                           <p className="text-sm text-foreground truncate">{user.email}</p>
                         </div>
                       </div>
+
                       <div className="flex items-center gap-3 p-2.5 rounded-xl bg-secondary/50">
                         <TrendingUp className="w-4 h-4 text-muted-foreground shrink-0" />
                         <div>
@@ -152,6 +175,7 @@ export default function Navbar() {
                           )}
                         </div>
                       </div>
+
                       <Button
                         variant="ghost"
                         onClick={handleSignOut}
@@ -159,18 +183,19 @@ export default function Navbar() {
                       >
                         <LogOut className="w-4 h-4" /> Sign Out
                       </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            ) : (
-              <Button asChild variant="outline" size="sm" className="rounded-xl shrink-0">
-                <Link to="/auth">
-                  <LogIn className="w-4 h-4 mr-1.5" />
-                  <span className="hidden sm:inline">Sign In</span>
-                </Link>
-              </Button>
-            )}
+                    </>
+                  )}
+
+                  {!user && (
+                    <Button asChild variant="default" className="w-full rounded-xl gap-2">
+                      <Link to="/auth">
+                        <LogIn className="w-4 h-4" /> Sign In
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
