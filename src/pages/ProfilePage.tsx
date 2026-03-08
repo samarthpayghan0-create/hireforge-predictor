@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare, BookOpen, Sparkles } from "lucide-react";
+import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare, BookOpen, Sparkles, Camera, ImageIcon } from "lucide-react";
 
 const programmingOptions = [
   "Python", "Java", "C++", "C", "JavaScript", "TypeScript", "React", "Angular", "Vue.js",
