@@ -296,6 +296,54 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Rating Dialog */}
+      <Dialog open={showRating && !hasRated} onOpenChange={setShowRating}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center font-display text-xl">Rate HireForge</DialogTitle>
+            <DialogDescription className="text-center">
+              How was your experience? Your feedback helps us improve!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center gap-2 py-6">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onMouseEnter={() => setHoveredRating(star)}
+                onMouseLeave={() => setHoveredRating(0)}
+                onClick={() => setSelectedRating(star)}
+                className="transition-transform hover:scale-110"
+              >
+                <Star
+                  className={`w-10 h-10 transition-colors ${
+                    star <= (hoveredRating || selectedRating)
+                      ? "fill-warning text-warning"
+                      : "text-muted-foreground/30"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          {selectedRating > 0 && (
+            <p className="text-center text-sm text-muted-foreground">
+              {selectedRating === 5 ? "Amazing! 🎉" : selectedRating === 4 ? "Great! 😊" : selectedRating === 3 ? "Good 👍" : selectedRating === 2 ? "Could be better 🤔" : "We'll improve! 💪"}
+            </p>
+          )}
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowRating(false)} className="flex-1 rounded-xl">
+              Skip
+            </Button>
+            <Button
+              onClick={submitRating}
+              disabled={!selectedRating || submittingRating}
+              className="flex-1 gradient-primary text-primary-foreground rounded-xl shadow-glow"
+            >
+              {submittingRating ? "Submitting..." : "Submit Rating"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
