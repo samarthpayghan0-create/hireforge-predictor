@@ -1,8 +1,12 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, Brain, BarChart3, BookOpen, Mic, Shield, Sun, Moon, LogIn, LogOut } from "lucide-react";
+import { User, Brain, BarChart3, BookOpen, Mic, Shield, Sun, Moon, LogIn, LogOut, TrendingUp, Mail } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
+import { useAppContext } from "@/context/AppContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
 const navItems = [
@@ -18,6 +22,33 @@ export default function Navbar() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
+  const { profile } = useAppContext();
+  const [lastPrediction, setLastPrediction] = useState<number | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("student_profiles")
+      .select("name, cgpa, dsa_score, aptitude_score, num_projects, internship_experience, communication_rating")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setProfileName(data.name);
+          // Simple prediction calc
+          const cgpaNorm = (data.cgpa / 10) * 100;
+          const projectNorm = Math.min(100, data.num_projects * 15);
+          const internshipNorm = Math.min(100, data.internship_experience * 30);
+          const prob = cgpaNorm * 0.2 + data.dsa_score * 0.15 + data.aptitude_score * 0.15 +
+            projectNorm * 0.1 + internshipNorm * 0.1 + ((data.dsa_score + data.aptitude_score) / 2) * 0.15 +
+            (data.communication_rating * 10) * 0.15;
+          setLastPrediction(Math.min(99, Math.max(5, Math.round(prob))));
+        }
+      });
+  }, [user, profile]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -73,22 +104,62 @@ export default function Navbar() {
             {/* Auth Button */}
             {user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl">
-                  <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
-                    <User className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-foreground truncate max-w-[120px]">
-                    {user.user_metadata?.full_name || user.email?.split("@")[0]}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleSignOut}
-                  className="rounded-xl w-10 h-10 shrink-0 text-muted-foreground hover:text-destructive"
-                >
-                  <LogOut className="h-5 w-5" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl hover:bg-primary/20 transition-colors cursor-pointer">
+                      <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-xs font-medium text-foreground truncate max-w-[120px] hidden sm:inline">
+                        {profileName || user.user_metadata?.full_name || user.email?.split("@")[0]}
+                      </span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-72 p-0 rounded-2xl overflow-hidden">
+                    <div className="gradient-primary p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-white truncate">
+                            {profileName || user.user_metadata?.full_name || "Student"}
+                          </p>
+                          <p className="text-xs text-white/70 truncate">{user.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 space-y-2">
+                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-secondary/50">
+                        <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-[10px] uppercase text-muted-foreground font-semibold">Email</p>
+                          <p className="text-sm text-foreground truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-secondary/50">
+                        <TrendingUp className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase text-muted-foreground font-semibold">Last Prediction</p>
+                          {lastPrediction !== null ? (
+                            <p className={`text-sm font-bold ${lastPrediction >= 60 ? "text-success" : "text-destructive"}`}>
+                              {lastPrediction}% — {lastPrediction >= 60 ? "Likely Placed" : "Needs Improvement"}
+                            </p>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">No prediction yet</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        onClick={handleSignOut}
+                        className="w-full justify-start gap-2 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 mt-1"
+                      >
+                        <LogOut className="w-4 h-4" /> Sign Out
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             ) : (
               <Button asChild variant="outline" size="sm" className="rounded-xl shrink-0">
