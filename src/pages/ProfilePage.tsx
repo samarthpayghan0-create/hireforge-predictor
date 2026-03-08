@@ -76,6 +76,8 @@ export default function ProfilePage() {
     setForm((f) => ({ ...f, [field]: f[field].filter((s) => s !== skill) }));
   };
 
+  const { user } = useAuth();
+
   const handleSubmit = async () => {
     if (!form.name.trim()) { toast.error("Please enter your name"); return; }
     setLoading(true);
@@ -90,6 +92,7 @@ export default function ProfilePage() {
         internship_experience: form.internship_experience,
         technical_skills: form.technical_skills,
         communication_rating: form.communication_rating,
+        user_id: user?.id || null,
       }).select().single();
       if (error) throw error;
       setProfile(form);
