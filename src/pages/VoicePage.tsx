@@ -37,7 +37,7 @@ export default function MockInterviewPage() {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState("");
-  const [inputMode, setInputMode] = useState<"text" | "voice">("text");
+  
   const [isRecording, setIsRecording] = useState(false);
   const [result, setResult] = useState<EvalResult | null>(null);
 
