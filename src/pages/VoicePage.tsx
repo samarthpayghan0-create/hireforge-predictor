@@ -97,6 +97,8 @@ export default function MockInterviewPage() {
 
   const recognitionRef = useRef<any>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finalTranscriptRef = useRef<string>("");
+  const stoppedManuallyRef = useRef(false);
 
   const generateQuestions = async () => {
     setPhase("loading");
