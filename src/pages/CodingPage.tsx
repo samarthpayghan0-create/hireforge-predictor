@@ -63,7 +63,8 @@ const DIFF_COLORS: Record<string, string> = {
   hard: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
-const DIFF_POINTS: Record<string, number> = { easy: 10, medium: 20, hard: 30 };
+const DIFF_POINTS: Record<string, number> = { easy: 10, medium: 10, hard: 10 };
+const TIME_LIMIT_SECONDS = 5 * 60; // 5 minutes
 
 const RANK_ICONS = [
   <Crown className="w-5 h-5 text-warning" />,
