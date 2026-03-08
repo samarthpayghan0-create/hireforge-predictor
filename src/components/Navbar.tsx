@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, Brain, BarChart3, BookOpen, Mic, Shield, Sun, Moon, LogIn, LogOut, TrendingUp, Mail } from "lucide-react";
+import { User, Brain, BarChart3, BookOpen, Mic, Shield, Sun, Moon, LogIn, LogOut, TrendingUp, Mail, FileText } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
 import { useAppContext } from "@/context/AppContext";
