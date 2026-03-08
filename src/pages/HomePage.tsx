@@ -64,7 +64,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-display font-bold text-center mb-12 text-foreground">Your Journey</h2>
           <div className="max-w-2xl mx-auto space-y-6">
-            {["Create your profile", "Take the skill quiz", "Record a voice sample", "View AI predictions & recommendations"].map((step, i) => (
+            {["Create your profile", "Take the skill quiz (optional)", "Record a voice sample (optional)", "View AI predictions & recommendations"].map((step, i) => (
               <div key={i} className="flex items-center gap-4 animate-slide-in" style={{ animationDelay: `${i * 150}ms` }}>
                 <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
                   {i + 1}

@@ -29,6 +29,7 @@ const App = () => (
             <Route path="/quiz" element={<QuizPage />} />
             <Route path="/voice" element={<VoicePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppProvider>
