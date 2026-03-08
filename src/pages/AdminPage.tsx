@@ -256,6 +256,7 @@ export default function AdminPage() {
                       <th className="text-center p-4 font-semibold text-foreground">Profile</th>
                       <th className="text-center p-4 font-semibold text-foreground">Prediction</th>
                       <th className="text-center p-4 font-semibold text-foreground">Actions</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {authUsers.map((u, i) => {
