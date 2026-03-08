@@ -116,11 +116,6 @@ export default function HomePage() {
                   Start Assessment <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="text-base px-8 py-6 rounded-lg border-2 border-border hover:bg-secondary">
-                <Link to="/quiz">
-                  View Demo <BookOpen className="w-5 h-5 ml-2" />
-                </Link>
-              </Button>
             </div>
 
             {/* Trust indicators */}
