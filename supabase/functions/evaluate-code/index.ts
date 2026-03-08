@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
 
     // Update leaderboard if correct and user is logged in
     if (parsed.is_correct && userId && username) {
-      const earnedPoints = points || (difficulty === "hard" ? 30 : difficulty === "medium" ? 20 : 10);
+      const earnedPoints = 10; // Fixed 10 points per correct answer
       // Calculate bonus for fast solutions
       const timeBonus = parsed.execution_time_estimate_ms < 100 ? 5 : parsed.execution_time_estimate_ms < 500 ? 2 : 0;
       const totalEarned = earnedPoints + timeBonus;
