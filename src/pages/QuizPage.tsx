@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
-import { getShuffledQuestions, QuizQuestion } from "@/data/quizData";
+import { getShuffledQuestionsForSection, QuizQuestion } from "@/data/quizData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -12,25 +12,13 @@ type Difficulty = "medium" | "hard" | "mixed";
 type QuestionCount = 20 | 30 | 50;
 
 const SECTIONS = [
-  { key: "Aptitude", label: "Aptitude", icon: Brain },
-  { key: "Programming", label: "Programming", icon: Code },
-  { key: "Data Structures", label: "Data Structures", icon: Database },
-  { key: "Core Subjects", label: "Core Subjects", icon: Cpu },
+  { key: "Aptitude", label: "Aptitude", icon: Brain, categories: ["Aptitude"] },
+  { key: "Programming", label: "Programming", icon: Code, categories: ["Programming"] },
+  { key: "Data Structures", label: "Data Structures", icon: Database, categories: ["Data Structures"] },
+  { key: "Core Subjects", label: "Core Subjects", icon: Cpu, categories: ["DBMS", "Operating Systems"] },
 ] as const;
 
 type SectionKey = typeof SECTIONS[number]["key"];
-
-// Core Subjects = DBMS + Operating Systems
-const CORE_CATEGORIES = ["DBMS", "Operating Systems"];
-
-function groupBySection(questions: QuizQuestion[]): Record<SectionKey, QuizQuestion[]> {
-  return {
-    "Aptitude": questions.filter(q => q.category === "Aptitude"),
-    "Programming": questions.filter(q => q.category === "Programming"),
-    "Data Structures": questions.filter(q => q.category === "Data Structures"),
-    "Core Subjects": questions.filter(q => CORE_CATEGORIES.includes(q.category)),
-  };
-}
 
 export default function QuizPage() {
   const { profileId, setQuizScores } = useAppContext();
@@ -38,7 +26,9 @@ export default function QuizPage() {
 
   const [started, setStarted] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [questionCount, setQuestionCount] = useState<QuestionCount>(20);
+  const [sectionCounts, setSectionCounts] = useState<Record<SectionKey, QuestionCount>>({
+    "Aptitude": 20, "Programming": 20, "Data Structures": 20, "Core Subjects": 20,
+  });
 
   const [activeSection, setActiveSection] = useState<SectionKey>("Aptitude");
   const [currentIndex, setCurrentIndex] = useState<Record<SectionKey, number>>({
@@ -47,42 +37,32 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResult, setShowResult] = useState(false);
 
-  const questions = useMemo(() => {
-    if (!started) return [];
-    const seed = profileId ? hashCode(profileId + Date.now().toString()) : Date.now();
-    return getShuffledQuestions(difficulty, questionCount, seed);
-  }, [started, difficulty, questionCount, profileId]);
+  // Generate questions per section independently
+  const grouped = useMemo(() => {
+    if (!started) return { "Aptitude": [], "Programming": [], "Data Structures": [], "Core Subjects": [] } as Record<SectionKey, QuizQuestion[]>;
+    const baseSeed = profileId ? hashCode(profileId + Date.now().toString()) : Date.now();
+    const result: Record<string, QuizQuestion[]> = {};
+    SECTIONS.forEach((s, i) => {
+      result[s.key] = getShuffledQuestionsForSection(
+        [...s.categories], difficulty, sectionCounts[s.key], baseSeed + i * 1000
+      );
+    });
+    return result as Record<SectionKey, QuizQuestion[]>;
+  }, [started, difficulty, sectionCounts, profileId]);
 
-  const grouped = useMemo(() => groupBySection(questions), [questions]);
+  const allQuestions = useMemo(() => SECTIONS.flatMap(s => grouped[s.key]), [grouped]);
 
   const sectionQuestions = grouped[activeSection];
   const idx = currentIndex[activeSection];
   const q = sectionQuestions[idx];
 
-  const selectAnswer = (optIndex: number) => {
-    if (!q) return;
-    setAnswers({ ...answers, [q.id]: optIndex });
-  };
-
-  const next = () => {
-    if (idx < sectionQuestions.length - 1) {
-      setCurrentIndex({ ...currentIndex, [activeSection]: idx + 1 });
-    }
-  };
-
-  const prev = () => {
-    if (idx > 0) {
-      setCurrentIndex({ ...currentIndex, [activeSection]: idx - 1 });
-    }
-  };
-
-  const allAnswered = questions.every(q => answers[q.id] !== undefined);
   const sectionAnsweredCount = (key: SectionKey) => grouped[key].filter(q => answers[q.id] !== undefined).length;
+  const allAnswered = allQuestions.length > 0 && allQuestions.every(q => answers[q.id] !== undefined);
 
   const finishQuiz = async () => {
-    const categories = [...new Set(questions.map(q => q.category))];
+    const categories = [...new Set(allQuestions.map(q => q.category))];
     const scores = categories.map(cat => {
-      const catQs = questions.filter(q => q.category === cat);
+      const catQs = allQuestions.filter(q => q.category === cat);
       const correct = catQs.filter(q => answers[q.id] === q.correctAnswer).length;
       return { category: cat, score: correct, total_questions: catQs.length };
     });
@@ -103,26 +83,31 @@ export default function QuizPage() {
     toast.success("Quiz completed!");
   };
 
-  const totalCorrect = questions.filter(q => answers[q.id] === q.correctAnswer).length;
+  const totalCorrect = allQuestions.filter(q => answers[q.id] === q.correctAnswer).length;
 
-  // ========== SETUP SCREEN ==========
   if (!started) {
-    return <QuizSetup difficulty={difficulty} setDifficulty={setDifficulty} questionCount={questionCount} setQuestionCount={setQuestionCount} onStart={() => setStarted(true)} />;
-  }
-
-  // ========== RESULT SCREEN ==========
-  if (showResult) {
-    return <QuizResult questions={questions} answers={answers} totalCorrect={totalCorrect} difficulty={difficulty} grouped={grouped}
-      onRetake={() => { setCurrentIndex({ "Aptitude": 0, "Programming": 0, "Data Structures": 0, "Core Subjects": 0 }); setAnswers({}); setShowResult(false); setStarted(false); }}
-      onDashboard={() => navigate("/dashboard")} />;
-  }
-
-  // ========== QUIZ SCREEN WITH TABS ==========
-  if (!q && sectionQuestions.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-10 max-w-3xl text-center">
-        <p className="text-muted-foreground">No questions available for this section at current settings.</p>
-      </div>
+      <QuizSetup
+        difficulty={difficulty} setDifficulty={setDifficulty}
+        sectionCounts={sectionCounts} setSectionCounts={setSectionCounts}
+        onStart={() => setStarted(true)}
+      />
+    );
+  }
+
+  if (showResult) {
+    return (
+      <QuizResult
+        questions={allQuestions} answers={answers} totalCorrect={totalCorrect}
+        difficulty={difficulty} grouped={grouped}
+        onRetake={() => {
+          setCurrentIndex({ "Aptitude": 0, "Programming": 0, "Data Structures": 0, "Core Subjects": 0 });
+          setAnswers({});
+          setShowResult(false);
+          setStarted(false);
+        }}
+        onDashboard={() => navigate("/dashboard")}
+      />
     );
   }
 
@@ -140,11 +125,11 @@ export default function QuizPage() {
 
       {/* Overall progress */}
       <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-        <span>Overall: {Object.values(answers).length}/{questions.length} answered</span>
-        <span>{Math.round((Object.values(answers).length / questions.length) * 100)}%</span>
+        <span>Overall: {Object.values(answers).length}/{allQuestions.length} answered</span>
+        <span>{allQuestions.length > 0 ? Math.round((Object.values(answers).length / allQuestions.length) * 100) : 0}%</span>
       </div>
       <div className="h-2 bg-secondary rounded-full mb-6 overflow-hidden">
-        <div className="h-full gradient-primary rounded-full transition-all duration-500" style={{ width: `${(Object.values(answers).length / questions.length) * 100}%` }} />
+        <div className="h-full gradient-primary rounded-full transition-all duration-500" style={{ width: `${allQuestions.length > 0 ? (Object.values(answers).length / allQuestions.length) * 100 : 0}%` }} />
       </div>
 
       <Tabs value={activeSection} onValueChange={(v) => setActiveSection(v as SectionKey)}>
@@ -186,7 +171,7 @@ export default function QuizPage() {
                   {secQ.options.map((opt, i) => {
                     const selected = answers[secQ.id] === i;
                     return (
-                      <button key={i} onClick={() => { setAnswers({ ...answers, [secQ.id]: i }); }}
+                      <button key={i} onClick={() => setAnswers({ ...answers, [secQ.id]: i })}
                         className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selected ? "border-primary bg-primary/5" : "border-border hover:border-primary/30 bg-card"}`}>
                         <span className={`font-medium ${selected ? "text-primary" : "text-foreground"}`}>{opt}</span>
                       </button>
@@ -204,7 +189,6 @@ export default function QuizPage() {
                     </Button>
                   ) : (
                     <Button onClick={() => {
-                      // Move to next incomplete section or finish
                       const nextSection = SECTIONS.find(s => s.key !== section.key && sectionAnsweredCount(s.key) < grouped[s.key].length);
                       if (nextSection) {
                         setActiveSection(nextSection.key);
@@ -221,11 +205,10 @@ export default function QuizPage() {
         })}
       </Tabs>
 
-      {/* Finish button */}
       <div className="mt-6">
         <Button onClick={finishQuiz} disabled={!allAnswered} className="w-full gradient-primary text-primary-foreground text-lg py-6">
           <CheckCircle2 className="w-5 h-5 mr-2" />
-          Finish Quiz ({Object.values(answers).length}/{questions.length} answered)
+          Finish Quiz ({Object.values(answers).length}/{allQuestions.length} answered)
         </Button>
         {!allAnswered && <p className="text-xs text-muted-foreground text-center mt-2">Answer all questions across all sections to submit</p>}
       </div>
@@ -234,11 +217,16 @@ export default function QuizPage() {
 }
 
 // ========== SETUP COMPONENT ==========
-function QuizSetup({ difficulty, setDifficulty, questionCount, setQuestionCount, onStart }: {
+function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, onStart }: {
   difficulty: Difficulty; setDifficulty: (d: Difficulty) => void;
-  questionCount: QuestionCount; setQuestionCount: (c: QuestionCount) => void;
+  sectionCounts: Record<SectionKey, QuestionCount>;
+  setSectionCounts: (c: Record<SectionKey, QuestionCount>) => void;
   onStart: () => void;
 }) {
+  const updateCount = (key: SectionKey, count: QuestionCount) => {
+    setSectionCounts({ ...sectionCounts, [key]: count });
+  };
+
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
       <div className="flex items-center gap-3 mb-8">
@@ -252,6 +240,7 @@ function QuizSetup({ difficulty, setDifficulty, questionCount, setQuestionCount,
       </div>
 
       <div className="bg-card rounded-xl border border-border p-6 space-y-8 animate-fade-in">
+        {/* Difficulty */}
         <div className="space-y-3">
           <label className="text-sm font-semibold text-foreground">Difficulty Level</label>
           <div className="grid grid-cols-3 gap-3">
@@ -265,21 +254,30 @@ function QuizSetup({ difficulty, setDifficulty, questionCount, setQuestionCount,
           </div>
         </div>
 
-        <div className="space-y-3">
-          <label className="text-sm font-semibold text-foreground">Number of Questions</label>
-          <div className="grid grid-cols-3 gap-3">
-            {([20, 30, 50] as const).map((count) => (
-              <button key={count} type="button" onClick={() => setQuestionCount(count)}
-                className={`p-4 rounded-xl border-2 text-center transition-all ${questionCount === count ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
-                <p className={`text-2xl font-display font-bold ${questionCount === count ? "text-primary" : "text-foreground"}`}>{count}</p>
-                <p className="text-xs text-muted-foreground">questions</p>
-              </button>
-            ))}
-          </div>
+        {/* Per-section question counts */}
+        <div className="space-y-4">
+          <label className="text-sm font-semibold text-foreground">Questions Per Section</label>
+          {SECTIONS.map(section => (
+            <div key={section.key} className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <section.icon className="w-4 h-4" />
+                <span className="font-medium text-foreground">{section.label}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {([20, 30, 50] as const).map(count => (
+                  <button key={count} type="button" onClick={() => updateCount(section.key, count)}
+                    className={`p-3 rounded-lg border-2 text-center transition-all ${sectionCounts[section.key] === count ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+                    <p className={`text-lg font-bold ${sectionCounts[section.key] === count ? "text-primary" : "text-foreground"}`}>{count}</p>
+                    <p className="text-[10px] text-muted-foreground">questions</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="bg-secondary/50 rounded-lg p-4 text-sm text-muted-foreground">
-          <p>📝 Questions are divided into <strong>4 sections</strong>: Aptitude, Programming, Data Structures, and Core Subjects (DBMS & OS). Medium-level aptitude questions are based on <strong>TCS NQT</strong> pattern. Navigate between sections using tabs.</p>
+          <p>📝 Each section has its own question count. Medium-level aptitude questions are based on <strong>TCS NQT</strong> pattern. Total questions: <strong>{Object.values(sectionCounts).reduce((a, b) => a + b, 0)}</strong></p>
         </div>
 
         <Button onClick={onStart} className="w-full gradient-primary text-primary-foreground text-lg py-6">
