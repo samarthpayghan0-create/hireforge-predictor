@@ -1,12 +1,11 @@
 import { useAppContext } from "@/context/AppContext";
-import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, ExternalLink } from "lucide-react";
+import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import SkillBar from "@/components/SkillBar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 function calculatePlacement(profile: any, quizScores: any[], commScore: number) {
-  // Weighted scoring model simulating ML prediction
   const cgpaWeight = 0.2;
   const dsaWeight = 0.15;
   const aptWeight = 0.15;
@@ -19,14 +18,21 @@ function calculatePlacement(profile: any, quizScores: any[], commScore: number) 
   const projectNorm = Math.min(100, profile.num_projects * 15);
   const internshipNorm = Math.min(100, profile.internship_experience * 30);
 
+  // Use quiz scores if available, otherwise use self-assessment
+  const dsaQuiz = quizScores.find(s => s.category === "Data Structures");
+  const dsaScore = dsaQuiz ? (dsaQuiz.score / dsaQuiz.total_questions) * 100 : profile.dsa_score;
+
+  const aptQuiz = quizScores.find(s => s.category === "Aptitude");
+  const aptScore = aptQuiz ? (aptQuiz.score / aptQuiz.total_questions) * 100 : profile.aptitude_score;
+
   const totalQuizScore = quizScores.length > 0
     ? quizScores.reduce((acc, s) => acc + (s.score / s.total_questions) * 100, 0) / quizScores.length
-    : 50;
+    : (profile.dsa_score + profile.aptitude_score) / 2;
 
   const probability =
     cgpaNorm * cgpaWeight +
-    profile.dsa_score * dsaWeight +
-    profile.aptitude_score * aptWeight +
+    dsaScore * dsaWeight +
+    aptScore * aptWeight +
     projectNorm * projectWeight +
     internshipNorm * internshipWeight +
     totalQuizScore * quizWeight +
@@ -38,11 +44,17 @@ function calculatePlacement(profile: any, quizScores: any[], commScore: number) 
 function getSkillGaps(profile: any, quizScores: any[], commScore: number) {
   const gaps: { skill: string; level: string; suggestion: string; resources: string[]; severity: "high" | "medium" | "low" }[] = [];
 
-  if (profile.dsa_score < 50) {
-    gaps.push({ skill: "Data Structures & Algorithms", level: `${profile.dsa_score}%`, suggestion: "Practice DSA daily on competitive platforms", resources: ["LeetCode", "GeeksforGeeks", "HackerRank"], severity: "high" });
+  const dsaQuiz = quizScores.find(s => s.category === "Data Structures");
+  const dsaScore = dsaQuiz ? Math.round((dsaQuiz.score / dsaQuiz.total_questions) * 100) : profile.dsa_score;
+
+  const aptQuiz = quizScores.find(s => s.category === "Aptitude");
+  const aptScore = aptQuiz ? Math.round((aptQuiz.score / aptQuiz.total_questions) * 100) : profile.aptitude_score;
+
+  if (dsaScore < 50) {
+    gaps.push({ skill: "Data Structures & Algorithms", level: `${dsaScore}%${dsaQuiz ? " (Quiz)" : " (Self-assessed)"}`, suggestion: "Practice DSA daily on competitive platforms", resources: ["LeetCode", "GeeksforGeeks", "HackerRank"], severity: "high" });
   }
-  if (profile.aptitude_score < 50) {
-    gaps.push({ skill: "Aptitude", level: `${profile.aptitude_score}%`, suggestion: "Solve aptitude problems regularly", resources: ["IndiaBix", "PrepInsta", "Aptitude Books"], severity: "high" });
+  if (aptScore < 50) {
+    gaps.push({ skill: "Aptitude", level: `${aptScore}%${aptQuiz ? " (Quiz)" : " (Self-assessed)"}`, suggestion: "Solve aptitude problems regularly", resources: ["IndiaBix", "PrepInsta", "Aptitude Books"], severity: "high" });
   }
   if (commScore < 50) {
     gaps.push({ skill: "Communication", level: `${commScore}%`, suggestion: "Practice speaking and presentations", resources: ["Toastmasters", "YouTube Channels", "Mock Interviews"], severity: "high" });
@@ -57,9 +69,9 @@ function getSkillGaps(profile: any, quizScores: any[], commScore: number) {
     gaps.push({ skill: "Internship Experience", level: "No internships", suggestion: "Apply for internships to gain industry experience", resources: ["Internshala", "LinkedIn", "AngelList"], severity: "medium" });
   }
 
-  const dsQuiz = quizScores.find(s => s.category === "Data Structures");
-  if (dsQuiz && (dsQuiz.score / dsQuiz.total_questions) < 0.5) {
-    gaps.push({ skill: "DS Quiz Performance", level: `${dsQuiz.score}/${dsQuiz.total_questions}`, suggestion: "Revise data structure concepts thoroughly", resources: ["Striver's SDE Sheet", "Abdul Bari YouTube", "CLRS Book"], severity: "medium" });
+  const progQuiz = quizScores.find(s => s.category === "Programming");
+  if (progQuiz && (progQuiz.score / progQuiz.total_questions) < 0.5) {
+    gaps.push({ skill: "Programming Quiz", level: `${progQuiz.score}/${progQuiz.total_questions}`, suggestion: "Revise programming concepts and practice coding", resources: ["HackerRank", "Codecademy", "freeCodeCamp"], severity: "medium" });
   }
 
   if (profile.programming_skills.length < 3) {
@@ -93,6 +105,15 @@ export default function DashboardPage() {
   const placementProb = calculatePlacement(profile, quizScores, commScore);
   const placed = placementProb >= 60;
   const gaps = getSkillGaps(profile, quizScores, commScore);
+
+  // Compute actual displayed scores
+  const dsaQuiz = quizScores.find(s => s.category === "Data Structures");
+  const dsaDisplayScore = dsaQuiz ? Math.round((dsaQuiz.score / dsaQuiz.total_questions) * 100) : profile.dsa_score;
+  const dsaSource = dsaQuiz ? "Quiz" : "Self-assessed";
+
+  const aptQuiz = quizScores.find(s => s.category === "Aptitude");
+  const aptDisplayScore = aptQuiz ? Math.round((aptQuiz.score / aptQuiz.total_questions) * 100) : profile.aptitude_score;
+  const aptSource = aptQuiz ? "Quiz" : "Self-assessed";
 
   const totalQuizPct = quizScores.length > 0
     ? Math.round(quizScores.reduce((a, s) => a + (s.score / s.total_questions) * 100, 0) / quizScores.length)
@@ -132,7 +153,7 @@ export default function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard title="CGPA" value={profile.cgpa.toFixed(1)} subtitle="out of 10" icon={<TrendingUp className="w-5 h-5" />} variant="primary" />
-        <StatCard title="Quiz Score" value={`${totalQuizPct}%`} subtitle={`${quizScores.length} categories`} icon={<BookOpen className="w-5 h-5" />} variant="accent" />
+        <StatCard title="Quiz Score" value={quizScores.length > 0 ? `${totalQuizPct}%` : "—"} subtitle={quizScores.length > 0 ? `${quizScores.length} categories` : "Not taken"} icon={<BookOpen className="w-5 h-5" />} variant="accent" />
         <StatCard title="Communication" value={`${commScore}%`} icon={<Mic className="w-5 h-5" />} variant="warning" />
         <StatCard title="Projects" value={profile.num_projects} subtitle={`${profile.internship_experience} internships`} icon={<Brain className="w-5 h-5" />} />
       </div>
@@ -143,10 +164,16 @@ export default function DashboardPage() {
           <h2 className="font-display font-semibold text-lg mb-5 text-foreground">Skill Levels</h2>
           <div className="space-y-4">
             <SkillBar label="CGPA" value={profile.cgpa} max={10} color={profile.cgpa >= 7 ? "success" : profile.cgpa >= 5 ? "warning" : "destructive"} />
-            <SkillBar label="DSA Knowledge" value={profile.dsa_score} max={100} color={profile.dsa_score >= 60 ? "success" : profile.dsa_score >= 40 ? "warning" : "destructive"} />
-            <SkillBar label="Aptitude" value={profile.aptitude_score} max={100} color={profile.aptitude_score >= 60 ? "success" : profile.aptitude_score >= 40 ? "warning" : "destructive"} />
+            <div>
+              <SkillBar label={`DSA Knowledge (${dsaSource})`} value={dsaDisplayScore} max={100} color={dsaDisplayScore >= 60 ? "success" : dsaDisplayScore >= 40 ? "warning" : "destructive"} />
+            </div>
+            <div>
+              <SkillBar label={`Aptitude (${aptSource})`} value={aptDisplayScore} max={100} color={aptDisplayScore >= 60 ? "success" : aptDisplayScore >= 40 ? "warning" : "destructive"} />
+            </div>
             <SkillBar label="Communication" value={commScore} max={100} color={commScore >= 60 ? "accent" : commScore >= 40 ? "warning" : "destructive"} />
-            <SkillBar label="Quiz Average" value={totalQuizPct} max={100} color={totalQuizPct >= 60 ? "primary" : totalQuizPct >= 40 ? "warning" : "destructive"} />
+            {quizScores.length > 0 && (
+              <SkillBar label="Quiz Average" value={totalQuizPct} max={100} color={totalQuizPct >= 60 ? "primary" : totalQuizPct >= 40 ? "warning" : "destructive"} />
+            )}
           </div>
         </div>
 
@@ -161,14 +188,14 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-muted-foreground mb-3">No quiz data yet</p>
+              <p className="text-muted-foreground mb-3">No quiz data yet — take the quiz for accurate scores</p>
               <Button asChild variant="outline" size="sm"><Link to="/quiz">Take Quiz</Link></Button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Skill Gap Analysis & Recommendations */}
+      {/* Skill Gap Analysis */}
       {gaps.length > 0 && (
         <div className="mt-8 bg-card rounded-xl border border-border p-6 animate-fade-in">
           <div className="flex items-center gap-2 mb-5">

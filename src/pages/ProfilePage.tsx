@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,16 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare } from "lucide-react";
+import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare, BookOpen } from "lucide-react";
 
-const programmingOptions = ["Python", "Java", "C++", "JavaScript", "React", "SQL", "Machine Learning", "Cloud", "DevOps", "Git"];
-const technicalOptions = ["Web Development", "Mobile Development", "Data Science", "AI/ML", "Cybersecurity", "Blockchain"];
+const programmingOptions = [
+  "Python", "Java", "C++", "C", "JavaScript", "TypeScript", "React", "Angular", "Vue.js",
+  "Node.js", "SQL", "MongoDB", "Machine Learning", "Deep Learning", "Cloud Computing",
+  "AWS", "Azure", "Docker", "Kubernetes", "DevOps", "Git", "GitHub", "Linux", "REST API",
+  "GraphQL", "Django", "Flask", "Spring Boot", "Ruby", "Go", "Rust", "PHP", "Swift", "Kotlin",
+  "Flutter", "React Native", "TensorFlow", "PyTorch", "Pandas", "NumPy"
+];
+
+const technicalOptions = [
+  "Web Development", "Mobile Development", "Data Science", "AI/ML", "Cybersecurity",
+  "Blockchain", "Cloud Architecture", "Database Management", "System Design",
+  "DevOps Engineering", "UI/UX Design", "Game Development", "IoT", "Embedded Systems",
+  "Data Engineering", "Network Security", "API Development", "Microservices"
+];
 
 const STEPS = [
   { key: "basics", label: "Basic Info", icon: User },
   { key: "academics", label: "Academics & Experience", icon: GraduationCap },
   { key: "programming", label: "Programming Skills", icon: Code },
   { key: "technical", label: "Technical Skills", icon: Briefcase },
+  { key: "selfAssess", label: "Self Assessment", icon: Brain },
   { key: "communication", label: "Communication", icon: MessageSquare },
 ] as const;
 
@@ -49,11 +62,11 @@ export default function ProfilePage() {
     }));
   };
 
-  const addCustomSkill = (field: "programming_skills" | "technical_skills") => {
-    const value = field === "programming_skills" ? customProgramming.trim() : customTechnical.trim();
-    if (!value) return;
-    if (form[field].includes(value)) { toast.error("Skill already added"); return; }
-    setForm((f) => ({ ...f, [field]: [...f[field], value] }));
+  const addCustomSkill = (field: "programming_skills" | "technical_skills", value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    if (form[field].includes(trimmed)) { toast.error("Skill already added"); return; }
+    setForm((f) => ({ ...f, [field]: [...f[field], trimmed] }));
     if (field === "programming_skills") setCustomProgramming("");
     else setCustomTechnical("");
   };
@@ -104,52 +117,6 @@ export default function ProfilePage() {
   const step = STEPS[currentStep];
   const StepIcon = step.icon;
 
-  const renderSkillSection = (
-    label: string,
-    field: "programming_skills" | "technical_skills",
-    options: string[],
-    customValue: string,
-    setCustomValue: (v: string) => void,
-    gradient: string
-  ) => {
-    const customSkills = form[field].filter((s) => !options.includes(s));
-    return (
-      <div className="space-y-3">
-        <Label>{label}</Label>
-        <div className="flex flex-wrap gap-2">
-          {options.map((s) => (
-            <button key={s} type="button" onClick={() => toggleSkill(s, field)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                form[field].includes(s) ? `${gradient} text-primary-foreground` : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }`}>{s}</button>
-          ))}
-        </div>
-        {customSkills.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {customSkills.map((s) => (
-              <span key={s} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${gradient} text-primary-foreground flex items-center gap-1`}>
-                {s}
-                <button type="button" onClick={() => removeCustomSkill(s, field)}><X className="w-3 h-3" /></button>
-              </span>
-            ))}
-          </div>
-        )}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Add other skill..."
-            value={customValue}
-            onChange={(e) => setCustomValue(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomSkill(field); } }}
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="sm" onClick={() => addCustomSkill(field)}>
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
       <div className="flex items-center gap-3 mb-8">
@@ -179,11 +146,36 @@ export default function ProfilePage() {
           <>
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter your name" maxLength={100} />
+              <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter your full name" maxLength={100} />
             </div>
-            <div className="space-y-2">
-              <Label>CGPA: {form.cgpa.toFixed(1)}</Label>
-              <Slider value={[form.cgpa]} onValueChange={([v]) => setForm({ ...form, cgpa: Math.round(v * 10) / 10 })} min={0} max={10} step={0.1} />
+            <div className="space-y-3">
+              <Label>CGPA</Label>
+              <div className="bg-secondary/50 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-muted-foreground">Your current CGPA</span>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={form.cgpa}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value);
+                        if (!isNaN(v) && v >= 0 && v <= 10) setForm({ ...form, cgpa: Math.round(v * 10) / 10 });
+                      }}
+                      className="w-20 text-center font-bold text-lg h-10"
+                      min={0} max={10} step={0.1}
+                    />
+                    <span className="text-sm text-muted-foreground font-medium">/ 10</span>
+                  </div>
+                </div>
+                <Slider value={[form.cgpa]} onValueChange={([v]) => setForm({ ...form, cgpa: Math.round(v * 10) / 10 })} min={0} max={10} step={0.1} />
+                <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                  <span>0.0</span>
+                  <span className={`font-semibold ${form.cgpa >= 8 ? "text-success" : form.cgpa >= 6 ? "text-warning" : "text-destructive"}`}>
+                    {form.cgpa >= 9 ? "Outstanding" : form.cgpa >= 8 ? "Excellent" : form.cgpa >= 7 ? "Good" : form.cgpa >= 6 ? "Average" : "Needs Improvement"}
+                  </span>
+                  <span>10.0</span>
+                </div>
+              </div>
             </div>
           </>
         )}
@@ -206,16 +198,74 @@ export default function ProfilePage() {
 
         {/* Step 3: Programming Skills */}
         {currentStep === 2 && (
-          renderSkillSection("Programming Skills", "programming_skills", programmingOptions, customProgramming, setCustomProgramming, "gradient-primary")
+          <SkillSelector
+            label="Programming Skills"
+            field="programming_skills"
+            options={programmingOptions}
+            selected={form.programming_skills}
+            customValue={customProgramming}
+            setCustomValue={setCustomProgramming}
+            onToggle={(s) => toggleSkill(s, "programming_skills")}
+            onAdd={(v) => addCustomSkill("programming_skills", v)}
+            onRemove={(s) => removeCustomSkill(s, "programming_skills")}
+            gradient="gradient-primary"
+          />
         )}
 
         {/* Step 4: Technical Skills */}
         {currentStep === 3 && (
-          renderSkillSection("Technical Skills", "technical_skills", technicalOptions, customTechnical, setCustomTechnical, "gradient-accent")
+          <SkillSelector
+            label="Technical Skills"
+            field="technical_skills"
+            options={technicalOptions}
+            selected={form.technical_skills}
+            customValue={customTechnical}
+            setCustomValue={setCustomTechnical}
+            onToggle={(s) => toggleSkill(s, "technical_skills")}
+            onAdd={(v) => addCustomSkill("technical_skills", v)}
+            onRemove={(s) => removeCustomSkill(s, "technical_skills")}
+            gradient="gradient-accent"
+          />
         )}
 
-        {/* Step 5: Communication */}
+        {/* Step 5: Self Assessment */}
         {currentStep === 4 && (
+          <>
+            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10 mb-2">
+              <div className="flex items-center gap-2 mb-1">
+                <BookOpen className="w-4 h-4 text-primary" />
+                <p className="text-sm font-semibold text-foreground">Set your self-assessment scores</p>
+              </div>
+              <p className="text-xs text-muted-foreground">These will be used if you don't take the quiz. We recommend taking the quiz for accurate results.</p>
+            </div>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>DSA Knowledge: {form.dsa_score}%</Label>
+                  <span className={`text-xs font-semibold ${form.dsa_score >= 60 ? "text-success" : form.dsa_score >= 40 ? "text-warning" : "text-destructive"}`}>
+                    {form.dsa_score >= 80 ? "Expert" : form.dsa_score >= 60 ? "Good" : form.dsa_score >= 40 ? "Intermediate" : "Beginner"}
+                  </span>
+                </div>
+                <Slider value={[form.dsa_score]} onValueChange={([v]) => setForm({ ...form, dsa_score: v })} min={0} max={100} step={5} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Aptitude Score: {form.aptitude_score}%</Label>
+                  <span className={`text-xs font-semibold ${form.aptitude_score >= 60 ? "text-success" : form.aptitude_score >= 40 ? "text-warning" : "text-destructive"}`}>
+                    {form.aptitude_score >= 80 ? "Expert" : form.aptitude_score >= 60 ? "Good" : form.aptitude_score >= 40 ? "Intermediate" : "Beginner"}
+                  </span>
+                </div>
+                <Slider value={[form.aptitude_score]} onValueChange={([v]) => setForm({ ...form, aptitude_score: v })} min={0} max={100} step={5} />
+              </div>
+            </div>
+            <Button type="button" variant="outline" onClick={() => navigate("/quiz")} className="w-full mt-2 border-primary/30 text-primary hover:bg-primary/5">
+              <Brain className="w-4 h-4 mr-2" /> Take the Quiz for accurate scores →
+            </Button>
+          </>
+        )}
+
+        {/* Step 6: Communication */}
+        {currentStep === 5 && (
           <>
             <div className="space-y-2">
               <Label>Communication Rating: {form.communication_rating}/10</Label>
@@ -242,19 +292,107 @@ export default function ProfilePage() {
             </Button>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
 
-        {/* Quiz shortcuts on last step */}
-        {currentStep === STEPS.length - 1 && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-            <Button type="button" variant="outline" onClick={() => navigate("/quiz")} className="flex items-center gap-2">
-              <Brain className="w-4 h-4" /> Check Aptitude Score
-            </Button>
-            <Button type="button" variant="outline" onClick={() => navigate("/quiz")} className="flex items-center gap-2">
-              <Code className="w-4 h-4" /> Check DSA Score
-            </Button>
-            <Button type="button" variant="outline" onClick={() => navigate("/quiz")} className="flex items-center gap-2">
-              <Cpu className="w-4 h-4" /> Check Core Subject Score
-            </Button>
+// ========== SKILL SELECTOR WITH AUTOCOMPLETE ==========
+function SkillSelector({ label, options, selected, customValue, setCustomValue, onToggle, onAdd, onRemove, gradient }: {
+  label: string; field: string; options: string[]; selected: string[];
+  customValue: string; setCustomValue: (v: string) => void;
+  onToggle: (s: string) => void; onAdd: (v: string) => void; onRemove: (s: string) => void;
+  gradient: string;
+}) {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const customSkills = selected.filter((s) => !options.includes(s));
+
+  // All available options for suggestions (unselected ones + matching custom input)
+  const suggestions = customValue.trim()
+    ? [...options, ...customSkills]
+        .filter(s => s.toLowerCase().includes(customValue.toLowerCase()) && !selected.includes(s))
+        .slice(0, 8)
+    : [];
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="space-y-3">
+      <Label>{label}</Label>
+      <div className="flex flex-wrap gap-2">
+        {options.slice(0, 15).map((s) => (
+          <button key={s} type="button" onClick={() => onToggle(s)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              selected.includes(s) ? `${gradient} text-primary-foreground` : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            }`}>{s}</button>
+        ))}
+      </div>
+      {customSkills.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {customSkills.map((s) => (
+            <span key={s} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${gradient} text-primary-foreground flex items-center gap-1`}>
+              {s}
+              <button type="button" onClick={() => onRemove(s)}><X className="w-3 h-3" /></button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="relative" ref={containerRef}>
+        <div className="flex gap-2">
+          <Input
+            ref={inputRef}
+            placeholder="Type to search or add skill..."
+            value={customValue}
+            onChange={(e) => { setCustomValue(e.target.value); setShowSuggestions(true); }}
+            onFocus={() => setShowSuggestions(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (suggestions.length > 0) {
+                  onToggle(suggestions[0]);
+                  setCustomValue("");
+                } else if (customValue.trim()) {
+                  onAdd(customValue);
+                }
+                setShowSuggestions(false);
+              }
+            }}
+            className="flex-1"
+          />
+          <Button type="button" variant="outline" size="sm" onClick={() => {
+            if (customValue.trim()) {
+              onAdd(customValue);
+              setShowSuggestions(false);
+            }
+          }}>
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute z-10 top-full mt-1 w-full bg-card border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
+            {suggestions.map(s => (
+              <button key={s} type="button"
+                className="w-full text-left px-4 py-2.5 text-sm hover:bg-secondary/50 transition-colors text-foreground first:rounded-t-xl last:rounded-b-xl"
+                onClick={() => {
+                  if (options.includes(s)) onToggle(s);
+                  else onAdd(s);
+                  setCustomValue("");
+                  setShowSuggestions(false);
+                }}>
+                {s}
+              </button>
+            ))}
           </div>
         )}
       </div>
