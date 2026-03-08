@@ -1,9 +1,13 @@
+import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight, Star } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import SkillBar from "@/components/SkillBar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 function calculatePlacement(profile: any, quizScores: any[], commScore: number) {
   const cgpaWeight = 0.2;
