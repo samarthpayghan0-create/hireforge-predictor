@@ -183,45 +183,6 @@ export default function ProfilePage() {
           {/* Step 1: Basic Info */}
           {currentStep === 0 && (
             <>
-              {/* Profile Photo */}
-              <div className="flex flex-col items-center gap-3 mb-2">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-secondary/50 border-2 border-border flex items-center justify-center">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="w-10 h-10 text-muted-foreground" />
-                  )}
-                  {uploadingAvatar && (
-                    <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
-                  />
-                  <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="user"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
-                  />
-                  <Button type="button" variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar}>
-                    <ImageIcon className="w-4 h-4" /> Gallery
-                  </Button>
-                  <Button type="button" variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => cameraInputRef.current?.click()} disabled={uploadingAvatar}>
-                    <Camera className="w-4 h-4" /> Camera
-                  </Button>
-                </div>
-              </div>
-
               <div className="space-y-3">
                 <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
                 <Input 
