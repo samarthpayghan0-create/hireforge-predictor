@@ -167,10 +167,22 @@ export default function ProfilePage() {
         {renderSkillSection("Programming Skills", "programming_skills", programmingOptions, customProgramming, setCustomProgramming, "gradient-primary")}
         {renderSkillSection("Technical Skills", "technical_skills", technicalOptions, customTechnical, setCustomTechnical, "gradient-accent")}
 
-        <Button type="submit" disabled={loading} className="w-full gradient-primary text-primary-foreground">
-          <Save className="w-4 h-4 mr-2" />
-          {loading ? "Saving..." : "Save & View Dashboard"}
+        <Button type="submit" disabled={loading} className="w-full gradient-primary text-primary-foreground text-lg py-5">
+          <Save className="w-5 h-5 mr-2" />
+          {loading ? "Saving..." : "Predict My Placement"}
         </Button>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+          <Button type="button" variant="outline" onClick={() => navigate("/quiz")} className="flex items-center gap-2">
+            <Brain className="w-4 h-4" /> Check Aptitude Score
+          </Button>
+          <Button type="button" variant="outline" onClick={() => navigate("/quiz")} className="flex items-center gap-2">
+            <Code className="w-4 h-4" /> Check DSA Score
+          </Button>
+          <Button type="button" variant="outline" onClick={() => navigate("/quiz")} className="flex items-center gap-2">
+            <Cpu className="w-4 h-4" /> Check Core Subject Score
+          </Button>
+        </div>
       </form>
     </div>
   );
