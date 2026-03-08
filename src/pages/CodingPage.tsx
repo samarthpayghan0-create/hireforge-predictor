@@ -214,6 +214,7 @@ export default function CodingPage() {
     }
   };
 
+  const remainingTime = Math.max(0, TIME_LIMIT_SECONDS - elapsedTime);
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
   const categories = [...new Set(problems.map((p) => p.category))];
