@@ -159,6 +159,7 @@ export default function CodingPage() {
     setSelectedProblem(p);
     setResult(null);
     setShowSolution(false);
+    setTimeExpired(false);
     const lang = LANGUAGES.find((l) => l.id === language);
     setCode(lang?.template || "");
     setStartTime(Date.now());
