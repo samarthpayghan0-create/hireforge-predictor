@@ -7,14 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { User, Save } from "lucide-react";
+import { User, Save, Plus, X } from "lucide-react";
 
-const skillOptions = ["Python", "Java", "C++", "JavaScript", "React", "SQL", "Machine Learning", "Cloud", "DevOps", "Git"];
+const programmingOptions = ["Python", "Java", "C++", "JavaScript", "React", "SQL", "Machine Learning", "Cloud", "DevOps", "Git"];
+const technicalOptions = ["Web Development", "Mobile Development", "Data Science", "AI/ML", "Cybersecurity", "Blockchain"];
 
 export default function ProfilePage() {
   const { setProfile, setProfileId } = useAppContext();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [customProgramming, setCustomProgramming] = useState("");
+  const [customTechnical, setCustomTechnical] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -33,6 +36,19 @@ export default function ProfilePage() {
       ...f,
       [field]: f[field].includes(skill) ? f[field].filter((s) => s !== skill) : [...f[field], skill],
     }));
+  };
+
+  const addCustomSkill = (field: "programming_skills" | "technical_skills") => {
+    const value = field === "programming_skills" ? customProgramming.trim() : customTechnical.trim();
+    if (!value) return;
+    if (form[field].includes(value)) { toast.error("Skill already added"); return; }
+    setForm((f) => ({ ...f, [field]: [...f[field], value] }));
+    if (field === "programming_skills") setCustomProgramming("");
+    else setCustomTechnical("");
+  };
+
+  const removeCustomSkill = (skill: string, field: "programming_skills" | "technical_skills") => {
+    setForm((f) => ({ ...f, [field]: f[field].filter((s) => s !== skill) }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,12 +71,58 @@ export default function ProfilePage() {
       setProfile(form);
       setProfileId(data.id);
       toast.success("Profile saved successfully!");
-      navigate("/quiz");
+      navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Failed to save profile");
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderSkillSection = (
+    label: string,
+    field: "programming_skills" | "technical_skills",
+    options: string[],
+    customValue: string,
+    setCustomValue: (v: string) => void,
+    gradient: string
+  ) => {
+    const customSkills = form[field].filter((s) => !options.includes(s));
+    return (
+      <div className="space-y-3">
+        <Label>{label}</Label>
+        <div className="flex flex-wrap gap-2">
+          {options.map((s) => (
+            <button key={s} type="button" onClick={() => toggleSkill(s, field)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                form[field].includes(s) ? `${gradient} text-primary-foreground` : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              }`}>{s}</button>
+          ))}
+        </div>
+        {customSkills.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {customSkills.map((s) => (
+              <span key={s} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${gradient} text-primary-foreground flex items-center gap-1`}>
+                {s}
+                <button type="button" onClick={() => removeCustomSkill(s, field)}><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Input
+            placeholder="Add other skill..."
+            value={customValue}
+            onChange={(e) => setCustomValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomSkill(field); } }}
+            className="flex-1"
+          />
+          <Button type="button" variant="outline" size="sm" onClick={() => addCustomSkill(field)}>
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -86,16 +148,6 @@ export default function ProfilePage() {
           <Slider value={[form.cgpa]} onValueChange={([v]) => setForm({ ...form, cgpa: Math.round(v * 10) / 10 })} min={0} max={10} step={0.1} />
         </div>
 
-        <div className="space-y-2">
-          <Label>DSA Score: {form.dsa_score}%</Label>
-          <Slider value={[form.dsa_score]} onValueChange={([v]) => setForm({ ...form, dsa_score: v })} min={0} max={100} step={1} />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Aptitude Score: {form.aptitude_score}%</Label>
-          <Slider value={[form.aptitude_score]} onValueChange={([v]) => setForm({ ...form, aptitude_score: v })} min={0} max={100} step={1} />
-        </div>
-
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="projects">Number of Projects</Label>
@@ -112,33 +164,12 @@ export default function ProfilePage() {
           <Slider value={[form.communication_rating]} onValueChange={([v]) => setForm({ ...form, communication_rating: v })} min={1} max={10} step={1} />
         </div>
 
-        <div className="space-y-2">
-          <Label>Programming Skills</Label>
-          <div className="flex flex-wrap gap-2">
-            {skillOptions.map((s) => (
-              <button key={s} type="button" onClick={() => toggleSkill(s, "programming_skills")}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  form.programming_skills.includes(s) ? "gradient-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}>{s}</button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Technical Skills</Label>
-          <div className="flex flex-wrap gap-2">
-            {["Web Development", "Mobile Development", "Data Science", "AI/ML", "Cybersecurity", "Blockchain"].map((s) => (
-              <button key={s} type="button" onClick={() => toggleSkill(s, "technical_skills")}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  form.technical_skills.includes(s) ? "gradient-accent text-accent-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}>{s}</button>
-            ))}
-          </div>
-        </div>
+        {renderSkillSection("Programming Skills", "programming_skills", programmingOptions, customProgramming, setCustomProgramming, "gradient-primary")}
+        {renderSkillSection("Technical Skills", "technical_skills", technicalOptions, customTechnical, setCustomTechnical, "gradient-accent")}
 
         <Button type="submit" disabled={loading} className="w-full gradient-primary text-primary-foreground">
           <Save className="w-4 h-4 mr-2" />
-          {loading ? "Saving..." : "Save & Continue to Quiz"}
+          {loading ? "Saving..." : "Save & View Dashboard"}
         </Button>
       </form>
     </div>
