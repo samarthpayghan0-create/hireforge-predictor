@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User, Brain, BarChart3, BookOpen, Mic, Sun, Moon, LogIn, LogOut,
-  TrendingUp, Mail, FileText, Code, Compass, Settings, Menu, X, Briefcase, Map
+  TrendingUp, Mail, FileText, Code, Compass, Settings, Menu, X, Briefcase, Map,
+  Home, ArrowLeft
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
@@ -25,6 +26,7 @@ const navItems = [
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const { profile } = useAppContext();
@@ -81,6 +83,30 @@ export default function Navbar() {
               HireForge
             </span>
           </Link>
+
+          {/* Quick Actions: Home & Back */}
+          <div className="flex items-center gap-1.5 ml-2">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="rounded-xl border-border/50 bg-secondary/50 hover:bg-secondary gap-1.5 font-bold"
+            >
+              <Link to="/">
+                <Home className="w-4 h-4" /> <span className="hidden sm:inline">Home</span>
+              </Link>
+            </Button>
+            {location.pathname !== "/" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="rounded-xl border-border/50 bg-secondary/50 hover:bg-secondary gap-1.5 font-bold"
+              >
+                <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Back</span>
+              </Button>
+            )}
+          </div>
 
           {/* Desktop Nav */}
           <div className="hidden xl:flex items-center gap-1">
