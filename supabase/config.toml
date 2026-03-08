@@ -2,3 +2,12 @@ project_id = "anlvztabbkcvupnzqfys"
 
 [functions.analyze-resume]
 verify_jwt = false
+
+[functions.mock-interview]
+verify_jwt = false
+
+[functions.evaluate-code]
+verify_jwt = false
+
+[functions.career-roadmap]
+verify_jwt = false
