@@ -123,38 +123,50 @@ export const quizQuestions: QuizQuestion[] = [
   { id: 94, question: "What is the working set model used for?", options: ["Controlling thrashing", "Scheduling", "File management", "Network I/O"], correctAnswer: 0, category: "Operating Systems", difficulty: "hard" },
 ];
 
-// Shuffle using Fisher-Yates and seed for rotation
-export function getShuffledQuestions(
+// Get questions for a specific section with shuffling
+export function getShuffledQuestionsForSection(
+  categories: string[],
   difficulty: "medium" | "hard" | "mixed",
   count: number,
   seed?: number
 ): QuizQuestion[] {
-  let pool = [...quizQuestions];
+  let pool = quizQuestions.filter(q => categories.includes(q.category));
 
   if (difficulty === "medium") {
-    pool = pool.filter((q) => q.difficulty === "medium");
+    pool = pool.filter(q => q.difficulty === "medium");
   } else if (difficulty === "hard") {
-    pool = pool.filter((q) => q.difficulty === "hard");
+    pool = pool.filter(q => q.difficulty === "hard");
   }
 
-  // Fisher-Yates shuffle with optional seed for rotation
   const rng = seed !== undefined ? seededRandom(seed) : Math.random;
-  for (let i = pool.length - 1; i > 0; i--) {
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  // Also shuffle options for each question
-  return pool.slice(0, Math.min(count, pool.length)).map((q) => {
+  return shuffled.slice(0, Math.min(count, shuffled.length)).map((q) => {
     const optionIndices = [0, 1, 2, 3];
     for (let i = 3; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1));
       [optionIndices[i], optionIndices[j]] = [optionIndices[j], optionIndices[i]];
     }
-    const newOptions = optionIndices.map((idx) => q.options[idx]);
+    const newOptions = optionIndices.map(idx => q.options[idx]);
     const newCorrect = optionIndices.indexOf(q.correctAnswer);
     return { ...q, options: newOptions, correctAnswer: newCorrect };
   });
+}
+
+// Legacy support
+export function getShuffledQuestions(
+  difficulty: "medium" | "hard" | "mixed",
+  count: number,
+  seed?: number
+): QuizQuestion[] {
+  return getShuffledQuestionsForSection(
+    ["Aptitude", "Programming", "Data Structures", "DBMS", "Operating Systems"],
+    difficulty, count, seed
+  );
 }
 
 function seededRandom(seed: number) {
