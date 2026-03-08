@@ -8,7 +8,7 @@ export interface QuizQuestion {
 }
 
 export const quizQuestions: QuizQuestion[] = [
-  // ============ APTITUDE - MEDIUM ============
+  // ============ APTITUDE - MEDIUM (TCS NQT Style) ============
   { id: 1, question: "A train 150m long passes a pole in 15 seconds. What is its speed in km/h?", options: ["36 km/h", "40 km/h", "30 km/h", "45 km/h"], correctAnswer: 0, category: "Aptitude", difficulty: "medium" },
   { id: 2, question: "What is 35% of 1200?", options: ["420", "380", "450", "400"], correctAnswer: 0, category: "Aptitude", difficulty: "medium" },
   { id: 3, question: "If a product is sold at 20% profit and its cost is ₹800, what is the selling price?", options: ["₹960", "₹900", "₹1000", "₹880"], correctAnswer: 0, category: "Aptitude", difficulty: "medium" },
