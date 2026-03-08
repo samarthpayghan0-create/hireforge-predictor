@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can delete profiles" ON public.student_profiles FOR DELETE USING (true);
