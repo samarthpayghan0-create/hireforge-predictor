@@ -33,9 +33,6 @@ export default function HomePage() {
                   Get Started <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/dashboard">View Dashboard</Link>
-              </Button>
             </div>
           </div>
         </div>

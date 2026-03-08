@@ -26,10 +26,12 @@ export default function QuizPage() {
 
   const [started, setStarted] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [selectedSections, setSelectedSections] = useState<Set<SectionKey>>(new Set(["Aptitude"]));
   const [sectionCounts, setSectionCounts] = useState<Record<SectionKey, QuestionCount>>({
     "Aptitude": 20, "Programming": 20, "Data Structures": 20, "Core Subjects": 20,
   });
 
+  const activeSections = SECTIONS.filter(s => selectedSections.has(s.key));
   const [activeSection, setActiveSection] = useState<SectionKey>("Aptitude");
   const [currentIndex, setCurrentIndex] = useState<Record<SectionKey, number>>({
     "Aptitude": 0, "Programming": 0, "Data Structures": 0, "Core Subjects": 0,
@@ -37,20 +39,23 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResult, setShowResult] = useState(false);
 
-  // Generate questions per section independently
   const grouped = useMemo(() => {
     if (!started) return { "Aptitude": [], "Programming": [], "Data Structures": [], "Core Subjects": [] } as Record<SectionKey, QuizQuestion[]>;
     const baseSeed = profileId ? hashCode(profileId + Date.now().toString()) : Date.now();
     const result: Record<string, QuizQuestion[]> = {};
     SECTIONS.forEach((s, i) => {
-      result[s.key] = getShuffledQuestionsForSection(
-        [...s.categories], difficulty, sectionCounts[s.key], baseSeed + i * 1000
-      );
+      if (selectedSections.has(s.key)) {
+        result[s.key] = getShuffledQuestionsForSection(
+          [...s.categories], difficulty, sectionCounts[s.key], baseSeed + i * 1000
+        );
+      } else {
+        result[s.key] = [];
+      }
     });
     return result as Record<SectionKey, QuizQuestion[]>;
-  }, [started, difficulty, sectionCounts, profileId]);
+  }, [started, difficulty, sectionCounts, profileId, selectedSections]);
 
-  const allQuestions = useMemo(() => SECTIONS.flatMap(s => grouped[s.key]), [grouped]);
+  const allQuestions = useMemo(() => activeSections.flatMap(s => grouped[s.key]), [grouped, activeSections]);
 
   const sectionQuestions = grouped[activeSection];
   const idx = currentIndex[activeSection];
@@ -85,12 +90,24 @@ export default function QuizPage() {
 
   const totalCorrect = allQuestions.filter(q => answers[q.id] === q.correctAnswer).length;
 
+  // Ensure activeSection is valid when starting
+  const handleStart = () => {
+    if (selectedSections.size === 0) {
+      toast.error("Please select at least one section");
+      return;
+    }
+    const firstSelected = SECTIONS.find(s => selectedSections.has(s.key));
+    if (firstSelected) setActiveSection(firstSelected.key);
+    setStarted(true);
+  };
+
   if (!started) {
     return (
       <QuizSetup
         difficulty={difficulty} setDifficulty={setDifficulty}
         sectionCounts={sectionCounts} setSectionCounts={setSectionCounts}
-        onStart={() => setStarted(true)}
+        selectedSections={selectedSections} setSelectedSections={setSelectedSections}
+        onStart={handleStart}
       />
     );
   }
@@ -99,7 +116,7 @@ export default function QuizPage() {
     return (
       <QuizResult
         questions={allQuestions} answers={answers} totalCorrect={totalCorrect}
-        difficulty={difficulty} grouped={grouped}
+        difficulty={difficulty} grouped={grouped} activeSections={activeSections}
         onRetake={() => {
           setCurrentIndex({ "Aptitude": 0, "Programming": 0, "Data Structures": 0, "Core Subjects": 0 });
           setAnswers({});
@@ -119,7 +136,7 @@ export default function QuizPage() {
         </div>
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Skill Assessment Quiz</h1>
-          <p className="text-sm text-muted-foreground">Answer questions across all sections</p>
+          <p className="text-sm text-muted-foreground">Answer questions across selected sections</p>
         </div>
       </div>
 
@@ -133,8 +150,8 @@ export default function QuizPage() {
       </div>
 
       <Tabs value={activeSection} onValueChange={(v) => setActiveSection(v as SectionKey)}>
-        <TabsList className="w-full grid grid-cols-4 mb-6">
-          {SECTIONS.map(s => (
+        <TabsList className={`w-full grid mb-6`} style={{ gridTemplateColumns: `repeat(${activeSections.length}, 1fr)` }}>
+          {activeSections.map(s => (
             <TabsTrigger key={s.key} value={s.key} className="text-xs sm:text-sm gap-1">
               <s.icon className="w-3.5 h-3.5 hidden sm:block" />
               {s.label}
@@ -143,7 +160,7 @@ export default function QuizPage() {
           ))}
         </TabsList>
 
-        {SECTIONS.map(section => {
+        {activeSections.map(section => {
           const secQs = grouped[section.key];
           const secIdx = currentIndex[section.key];
           const secQ = secQs[secIdx];
@@ -189,7 +206,7 @@ export default function QuizPage() {
                     </Button>
                   ) : (
                     <Button onClick={() => {
-                      const nextSection = SECTIONS.find(s => s.key !== section.key && sectionAnsweredCount(s.key) < grouped[s.key].length);
+                      const nextSection = activeSections.find(s => s.key !== section.key && sectionAnsweredCount(s.key) < grouped[s.key].length);
                       if (nextSection) {
                         setActiveSection(nextSection.key);
                         toast.info(`Moving to ${nextSection.label}`);
@@ -210,22 +227,35 @@ export default function QuizPage() {
           <CheckCircle2 className="w-5 h-5 mr-2" />
           Finish Quiz ({Object.values(answers).length}/{allQuestions.length} answered)
         </Button>
-        {!allAnswered && <p className="text-xs text-muted-foreground text-center mt-2">Answer all questions across all sections to submit</p>}
+        {!allAnswered && <p className="text-xs text-muted-foreground text-center mt-2">Answer all questions across selected sections to submit</p>}
       </div>
     </div>
   );
 }
 
 // ========== SETUP COMPONENT ==========
-function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, onStart }: {
+function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, onStart }: {
   difficulty: Difficulty; setDifficulty: (d: Difficulty) => void;
   sectionCounts: Record<SectionKey, QuestionCount>;
   setSectionCounts: (c: Record<SectionKey, QuestionCount>) => void;
+  selectedSections: Set<SectionKey>;
+  setSelectedSections: (s: Set<SectionKey>) => void;
   onStart: () => void;
 }) {
   const updateCount = (key: SectionKey, count: QuestionCount) => {
     setSectionCounts({ ...sectionCounts, [key]: count });
   };
+
+  const toggleSection = (key: SectionKey) => {
+    const next = new Set(selectedSections);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setSelectedSections(next);
+  };
+
+  const totalQuestions = SECTIONS
+    .filter(s => selectedSections.has(s.key))
+    .reduce((a, s) => a + sectionCounts[s.key], 0);
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
@@ -235,11 +265,33 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
         </div>
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Quiz Setup</h1>
-          <p className="text-sm text-muted-foreground">Choose your quiz preferences before starting</p>
+          <p className="text-sm text-muted-foreground">Choose sections and preferences before starting</p>
         </div>
       </div>
 
       <div className="bg-card rounded-xl border border-border p-6 space-y-8 animate-fade-in">
+        {/* Section Selection */}
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-foreground">Select Sections <span className="text-muted-foreground font-normal">(choose one or more)</span></label>
+          <div className="grid grid-cols-2 gap-3">
+            {SECTIONS.map(section => {
+              const isSelected = selectedSections.has(section.key);
+              return (
+                <button key={section.key} type="button" onClick={() => toggleSection(section.key)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSelected ? "gradient-primary" : "bg-secondary"}`}>
+                    <section.icon className={`w-4 h-4 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                  </div>
+                  <div>
+                    <p className={`font-semibold text-sm ${isSelected ? "text-primary" : "text-foreground"}`}>{section.label}</p>
+                    <p className="text-xs text-muted-foreground">{isSelected ? "Selected" : "Tap to add"}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Difficulty */}
         <div className="space-y-3">
           <label className="text-sm font-semibold text-foreground">Difficulty Level</label>
@@ -254,34 +306,36 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
           </div>
         </div>
 
-        {/* Per-section question counts */}
-        <div className="space-y-4">
-          <label className="text-sm font-semibold text-foreground">Questions Per Section</label>
-          {SECTIONS.map(section => (
-            <div key={section.key} className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <section.icon className="w-4 h-4" />
-                <span className="font-medium text-foreground">{section.label}</span>
+        {/* Per-section question counts - only for selected sections */}
+        {selectedSections.size > 0 && (
+          <div className="space-y-4">
+            <label className="text-sm font-semibold text-foreground">Questions Per Section</label>
+            {SECTIONS.filter(s => selectedSections.has(s.key)).map(section => (
+              <div key={section.key} className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <section.icon className="w-4 h-4" />
+                  <span className="font-medium text-foreground">{section.label}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {([20, 30, 50] as const).map(count => (
+                    <button key={count} type="button" onClick={() => updateCount(section.key, count)}
+                      className={`p-3 rounded-lg border-2 text-center transition-all ${sectionCounts[section.key] === count ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+                      <p className={`text-lg font-bold ${sectionCounts[section.key] === count ? "text-primary" : "text-foreground"}`}>{count}</p>
+                      <p className="text-[10px] text-muted-foreground">questions</p>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                {([20, 30, 50] as const).map(count => (
-                  <button key={count} type="button" onClick={() => updateCount(section.key, count)}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${sectionCounts[section.key] === count ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
-                    <p className={`text-lg font-bold ${sectionCounts[section.key] === count ? "text-primary" : "text-foreground"}`}>{count}</p>
-                    <p className="text-[10px] text-muted-foreground">questions</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="bg-secondary/50 rounded-lg p-4 text-sm text-muted-foreground">
-          <p>📝 Each section has its own question count. Medium-level aptitude questions are based on <strong>TCS NQT</strong> pattern. Total questions: <strong>{Object.values(sectionCounts).reduce((a, b) => a + b, 0)}</strong></p>
+          <p>📝 Select the sections you want to attempt. Medium-level aptitude questions are based on <strong>TCS NQT</strong> pattern. Total questions: <strong>{totalQuestions}</strong></p>
         </div>
 
-        <Button onClick={onStart} className="w-full gradient-primary text-primary-foreground text-lg py-6">
-          Start Quiz <ChevronRight className="w-5 h-5 ml-2" />
+        <Button onClick={onStart} disabled={selectedSections.size === 0} className="w-full gradient-primary text-primary-foreground text-lg py-6">
+          Start Quiz ({selectedSections.size} section{selectedSections.size !== 1 ? "s" : ""}) <ChevronRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
     </div>
@@ -289,9 +343,9 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
 }
 
 // ========== RESULT COMPONENT ==========
-function QuizResult({ questions, answers, totalCorrect, difficulty, grouped, onRetake, onDashboard }: {
+function QuizResult({ questions, answers, totalCorrect, difficulty, grouped, activeSections, onRetake, onDashboard }: {
   questions: QuizQuestion[]; answers: Record<number, number>; totalCorrect: number; difficulty: string;
-  grouped: Record<SectionKey, QuizQuestion[]>; onRetake: () => void; onDashboard: () => void;
+  grouped: Record<SectionKey, QuizQuestion[]>; activeSections: typeof SECTIONS[number][]; onRetake: () => void; onDashboard: () => void;
 }) {
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
@@ -306,7 +360,7 @@ function QuizResult({ questions, answers, totalCorrect, difficulty, grouped, onR
         </p>
 
         <div className="space-y-3 text-left">
-          {SECTIONS.map(section => {
+          {activeSections.map(section => {
             const secQs = grouped[section.key];
             if (secQs.length === 0) return null;
             const correct = secQs.filter(q => answers[q.id] === q.correctAnswer).length;
