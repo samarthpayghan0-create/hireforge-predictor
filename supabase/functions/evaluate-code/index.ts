@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { code, language, problemTitle, problemDescription, sampleInput, sampleOutput, testCases, problemId, profileId, userId } = await req.json();
+    const { code, language, problemTitle, problemDescription, sampleInput, sampleOutput, testCases, problemId, profileId, userId, username, difficulty, points } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -47,8 +47,9 @@ Deno.serve(async (req) => {
     let parsed;
     try { const m = content.match(/\{[\s\S]*\}/); parsed = JSON.parse(m ? m[0] : content); } catch { parsed = { is_correct: false, score: 0, feedback: "Could not evaluate code.", suggestions: [], test_results: [] }; }
 
-    // Save submission
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Save submission
     await supabase.from("coding_submissions").insert({
       problem_id: problemId || null,
       profile_id: profileId || null,
@@ -60,6 +61,62 @@ Deno.serve(async (req) => {
       ai_feedback: parsed.feedback || "",
       score: parsed.score || 0,
     });
+
+    // Update leaderboard if correct and user is logged in
+    if (parsed.is_correct && userId && username) {
+      const earnedPoints = points || (difficulty === "hard" ? 30 : difficulty === "medium" ? 20 : 10);
+      // Calculate bonus for fast solutions
+      const timeBonus = parsed.execution_time_estimate_ms < 100 ? 5 : parsed.execution_time_estimate_ms < 500 ? 2 : 0;
+      const totalEarned = earnedPoints + timeBonus;
+
+      const { data: existing } = await supabase
+        .from("coding_leaderboard")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (existing) {
+        const diffKey = difficulty === "hard" ? "hard_solved" : difficulty === "medium" ? "medium_solved" : "easy_solved";
+        const newSolved = (existing.problems_solved || 0) + 1;
+        const newScore = (existing.total_score || 0) + totalEarned;
+
+        // Count total submissions for success rate
+        const { count: totalSubs } = await supabase
+          .from("coding_submissions")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId);
+        const { count: correctSubs } = await supabase
+          .from("coding_submissions")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("is_correct", true);
+
+        await supabase.from("coding_leaderboard").update({
+          total_score: newScore,
+          problems_solved: newSolved,
+          [diffKey]: (existing[diffKey] || 0) + 1,
+          preferred_language: language,
+          success_rate: totalSubs ? Math.round(((correctSubs || 0) / totalSubs) * 100) : 0,
+          updated_at: new Date().toISOString(),
+        }).eq("user_id", userId);
+      } else {
+        await supabase.from("coding_leaderboard").insert({
+          user_id: userId,
+          profile_id: profileId || null,
+          username,
+          total_score: totalEarned,
+          problems_solved: 1,
+          easy_solved: difficulty === "easy" ? 1 : 0,
+          medium_solved: difficulty === "medium" ? 1 : 0,
+          hard_solved: difficulty === "hard" ? 1 : 0,
+          preferred_language: language,
+          success_rate: 100,
+        });
+      }
+
+      parsed.points_earned = totalEarned;
+      parsed.time_bonus = timeBonus;
+    }
 
     return new Response(JSON.stringify(parsed), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
