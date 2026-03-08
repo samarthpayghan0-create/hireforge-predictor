@@ -98,6 +98,7 @@ export default function MockInterviewPage() {
   const recognitionRef = useRef<any>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accumulatedTextRef = useRef<string>("");
+  const interimRef = useRef<string>("");
   const stoppedManuallyRef = useRef(false);
   const setAnswerRef = useRef(setCurrentAnswer);
   setAnswerRef.current = setCurrentAnswer;
@@ -119,19 +120,25 @@ export default function MockInterviewPage() {
         setPauseCount(prev => prev + 1);
       }, 2000);
 
-      let sessionFinal = "";
-      let interim = "";
-      for (let i = 0; i < e.results.length; i++) {
+      // Process only from resultIndex onward to avoid re-reading old results
+      let newFinal = "";
+      let newInterim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
         const transcript = e.results[i][0].transcript;
         if (e.results[i].isFinal) {
-          sessionFinal += transcript + " ";
+          newFinal += transcript + " ";
         } else {
-          interim += transcript;
+          newInterim += transcript;
         }
       }
 
-      const fullText = accumulatedTextRef.current + sessionFinal + interim;
-      setAnswerRef.current(fullText);
+      // When text becomes final, permanently save it
+      if (newFinal) {
+        accumulatedTextRef.current += newFinal;
+      }
+
+      interimRef.current = newInterim;
+      setAnswerRef.current(accumulatedTextRef.current + newInterim);
     };
 
     recognition.onerror = (e: any) => {
@@ -146,9 +153,8 @@ export default function MockInterviewPage() {
         if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
         return;
       }
-      // Auto-restart: save finalized text and start fresh session
-      // Get all final results from the ended session
-      accumulatedTextRef.current = accumulatedTextRef.current;
+      // Auto-restart after pause/timeout — accumulated text is already saved in ref
+      interimRef.current = "";
       try {
         const newRec = createRecognition();
         if (newRec) {
