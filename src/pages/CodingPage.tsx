@@ -94,6 +94,7 @@ export default function CodingPage() {
   const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({});
   const [showSolution, setShowSolution] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [timeExpired, setTimeExpired] = useState(false);
 
   // Load problems
   useEffect(() => {
