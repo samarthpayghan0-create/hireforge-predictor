@@ -10,6 +10,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import QuizPage from "@/pages/QuizPage";
 import VoicePage from "@/pages/VoicePage";
 import DashboardPage from "@/pages/DashboardPage";
+import AdminPage from "@/pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/quiz" element={<QuizPage />} />
             <Route path="/voice" element={<VoicePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppProvider>

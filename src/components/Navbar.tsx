@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, Brain, MessageSquare, BarChart3, BookOpen, Mic } from "lucide-react";
+import { User, Brain, BarChart3, BookOpen, Mic, Shield } from "lucide-react";
 
 const navItems = [
   { path: "/", label: "Home", icon: BarChart3 },
@@ -7,6 +7,7 @@ const navItems = [
   { path: "/quiz", label: "Quiz", icon: BookOpen },
   { path: "/voice", label: "Voice", icon: Mic },
   { path: "/dashboard", label: "Dashboard", icon: Brain },
+  { path: "/admin", label: "Admin", icon: Shield },
 ];
 
 export default function Navbar() {
