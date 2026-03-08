@@ -125,6 +125,77 @@ export type Database = {
           },
         ]
       }
+      resume_analyses: {
+        Row: {
+          certifications: string[] | null
+          created_at: string
+          detected_skills: string[] | null
+          education: string[] | null
+          experience_score: number | null
+          id: string
+          keywords_score: number | null
+          missing_skills: string[] | null
+          profile_id: string | null
+          projects: string[] | null
+          projects_score: number | null
+          raw_text: string | null
+          resume_score: number | null
+          resume_url: string | null
+          skills_score: number | null
+          suggestions: string[] | null
+          user_id: string | null
+          work_experience: string[] | null
+        }
+        Insert: {
+          certifications?: string[] | null
+          created_at?: string
+          detected_skills?: string[] | null
+          education?: string[] | null
+          experience_score?: number | null
+          id?: string
+          keywords_score?: number | null
+          missing_skills?: string[] | null
+          profile_id?: string | null
+          projects?: string[] | null
+          projects_score?: number | null
+          raw_text?: string | null
+          resume_score?: number | null
+          resume_url?: string | null
+          skills_score?: number | null
+          suggestions?: string[] | null
+          user_id?: string | null
+          work_experience?: string[] | null
+        }
+        Update: {
+          certifications?: string[] | null
+          created_at?: string
+          detected_skills?: string[] | null
+          education?: string[] | null
+          experience_score?: number | null
+          id?: string
+          keywords_score?: number | null
+          missing_skills?: string[] | null
+          profile_id?: string | null
+          projects?: string[] | null
+          projects_score?: number | null
+          raw_text?: string | null
+          resume_score?: number | null
+          resume_url?: string | null
+          skills_score?: number | null
+          suggestions?: string[] | null
+          user_id?: string | null
+          work_experience?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_analyses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_profiles: {
         Row: {
           aptitude_score: number
