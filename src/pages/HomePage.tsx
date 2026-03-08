@@ -76,69 +76,67 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-pattern">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32 lg:py-40">
-        {/* Background effects */}
-        <div className="absolute inset-0 gradient-hero opacity-[0.03]" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse]" />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-primary/5 rounded-full blur-2xl animate-[float_12s_ease-in-out_infinite_2s]" />
+      <section className="relative overflow-hidden py-24 md:py-32 lg:py-40 border-b border-border/40">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] via-transparent to-transparent" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/[0.03] rounded-full blur-[100px]" />
 
-        {/* Floating particles */}
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 rounded-full bg-primary/20 animate-[particle_var(--dur)_linear_infinite]"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              '--dur': `${6 + Math.random() * 10}s`,
-              animationDelay: `${Math.random() * 8}s`,
-              width: `${2 + Math.random() * 3}px`,
-              height: `${2 + Math.random() * 3}px`,
-              opacity: 0.15 + Math.random() * 0.25,
-            } as React.CSSProperties}
-          />
-        ))}
-
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{
+          backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
         }} />
         
         <div className="container mx-auto px-4 lg:px-8 relative">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
+          <div className="max-w-4xl mx-auto text-center space-y-10">
             
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20 animate-fade-in">
-              <Sparkles className="w-4 h-4" />
-              AI-Powered Career Analysis Platform
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium border border-border animate-fade-in">
+              <Sparkles className="w-4 h-4 text-primary" />
+              Enterprise-Grade Career Intelligence
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-foreground leading-[1.1] animate-fade-in" style={{ animationDelay: '100ms' }}>
-              Predict Your{" "}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-foreground leading-[1.05] tracking-tight animate-fade-in" style={{ animationDelay: '100ms' }}>
+              Data-Driven{" "}
               <span className="text-gradient">Placement</span>
               <br />
-              <span className="text-gradient-accent">Success</span> with AI
+              <span className="text-gradient-accent">Analytics</span> Platform
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '200ms' }}>
-              Analyze your skills, take comprehensive quizzes, assess communication abilities — 
-              get AI-driven predictions and personalized improvement strategies.
+              Leverage AI-powered analytics to assess your competencies, identify skill gaps, 
+              and receive actionable insights for career advancement.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in" style={{ animationDelay: '300ms' }}>
-              <Button asChild size="lg" className="gradient-primary text-primary-foreground shadow-glow hover:opacity-90 transition-all text-base px-8 py-6 rounded-xl">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-fade-in" style={{ animationDelay: '300ms' }}>
+              <Button asChild size="lg" className="bg-foreground text-background hover:bg-foreground/90 transition-all text-base px-8 py-6 rounded-lg font-medium">
                 <Link to="/profile">
-                  Get Started Free <ArrowRight className="w-5 h-5 ml-2" />
+                  Start Assessment <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="text-base px-8 py-6 rounded-xl border-2">
+              <Button asChild variant="outline" size="lg" className="text-base px-8 py-6 rounded-lg border-2 border-border hover:bg-secondary">
                 <Link to="/quiz">
-                  Take a Quiz <BookOpen className="w-5 h-5 ml-2" />
+                  View Demo <BookOpen className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="pt-8 flex items-center justify-center gap-8 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '400ms' }}>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-success" />
+                <span>Free to Start</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-success" />
+                <span>AI-Powered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-success" />
+                <span>Instant Results</span>
+              </div>
             </div>
           </div>
         </div>
