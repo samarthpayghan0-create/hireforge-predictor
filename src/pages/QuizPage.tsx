@@ -238,13 +238,14 @@ export default function QuizPage() {
 }
 
 // ========== SETUP COMPONENT ==========
-function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, onStart }: {
+function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, onStart, onBack }: {
   difficulty: Difficulty; setDifficulty: (d: Difficulty) => void;
   sectionCounts: Record<SectionKey, QuestionCount>;
   setSectionCounts: (c: Record<SectionKey, QuestionCount>) => void;
   selectedSections: Set<SectionKey>;
   setSelectedSections: (s: Set<SectionKey>) => void;
   onStart: () => void;
+  onBack: () => void;
 }) {
   const updateCount = (key: SectionKey, count: QuestionCount) => {
     setSectionCounts({ ...sectionCounts, [key]: count });
