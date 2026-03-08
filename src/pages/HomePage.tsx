@@ -64,7 +64,7 @@ export default function HomePage() {
   }, []);
 
   const stats = [
-    { value: "95%", label: "Prediction Accuracy" },
+    { value: "90%", label: "Prediction Accuracy" },
     { value: `${studentCount}+`, label: "Students Analyzed" },
     { value: avgRating ? `${avgRating}★` : "—", label: "User Rating" },
   ];
