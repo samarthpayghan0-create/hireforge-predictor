@@ -13,6 +13,30 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+    // ===== RUN CODE MODE (quick test, no save) =====
+    if (body.mode === "run") {
+      const { code, language, problemTitle, problemDescription, sampleInput, sampleOutput } = body;
+      const runRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${LOVABLE_API_KEY}` },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: `You are a code evaluator. Trace through the ${language} code mentally and determine what it would output for the given input. Return ONLY valid JSON: {"is_correct": true/false, "test_results": [{"input": "...", "expected": "...", "actual": "...", "passed": true/false}]}` },
+            { role: "user", content: `Problem: ${problemTitle}\n${problemDescription}\n\nInput: ${sampleInput}\nExpected Output: ${sampleOutput}\n\nCode:\n\`\`\`${language}\n${code}\n\`\`\`` },
+          ],
+          temperature: 0.1,
+          max_tokens: 500,
+        }),
+      });
+      if (!runRes.ok) throw new Error("Failed to run code");
+      const runData = await runRes.json();
+      const content = runData.choices?.[0]?.message?.content || "{}";
+      let parsed;
+      try { const m = content.match(/\{[\s\S]*\}/); parsed = JSON.parse(m ? m[0] : content); } catch { parsed = { is_correct: false, test_results: [{ input: sampleInput, expected: sampleOutput, actual: "Error", passed: false }] }; }
+      return new Response(JSON.stringify(parsed), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // ===== GENERATE SOLUTION MODE =====
     if (body.mode === "generate-solution") {
       const { language, problemTitle, problemDescription, sampleInput, sampleOutput } = body;

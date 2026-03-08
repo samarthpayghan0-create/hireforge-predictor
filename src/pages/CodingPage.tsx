@@ -83,6 +83,8 @@ export default function CodingPage() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [runOutput, setRunOutput] = useState<{ passed: boolean; expected: string; actual: string } | null>(null);
   const [result, setResult] = useState<EvalResult | null>(null);
   const [filter, setFilter] = useState("all");
   const [catFilter, setCatFilter] = useState("all");
@@ -162,9 +164,47 @@ export default function CodingPage() {
     setTimeExpired(false);
     const lang = LANGUAGES.find((l) => l.id === language);
     setCode(lang?.template || "");
+    setRunOutput(null);
     setStartTime(Date.now());
     setElapsedTime(0);
     setPhase("solve");
+  };
+
+  const runCode = async () => {
+    if (!selectedProblem || !code.trim()) return;
+    if (timeExpired) { toast.error("⏰ Time expired!"); return; }
+    setRunning(true);
+    setRunOutput(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("evaluate-code", {
+        body: {
+          code, language,
+          problemTitle: selectedProblem.title,
+          problemDescription: selectedProblem.description,
+          sampleInput: selectedProblem.sample_input,
+          sampleOutput: selectedProblem.sample_output,
+          testCases: [{ input: selectedProblem.sample_input, expected_output: selectedProblem.sample_output }],
+          mode: "run",
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const testResult = data.test_results?.[0];
+      setRunOutput({
+        passed: testResult?.passed ?? data.is_correct ?? false,
+        expected: selectedProblem.sample_output || "",
+        actual: testResult?.actual || "N/A",
+      });
+      if (testResult?.passed || data.is_correct) {
+        toast.success("✅ Sample test passed!");
+      } else {
+        toast.error("❌ Sample test failed.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to run code");
+    } finally {
+      setRunning(false);
+    }
   };
 
   const submitCode = async () => {
@@ -562,10 +602,22 @@ export default function CodingPage() {
               />
             </div>
 
+            {/* Run output */}
+            {runOutput && (
+              <div className={`px-3 py-2 border-t border-border text-xs font-mono ${runOutput.passed ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                <span className="font-semibold">{runOutput.passed ? "✅ Passed" : "❌ Failed"}</span>
+                <span className="ml-3 text-muted-foreground">Expected: <span className="text-foreground">{runOutput.expected}</span></span>
+                <span className="ml-3 text-muted-foreground">Got: <span className="text-foreground">{runOutput.actual}</span></span>
+              </div>
+            )}
+
             {/* Action bar */}
             <div className="p-3 border-t border-border bg-secondary/20 flex items-center gap-3">
-              <Button onClick={submitCode} disabled={evaluating || !code.trim() || timeExpired} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
-                {evaluating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Evaluating...</> : <><Play className="w-4 h-4 mr-2" /> Submit Solution</>}
+              <Button onClick={runCode} disabled={running || evaluating || !code.trim() || timeExpired} variant="outline" className="h-11 rounded-xl font-semibold gap-2">
+                {running ? <><Loader2 className="w-4 h-4 animate-spin" /> Running...</> : <><Play className="w-4 h-4" /> Run Code</>}
+              </Button>
+              <Button onClick={submitCode} disabled={evaluating || running || !code.trim() || timeExpired} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
+                {evaluating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Evaluating...</> : <><CheckCircle2 className="w-4 h-4 mr-2" /> Submit Solution</>}
               </Button>
               {showNextProblem && (
                 <Button onClick={goToNextProblem} className="gradient-primary text-primary-foreground h-11 rounded-xl font-semibold animate-fade-in">
