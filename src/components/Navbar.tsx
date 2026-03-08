@@ -18,7 +18,7 @@ const navItems = [
   { path: "/voice", label: "AI Mock Interview", icon: Mic },
   { path: "/coding", label: "Coding Challenge", icon: Code },
   { path: "/career", label: "Career Paths", icon: Compass },
-  { path: "/quiz", label: "Learning Roadmap", icon: Map },
+  { path: "/quiz", label: "Quiz Setup", icon: Map },
   { path: "/profile", label: "Predictor", icon: TrendingUp },
   { path: "/dashboard", label: "Progress Dashboard", icon: Brain },
 ];
