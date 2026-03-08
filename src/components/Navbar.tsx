@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User, Brain, BarChart3, BookOpen, Mic, Sun, Moon, LogIn, LogOut,
-  TrendingUp, Mail, FileText, Code, Compass, Settings, Menu, X, Briefcase, Map
+  TrendingUp, Mail, FileText, Code, Compass, Settings, Menu, X, Briefcase, Map,
+  Home, ArrowLeft
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
