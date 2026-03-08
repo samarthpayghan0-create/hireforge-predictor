@@ -6,7 +6,7 @@ import { getShuffledQuestionsForSection, QuizQuestion } from "@/data/quizData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { BookOpen, ChevronRight, CheckCircle2, Settings2, Brain, Code, Database, Cpu } from "lucide-react";
+import { BookOpen, ChevronRight, ChevronLeft, CheckCircle2, Settings2, Brain, Code, Database, Cpu } from "lucide-react";
 
 type Difficulty = "medium" | "hard" | "mixed";
 type QuestionCount = 20 | 30 | 50;
@@ -108,6 +108,7 @@ export default function QuizPage() {
         sectionCounts={sectionCounts} setSectionCounts={setSectionCounts}
         selectedSections={selectedSections} setSelectedSections={setSelectedSections}
         onStart={handleStart}
+        onBack={() => navigate("/profile")}
       />
     );
   }
@@ -222,7 +223,10 @@ export default function QuizPage() {
         })}
       </Tabs>
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-3">
+        <Button variant="outline" onClick={() => { setStarted(false); setAnswers({}); setCurrentIndex({ "Aptitude": 0, "Programming": 0, "Data Structures": 0, "Core Subjects": 0 }); }} className="w-full">
+          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Setup
+        </Button>
         <Button onClick={finishQuiz} disabled={!allAnswered} className="w-full gradient-primary text-primary-foreground text-lg py-6">
           <CheckCircle2 className="w-5 h-5 mr-2" />
           Finish Quiz ({Object.values(answers).length}/{allQuestions.length} answered)
@@ -234,13 +238,14 @@ export default function QuizPage() {
 }
 
 // ========== SETUP COMPONENT ==========
-function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, onStart }: {
+function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, onStart, onBack }: {
   difficulty: Difficulty; setDifficulty: (d: Difficulty) => void;
   sectionCounts: Record<SectionKey, QuestionCount>;
   setSectionCounts: (c: Record<SectionKey, QuestionCount>) => void;
   selectedSections: Set<SectionKey>;
   setSelectedSections: (s: Set<SectionKey>) => void;
   onStart: () => void;
+  onBack: () => void;
 }) {
   const updateCount = (key: SectionKey, count: QuestionCount) => {
     setSectionCounts({ ...sectionCounts, [key]: count });
@@ -334,9 +339,14 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
           <p>📝 Select the sections you want to attempt. Medium-level aptitude questions are based on <strong>TCS NQT</strong> pattern. Total questions: <strong>{totalQuestions}</strong></p>
         </div>
 
-        <Button onClick={onStart} disabled={selectedSections.size === 0} className="w-full gradient-primary text-primary-foreground text-lg py-6">
-          Start Quiz ({selectedSections.size} section{selectedSections.size !== 1 ? "s" : ""}) <ChevronRight className="w-5 h-5 ml-2" />
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onBack} className="flex-1">
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back
+          </Button>
+          <Button onClick={onStart} disabled={selectedSections.size === 0} className="flex-1 gradient-primary text-primary-foreground text-lg py-6">
+            Start Quiz ({selectedSections.size} section{selectedSections.size !== 1 ? "s" : ""}) <ChevronRight className="w-5 h-5 ml-2" />
+          </Button>
+        </div>
       </div>
     </div>
   );
