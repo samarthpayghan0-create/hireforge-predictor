@@ -14,7 +14,9 @@ const navItems = [
   { path: "/profile", label: "Profile", icon: User },
   { path: "/quiz", label: "Quiz", icon: BookOpen },
   { path: "/voice", label: "Interview", icon: Mic },
+  { path: "/coding", label: "Coding", icon: Code },
   { path: "/resume", label: "Resume", icon: FileText },
+  { path: "/career", label: "Career", icon: Compass },
   { path: "/dashboard", label: "Dashboard", icon: Brain },
   { path: "/admin", label: "Admin", icon: Shield },
 ];
