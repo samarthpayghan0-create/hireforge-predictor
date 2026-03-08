@@ -81,13 +81,72 @@ export type Database = {
           },
         ]
       }
+      coding_leaderboard: {
+        Row: {
+          created_at: string
+          easy_solved: number
+          hard_solved: number
+          id: string
+          medium_solved: number
+          preferred_language: string | null
+          problems_solved: number
+          profile_id: string | null
+          success_rate: number | null
+          total_score: number
+          updated_at: string
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          easy_solved?: number
+          hard_solved?: number
+          id?: string
+          medium_solved?: number
+          preferred_language?: string | null
+          problems_solved?: number
+          profile_id?: string | null
+          success_rate?: number | null
+          total_score?: number
+          updated_at?: string
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string
+          easy_solved?: number
+          hard_solved?: number
+          id?: string
+          medium_solved?: number
+          preferred_language?: string | null
+          problems_solved?: number
+          profile_id?: string | null
+          success_rate?: number | null
+          total_score?: number
+          updated_at?: string
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coding_leaderboard_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coding_problems: {
         Row: {
           category: string | null
+          company_tags: string[] | null
+          constraints: string | null
           created_at: string
           description: string
           difficulty: string
           id: string
+          points: number | null
           sample_input: string | null
           sample_output: string | null
           test_cases: Json
@@ -95,10 +154,13 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          company_tags?: string[] | null
+          constraints?: string | null
           created_at?: string
           description: string
           difficulty?: string
           id?: string
+          points?: number | null
           sample_input?: string | null
           sample_output?: string | null
           test_cases?: Json
@@ -106,10 +168,13 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          company_tags?: string[] | null
+          constraints?: string | null
           created_at?: string
           description?: string
           difficulty?: string
           id?: string
+          points?: number | null
           sample_input?: string | null
           sample_output?: string | null
           test_cases?: Json
