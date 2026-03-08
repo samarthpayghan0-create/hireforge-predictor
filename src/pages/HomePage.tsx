@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Brain, BookOpen, Mic, BarChart3, Sparkles, CheckCircle2, Zap, Target, TrendingUp } from "lucide-react";
+import { ArrowRight, Brain, BookOpen, Mic, BarChart3, Sparkles, CheckCircle2, Zap, Target, TrendingUp, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
