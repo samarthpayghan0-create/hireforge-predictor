@@ -39,19 +39,28 @@ export default function HomePage() {
   const [studentCount, setStudentCount] = useState(0);
   const [avgRating, setAvgRating] = useState<number | null>(null);
 
+  const fetchStats = async () => {
+    const [countRes, ratingRes] = await Promise.all([
+      supabase.from("student_profiles").select("*", { count: "exact", head: true }),
+      supabase.from("app_ratings").select("rating"),
+    ]);
+    setStudentCount(countRes.count ?? 0);
+    if (ratingRes.data && ratingRes.data.length > 0) {
+      const avg = ratingRes.data.reduce((sum, r) => sum + r.rating, 0) / ratingRes.data.length;
+      setAvgRating(Math.round(avg * 10) / 10);
+    }
+  };
+
   useEffect(() => {
-    const fetchStats = async () => {
-      const [countRes, ratingRes] = await Promise.all([
-        supabase.from("student_profiles").select("*", { count: "exact", head: true }),
-        supabase.from("app_ratings").select("rating"),
-      ]);
-      setStudentCount(countRes.count ?? 0);
-      if (ratingRes.data && ratingRes.data.length > 0) {
-        const avg = ratingRes.data.reduce((sum, r) => sum + r.rating, 0) / ratingRes.data.length;
-        setAvgRating(Math.round(avg * 10) / 10);
-      }
-    };
     fetchStats();
+
+    const channel = supabase
+      .channel("homepage-stats")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "student_profiles" }, () => fetchStats())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "app_ratings" }, () => fetchStats())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const stats = [
