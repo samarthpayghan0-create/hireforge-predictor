@@ -445,6 +445,31 @@ export default function CodingPage() {
                 </div>
               </div>
             )}
+
+            {/* View Solution - unlocked after 2 failed attempts */}
+            {selectedProblem && (failedAttempts[selectedProblem.id] || 0) >= 2 && (
+              <div className="mt-4 animate-fade-in">
+                {!showSolution ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSolution(true)}
+                    className="w-full rounded-xl gap-2 border-warning/30 text-warning hover:bg-warning/10"
+                  >
+                    <Zap className="w-4 h-4" /> 🔓 View Solution
+                  </Button>
+                ) : (
+                  <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-warning flex items-center gap-2">
+                        <Zap className="w-4 h-4" /> Reference Solution ({LANGUAGES.find(l => l.id === language)?.label})
+                      </p>
+                      <Button variant="ghost" size="sm" onClick={() => setShowSolution(false)} className="text-xs text-muted-foreground">Hide</Button>
+                    </div>
+                    <SolutionBlock problem={selectedProblem} language={language} />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Code editor panel */}
