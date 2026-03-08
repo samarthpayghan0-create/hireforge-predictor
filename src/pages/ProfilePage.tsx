@@ -108,8 +108,8 @@ export default function ProfilePage() {
   };
 
   const nextStep = () => {
-    if (currentStep === 0 && !form.name.trim()) {
-      toast.error("Please enter your name");
+    if (currentStep === 0 && !isValidName(form.name)) {
+      toast.error("Please enter a valid name (letters only, at least 2 characters)");
       return;
     }
     if (currentStep < STEPS.length - 1) setCurrentStep(currentStep + 1);
