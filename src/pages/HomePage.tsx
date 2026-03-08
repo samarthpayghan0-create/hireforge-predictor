@@ -86,9 +86,7 @@ export default function HomePage() {
         
         <div className="container mx-auto px-4 lg:px-8 relative">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="flex justify-center animate-fade-in">
-              <img src="/logo.png" alt="HireForge" className="w-24 h-24 md:w-32 md:h-32 drop-shadow-2xl" />
-            </div>
+            
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20 animate-fade-in">
               <Sparkles className="w-4 h-4" />
               AI-Powered Career Analysis Platform
