@@ -14,7 +14,133 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      communication_scores: {
+        Row: {
+          clarity_score: number | null
+          confidence_score: number | null
+          created_at: string
+          fluency_score: number | null
+          id: string
+          overall_score: number | null
+          profile_id: string | null
+          speaking_speed: number | null
+          transcript: string | null
+        }
+        Insert: {
+          clarity_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          fluency_score?: number | null
+          id?: string
+          overall_score?: number | null
+          profile_id?: string | null
+          speaking_speed?: number | null
+          transcript?: string | null
+        }
+        Update: {
+          clarity_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          fluency_score?: number | null
+          id?: string
+          overall_score?: number | null
+          profile_id?: string | null
+          speaking_speed?: number | null
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_scores_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_scores: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          profile_id: string | null
+          score: number
+          total_questions: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+          score: number
+          total_questions: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+          score?: number
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_scores_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_profiles: {
+        Row: {
+          aptitude_score: number
+          cgpa: number
+          communication_rating: number
+          created_at: string
+          dsa_score: number
+          id: string
+          internship_experience: number
+          name: string
+          num_projects: number
+          programming_skills: string[] | null
+          technical_skills: string[] | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          aptitude_score: number
+          cgpa: number
+          communication_rating: number
+          created_at?: string
+          dsa_score: number
+          id?: string
+          internship_experience?: number
+          name: string
+          num_projects?: number
+          programming_skills?: string[] | null
+          technical_skills?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          aptitude_score?: number
+          cgpa?: number
+          communication_rating?: number
+          created_at?: string
+          dsa_score?: number
+          id?: string
+          internship_experience?: number
+          name?: string
+          num_projects?: number
+          programming_skills?: string[] | null
+          technical_skills?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
