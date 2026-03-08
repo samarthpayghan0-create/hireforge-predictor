@@ -279,7 +279,7 @@ function QuizSetup({ difficulty, setDifficulty, questionCount, setQuestionCount,
         </div>
 
         <div className="bg-secondary/50 rounded-lg p-4 text-sm text-muted-foreground">
-          <p>📝 Questions are divided into <strong>4 sections</strong>: Aptitude, Programming, Data Structures, and Core Subjects (DBMS & OS). Navigate between sections using tabs.</p>
+          <p>📝 Questions are divided into <strong>4 sections</strong>: Aptitude, Programming, Data Structures, and Core Subjects (DBMS & OS). Medium-level aptitude questions are based on <strong>TCS NQT</strong> pattern. Navigate between sections using tabs.</p>
         </div>
 
         <Button onClick={onStart} className="w-full gradient-primary text-primary-foreground text-lg py-6">
