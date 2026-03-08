@@ -529,6 +529,61 @@ export default function CodingPage() {
   );
 }
 
+// ========== SOLUTION BLOCK COMPONENT ==========
+const SOLUTION_TEMPLATES: Record<string, Record<string, string>> = {};
+
+function SolutionBlock({ problem, language }: { problem: Problem; language: string }) {
+  const [solution, setSolution] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cacheKey = `${problem.id}_${language}`;
+    if (SOLUTION_TEMPLATES[cacheKey]) {
+      setSolution(SOLUTION_TEMPLATES[cacheKey]);
+      setLoading(false);
+      return;
+    }
+
+    const generateSolution = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("evaluate-code", {
+          body: {
+            mode: "generate-solution",
+            language,
+            problemTitle: problem.title,
+            problemDescription: problem.description,
+            sampleInput: problem.sample_input,
+            sampleOutput: problem.sample_output,
+          },
+        });
+        if (error) throw error;
+        const sol = data?.solution || "// Solution could not be generated";
+        SOLUTION_TEMPLATES[cacheKey] = sol;
+        setSolution(sol);
+      } catch {
+        setSolution("// Failed to generate solution. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    generateSolution();
+  }, [problem.id, language]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 py-4 justify-center text-muted-foreground text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" /> Generating solution...
+      </div>
+    );
+  }
+
+  return (
+    <pre className="text-sm text-foreground font-mono bg-background/80 rounded-lg p-4 overflow-x-auto whitespace-pre-wrap max-h-[400px] overflow-y-auto">
+      {solution}
+    </pre>
+  );
+}
+
 // ========== LEADERBOARD COMPONENT ==========
 function LeaderboardPanel({ leaderboard, userId, onClose }: { leaderboard: LeaderboardEntry[]; userId?: string; onClose: () => void }) {
   return (
