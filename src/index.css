@@ -217,11 +217,3 @@
   90% { opacity: 0.1; }
   100% { transform: translateY(-160px) translateX(-20px) scale(0.5); opacity: 0; }
 }
-
-/* Print styles for Speech PDF */
-@media print {
-  nav, .print\\:hidden { display: none !important; }
-  body { background: white !important; color: black !important; }
-  * { color-adjust: exact; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .page-break-after { page-break-after: always; }
-}
