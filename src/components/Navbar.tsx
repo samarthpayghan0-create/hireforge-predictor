@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User, Brain, BarChart3, BookOpen, Mic, Sun, Moon, LogIn, LogOut,
   TrendingUp, Mail, FileText, Code, Compass, Settings, Menu, X, Briefcase, Map
