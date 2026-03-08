@@ -112,6 +112,17 @@ export default function AdminPage() {
     setLoading(false);
   };
 
+  const deleteProfile = async (profileId: string, name: string) => {
+    try {
+      const { error } = await supabase.from("student_profiles").delete().eq("id", profileId);
+      if (error) throw error;
+      toast.success(`Deleted profile: ${name}`);
+      fetchAll();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete profile");
+    }
+  };
+
   useEffect(() => {
     if (authenticated) fetchAll();
   }, [authenticated]);
