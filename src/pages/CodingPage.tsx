@@ -170,6 +170,7 @@ export default function CodingPage() {
   const submitCode = async () => {
     if (!selectedProblem || !code.trim()) return;
     if (timeExpired) { toast.error("⏰ Time expired! Pick another problem."); return; }
+    setEvaluating(true);
     setResult(null);
     try {
       const username = profile?.name || user?.email?.split("@")[0] || "Anonymous";
