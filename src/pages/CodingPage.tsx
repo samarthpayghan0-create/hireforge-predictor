@@ -170,6 +170,43 @@ export default function CodingPage() {
     setPhase("solve");
   };
 
+  const runCode = async () => {
+    if (!selectedProblem || !code.trim()) return;
+    if (timeExpired) { toast.error("⏰ Time expired!"); return; }
+    setRunning(true);
+    setRunOutput(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("evaluate-code", {
+        body: {
+          code, language,
+          problemTitle: selectedProblem.title,
+          problemDescription: selectedProblem.description,
+          sampleInput: selectedProblem.sample_input,
+          sampleOutput: selectedProblem.sample_output,
+          testCases: [{ input: selectedProblem.sample_input, expected_output: selectedProblem.sample_output }],
+          mode: "run",
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const testResult = data.test_results?.[0];
+      setRunOutput({
+        passed: testResult?.passed ?? data.is_correct ?? false,
+        expected: selectedProblem.sample_output || "",
+        actual: testResult?.actual || "N/A",
+      });
+      if (testResult?.passed || data.is_correct) {
+        toast.success("✅ Sample test passed!");
+      } else {
+        toast.error("❌ Sample test failed.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to run code");
+    } finally {
+      setRunning(false);
+    }
+  };
+
   const submitCode = async () => {
     if (!selectedProblem || !code.trim()) return;
     if (timeExpired) { toast.error("⏰ Time expired! Pick another problem."); return; }
