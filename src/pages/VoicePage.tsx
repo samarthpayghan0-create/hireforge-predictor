@@ -111,6 +111,7 @@ export default function MockInterviewPage() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = "en-US";
+    let processedUpTo = 0; // track which results we've already committed
 
     recognition.onresult = (e: any) => {
       if (stoppedManuallyRef.current) return;
@@ -120,25 +121,19 @@ export default function MockInterviewPage() {
         setPauseCount(prev => prev + 1);
       }, 2000);
 
-      // Process only from resultIndex onward to avoid re-reading old results
-      let newFinal = "";
-      let newInterim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
+      let interim = "";
+      for (let i = processedUpTo; i < e.results.length; i++) {
         const transcript = e.results[i][0].transcript;
         if (e.results[i].isFinal) {
-          newFinal += transcript + " ";
+          accumulatedTextRef.current += transcript + " ";
+          processedUpTo = i + 1;
         } else {
-          newInterim += transcript;
+          interim += transcript;
         }
       }
 
-      // When text becomes final, permanently save it
-      if (newFinal) {
-        accumulatedTextRef.current += newFinal;
-      }
-
-      interimRef.current = newInterim;
-      setAnswerRef.current(accumulatedTextRef.current + newInterim);
+      interimRef.current = interim;
+      setAnswerRef.current(accumulatedTextRef.current + interim);
     };
 
     recognition.onerror = (e: any) => {
