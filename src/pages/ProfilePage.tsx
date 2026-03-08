@@ -80,7 +80,7 @@ export default function ProfilePage() {
   const { user } = useAuth();
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) { toast.error("Please enter your name"); return; }
+    if (!isValidName(form.name)) { toast.error("Please enter a valid name (letters only, at least 2 characters)"); return; }
     setLoading(true);
     try {
       const { data, error } = await supabase.from("student_profiles").insert({
