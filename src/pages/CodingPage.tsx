@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
 import {
   Code, Play, CheckCircle2, XCircle, Loader2, ChevronLeft,
-  Zap, Trophy, Medal, Crown, Star, Timer, ArrowRight, Users
+  Zap, Trophy, Medal, Crown, Star, Timer, ArrowRight, Users, Lock
 } from "lucide-react";
 
 interface Problem {
