@@ -1,9 +1,13 @@
+import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight, Star } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import SkillBar from "@/components/SkillBar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 function calculatePlacement(profile: any, quizScores: any[], commScore: number) {
   const cgpaWeight = 0.2;
@@ -81,7 +85,45 @@ function getSkillGaps(profile: any, quizScores: any[], commScore: number) {
 }
 
 export default function DashboardPage() {
-  const { profile, quizScores, commResult } = useAppContext();
+  const { profile, profileId, quizScores, commResult } = useAppContext();
+  const [showRating, setShowRating] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [hasRated, setHasRated] = useState(false);
+  const [submittingRating, setSubmittingRating] = useState(false);
+
+  useEffect(() => {
+    if (!profileId) return;
+    // Check if user already rated
+    supabase.from("app_ratings").select("id").eq("profile_id", profileId).maybeSingle().then(({ data }) => {
+      if (data) {
+        setHasRated(true);
+      } else {
+        // Show rating dialog after 2 seconds
+        const timer = setTimeout(() => setShowRating(true), 2000);
+        return () => clearTimeout(timer);
+      }
+    });
+  }, [profileId]);
+
+  const submitRating = async () => {
+    if (!selectedRating || !profileId) return;
+    setSubmittingRating(true);
+    try {
+      const { error } = await supabase.from("app_ratings").insert({
+        profile_id: profileId,
+        rating: selectedRating,
+      });
+      if (error) throw error;
+      setHasRated(true);
+      setShowRating(false);
+      toast.success("Thank you for your rating!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to submit rating");
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
 
   if (!profile) {
     return (
@@ -254,6 +296,54 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Rating Dialog */}
+      <Dialog open={showRating && !hasRated} onOpenChange={setShowRating}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center font-display text-xl">Rate HireForge</DialogTitle>
+            <DialogDescription className="text-center">
+              How was your experience? Your feedback helps us improve!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center gap-2 py-6">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onMouseEnter={() => setHoveredRating(star)}
+                onMouseLeave={() => setHoveredRating(0)}
+                onClick={() => setSelectedRating(star)}
+                className="transition-transform hover:scale-110"
+              >
+                <Star
+                  className={`w-10 h-10 transition-colors ${
+                    star <= (hoveredRating || selectedRating)
+                      ? "fill-warning text-warning"
+                      : "text-muted-foreground/30"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          {selectedRating > 0 && (
+            <p className="text-center text-sm text-muted-foreground">
+              {selectedRating === 5 ? "Amazing! 🎉" : selectedRating === 4 ? "Great! 😊" : selectedRating === 3 ? "Good 👍" : selectedRating === 2 ? "Could be better 🤔" : "We'll improve! 💪"}
+            </p>
+          )}
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowRating(false)} className="flex-1 rounded-xl">
+              Skip
+            </Button>
+            <Button
+              onClick={submitRating}
+              disabled={!selectedRating || submittingRating}
+              className="flex-1 gradient-primary text-primary-foreground rounded-xl shadow-glow"
+            >
+              {submittingRating ? "Submitting..." : "Submit Rating"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

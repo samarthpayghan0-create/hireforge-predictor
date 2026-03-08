@@ -37,22 +37,27 @@ const features = [
 
 export default function HomePage() {
   const [studentCount, setStudentCount] = useState(0);
+  const [avgRating, setAvgRating] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchCount = async () => {
-      const { count } = await supabase
-        .from("student_profiles")
-        .select("*", { count: "exact", head: true });
-      setStudentCount(count ?? 0);
+    const fetchStats = async () => {
+      const [countRes, ratingRes] = await Promise.all([
+        supabase.from("student_profiles").select("*", { count: "exact", head: true }),
+        supabase.from("app_ratings").select("rating"),
+      ]);
+      setStudentCount(countRes.count ?? 0);
+      if (ratingRes.data && ratingRes.data.length > 0) {
+        const avg = ratingRes.data.reduce((sum, r) => sum + r.rating, 0) / ratingRes.data.length;
+        setAvgRating(Math.round(avg * 10) / 10);
+      }
     };
-    fetchCount();
+    fetchStats();
   }, []);
 
   const stats = [
     { value: "95%", label: "Prediction Accuracy" },
     { value: `${studentCount}+`, label: "Students Analyzed" },
-    
-    { value: "4.9★", label: "User Rating" },
+    { value: avgRating ? `${avgRating}★` : "—", label: "User Rating" },
   ];
 
   return (
