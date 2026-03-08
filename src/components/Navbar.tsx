@@ -84,6 +84,51 @@ export default function Navbar() {
             </span>
           </Link>
 
+          {/* Quick Action Buttons */}
+          <div className="flex items-center gap-1.5">
+            {location.pathname !== "/" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="rounded-xl gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all duration-200"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+            )}
+            <Button
+              variant={location.pathname === "/" ? "default" : "ghost"}
+              size="sm"
+              asChild
+              className={`rounded-xl gap-1.5 text-sm font-semibold transition-all duration-200 ${
+                location.pathname === "/"
+                  ? "gradient-primary text-primary-foreground shadow-glow"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+              }`}
+            >
+              <Link to="/">
+                <Home className="w-4 h-4" />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+            </Button>
+            <Button
+              variant={location.pathname === "/coding" ? "default" : "ghost"}
+              size="sm"
+              asChild
+              className={`rounded-xl gap-1.5 text-sm font-semibold transition-all duration-200 ${
+                location.pathname === "/coding"
+                  ? "gradient-primary text-primary-foreground shadow-glow"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+              }`}
+            >
+              <Link to="/coding">
+                <Code className="w-4 h-4" />
+                <span className="hidden sm:inline">Coding Challenge</span>
+              </Link>
+            </Button>
+          </div>
+
           {/* Desktop Nav */}
           <div className="hidden xl:flex items-center gap-1">
             {navItems.map((item) => {
@@ -100,7 +145,6 @@ export default function Navbar() {
                 >
                   <item.icon className="w-4 h-4" />
                   <span>{item.label}</span>
-                  {/* Hover underline animation */}
                   {!isActive && (
                     <span className="absolute bottom-0.5 left-3 right-3 h-[2px] bg-primary rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                   )}
