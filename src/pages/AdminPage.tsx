@@ -123,6 +123,19 @@ export default function AdminPage() {
     }
   };
 
+  const deleteUser = async (userId: string, email: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: { userId },
+      });
+      if (error) throw error;
+      toast.success(`Deleted user: ${email}`);
+      fetchAll();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete user");
+    }
+  };
+
   useEffect(() => {
     if (authenticated) fetchAll();
   }, [authenticated]);
