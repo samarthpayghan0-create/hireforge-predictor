@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, Users, TrendingUp, TrendingDown, RefreshCw, Lock, Eye, EyeOff, LogOut, UserCheck, Mail, Clock, BarChart3 } from "lucide-react";
+import { Shield, Users, TrendingUp, TrendingDown, RefreshCw, Lock, Eye, EyeOff, LogOut, UserCheck, Mail, Clock, BarChart3, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const ADMIN_PASSWORD = "admin@2005";
