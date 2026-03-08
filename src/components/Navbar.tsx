@@ -112,7 +112,7 @@ export default function Navbar() {
               asChild
               className="rounded-xl border-primary/50 bg-primary/10 hover:bg-primary/20 gap-1.5 font-bold text-primary"
             >
-              <Link to="/career">
+              <Link to="/ai-roadmap">
                 <Route className="w-4 h-4" /> <span className="hidden sm:inline">AI Career Roadmap</span>
               </Link>
             </Button>
