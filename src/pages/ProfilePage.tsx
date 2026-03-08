@@ -44,6 +44,10 @@ export default function ProfilePage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [customProgramming, setCustomProgramming] = useState("");
   const [customTechnical, setCustomTechnical] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -56,6 +60,33 @@ export default function ProfilePage() {
     technical_skills: [] as string[],
     communication_rating: 5,
   });
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const fileName = `${user?.id || Date.now()}-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
+      setAvatarUrl(urlData.publicUrl);
+      toast.success("Photo uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const toggleSkill = (skill: string, field: "programming_skills" | "technical_skills") => {
     setForm((f) => ({
