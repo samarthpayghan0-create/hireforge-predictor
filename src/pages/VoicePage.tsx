@@ -97,118 +97,104 @@ export default function MockInterviewPage() {
 
   const recognitionRef = useRef<any>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const finalTranscriptRef = useRef<string>("");
+  const accumulatedTextRef = useRef<string>("");
   const stoppedManuallyRef = useRef(false);
+  const setAnswerRef = useRef(setCurrentAnswer);
+  setAnswerRef.current = setCurrentAnswer;
 
-  const generateQuestions = async () => {
-    setPhase("loading");
-    try {
-      const { data, error } = await supabase.functions.invoke("mock-interview", {
-        body: { action: "generate", category },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      if (!data?.questions?.length) throw new Error("No questions generated");
-      setQuestions(data.questions.slice(0, 5));
-      setAnswers([]);
-      setSpeechMetrics([]);
-      setCurrentQ(0);
-      setCurrentAnswer("");
-      setPhase("interview");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to generate questions");
-      setPhase("setup");
-    }
-  };
-
-  const startRecording = useCallback(() => {
+  const createRecognition = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { toast.error("Speech recognition not supported. Use Chrome."); return; }
-    
-    // Clean up any previous instance
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
-      recognitionRef.current = null;
-    }
-    
+    if (!SR) return null;
+
     const recognition = new SR();
-    recognition.continuous = false; // single utterance to prevent loops
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = "en-US";
-    finalTranscriptRef.current = currentAnswer; // preserve existing text
-    stoppedManuallyRef.current = false;
-    let localPauses = 0;
 
     recognition.onresult = (e: any) => {
       if (stoppedManuallyRef.current) return;
-      
-      // Reset pause timer on each result
+
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
       pauseTimerRef.current = setTimeout(() => {
-        localPauses++;
         setPauseCount(prev => prev + 1);
       }, 2000);
 
-      let final = "";
+      let sessionFinal = "";
       let interim = "";
       for (let i = 0; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
-        else interim += e.results[i][0].transcript;
+        const transcript = e.results[i][0].transcript;
+        if (e.results[i].isFinal) {
+          sessionFinal += transcript + " ";
+        } else {
+          interim += transcript;
+        }
       }
-      
-      const fullText = finalTranscriptRef.current + final + interim;
-      setCurrentAnswer(fullText);
+
+      const fullText = accumulatedTextRef.current + sessionFinal + interim;
+      setAnswerRef.current(fullText);
     };
-    
+
     recognition.onerror = (e: any) => {
       if (e.error === "no-speech" || e.error === "aborted") return;
       toast.error("Speech error: " + e.error);
       setIsRecording(false);
     };
-    
+
     recognition.onend = () => {
-      // Update the final transcript ref with what we have
-      const currentText = currentAnswer;
-      
-      // Only auto-restart if not manually stopped and still recording
-      if (!stoppedManuallyRef.current) {
-        // Capture final results before restarting
-        try {
-          const newRecognition = new SR();
-          newRecognition.continuous = false;
-          newRecognition.interimResults = true;
-          newRecognition.lang = "en-US";
-          finalTranscriptRef.current = currentText;
-          
-          newRecognition.onresult = recognition.onresult;
-          newRecognition.onerror = recognition.onerror;
-          newRecognition.onend = recognition.onend;
-          
-          recognitionRef.current = newRecognition;
-          newRecognition.start();
-        } catch {
-          setIsRecording(false);
-        }
-      } else {
+      if (stoppedManuallyRef.current) {
         setIsRecording(false);
         if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+        return;
+      }
+      // Auto-restart: save finalized text and start fresh session
+      // Get all final results from the ended session
+      accumulatedTextRef.current = accumulatedTextRef.current;
+      try {
+        const newRec = createRecognition();
+        if (newRec) {
+          recognitionRef.current = newRec;
+          newRec.start();
+        } else {
+          setIsRecording(false);
+        }
+      } catch {
+        setIsRecording(false);
       }
     };
-    
+
+    return recognition;
+  }, []);
+
+  const startRecording = useCallback(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { toast.error("Speech recognition not supported. Use Chrome."); return; }
+
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+
+    stoppedManuallyRef.current = false;
+    accumulatedTextRef.current = currentAnswer; // preserve existing typed text
+
+    const recognition = createRecognition();
+    if (!recognition) { toast.error("Speech recognition not supported."); return; }
+
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
     setRecordingStartTime(Date.now());
     setPauseCount(0);
     setUsedVoice(true);
-  }, [currentAnswer]);
+  }, [currentAnswer, createRecognition]);
 
   const stopRecording = useCallback(() => {
     stoppedManuallyRef.current = true;
     if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
+      try { recognitionRef.current.stop(); } catch {}
       recognitionRef.current = null;
     }
+    // Update accumulated text with current answer for consistency
     setIsRecording(false);
     if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
   }, []);
