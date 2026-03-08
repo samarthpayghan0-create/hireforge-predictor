@@ -337,6 +337,158 @@ export default function DashboardPage() {
             <p className="text-muted-foreground mt-2">No major skill gaps detected. Keep up the great work!</p>
           </div>
         )}
+
+        {/* AI-Powered Skill Recommendations */}
+        <div className="mt-8 card-elevated p-6 md:p-8 animate-fade-in">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h2 className="font-display font-semibold text-lg text-foreground">AI Skill Recommendations</h2>
+            </div>
+            <Button
+              onClick={fetchAIRecommendations}
+              disabled={loadingRecs}
+              className="gradient-primary text-primary-foreground rounded-xl shadow-glow"
+              size="sm"
+            >
+              {loadingRecs ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing...</> : <><Sparkles className="w-4 h-4 mr-2" /> {aiRecs ? "Refresh" : "Get AI Recommendations"}</>}
+            </Button>
+          </div>
+
+          {!aiRecs && !loadingRecs && !recsError && (
+            <div className="text-center py-10 space-y-3">
+              <Rocket className="w-12 h-12 text-muted-foreground/30 mx-auto" />
+              <p className="text-muted-foreground">Click the button above to get personalized AI-powered skill recommendations based on your profile.</p>
+            </div>
+          )}
+
+          {recsError && !loadingRecs && (
+            <div className="text-center py-8 text-destructive">
+              <AlertTriangle className="w-10 h-10 mx-auto mb-2 opacity-60" />
+              <p className="text-sm">{recsError}</p>
+            </div>
+          )}
+
+          {loadingRecs && (
+            <div className="text-center py-12 space-y-4">
+              <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+              <p className="text-muted-foreground">AI is analyzing your profile and generating personalized recommendations...</p>
+            </div>
+          )}
+
+          {aiRecs && !loadingRecs && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Summary */}
+              <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5">
+                <p className="text-sm text-foreground leading-relaxed">{aiRecs.summary}</p>
+                {aiRecs.estimated_improvement && (
+                  <p className="text-xs text-primary font-semibold mt-3 flex items-center gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5" /> {aiRecs.estimated_improvement}
+                  </p>
+                )}
+              </div>
+
+              {/* Quick Wins */}
+              {aiRecs.quick_wins?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+                    <Zap className="w-4 h-4 text-warning" /> Quick Wins
+                  </h3>
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    {aiRecs.quick_wins.map((tip, i) => (
+                      <div key={i} className="bg-warning/5 border border-warning/15 rounded-xl p-4">
+                        <p className="text-sm text-foreground">{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top Skills to Learn */}
+              {aiRecs.top_skills_to_learn?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+                    <Target className="w-4 h-4 text-accent" /> Skills to Focus On
+                  </h3>
+                  <div className="space-y-4">
+                    {aiRecs.top_skills_to_learn.map((skill, i) => (
+                      <div key={i} className={`rounded-2xl p-5 border-2 ${
+                        skill.priority === "critical" ? "bg-destructive/5 border-destructive/20" :
+                        skill.priority === "high" ? "bg-warning/5 border-warning/20" :
+                        "bg-primary/5 border-primary/20"
+                      }`}>
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full ${
+                              skill.priority === "critical" ? "bg-destructive/10 text-destructive" :
+                              skill.priority === "high" ? "bg-warning/10 text-warning" :
+                              "bg-primary/10 text-primary"
+                            }`}>{skill.priority}</span>
+                            <h4 className="font-semibold text-foreground mt-2">{skill.skill}</h4>
+                          </div>
+                          <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 rounded-lg">{skill.time_to_learn}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">{skill.why}</p>
+
+                        {/* Action Steps */}
+                        {skill.action_steps?.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs font-semibold text-muted-foreground mb-1.5">Action Steps:</p>
+                            <ol className="space-y-1">
+                              {skill.action_steps.map((step, j) => (
+                                <li key={j} className="text-xs text-muted-foreground flex items-start gap-2">
+                                  <span className="font-bold text-primary shrink-0">{j + 1}.</span> {step}
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        )}
+
+                        {/* Resources */}
+                        <div className="flex flex-wrap gap-2">
+                          {skill.resources?.map((r, j) => (
+                            <span key={j} className="text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-lg font-medium flex items-center gap-1">
+                              {r.name}
+                              {r.url && <ExternalLink className="w-3 h-3 opacity-50" />}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 30-Day Plan */}
+              {aiRecs.thirty_day_plan && (
+                <div>
+                  <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+                    <Calendar className="w-4 h-4 text-primary" /> 30-Day Improvement Plan
+                  </h3>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {Object.entries(aiRecs.thirty_day_plan).map(([week, plan], i) => (
+                      <div key={week} className="bg-secondary/30 rounded-xl p-4 border border-border/50">
+                        <p className="text-xs font-bold text-primary mb-2">Week {i + 1}</p>
+                        <p className="text-sm text-muted-foreground">{plan}</p>
+                        <Progress value={(i + 1) * 25} className="h-1 mt-3" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Target Companies */}
+              {aiRecs.target_companies?.length > 0 && (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-sm font-semibold text-muted-foreground">Target Companies:</span>
+                  {aiRecs.target_companies.map((c, i) => (
+                    <span key={i} className="text-xs font-semibold bg-primary/10 text-primary px-3 py-1.5 rounded-full">{c}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Rating Dialog */}
