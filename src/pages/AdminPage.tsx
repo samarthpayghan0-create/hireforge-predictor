@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-const ADMIN_PASSWORD = "sam@2005";
+const ADMIN_PASSWORD = "admin@2005";
 
 interface StudentRecord {
   id: string;
