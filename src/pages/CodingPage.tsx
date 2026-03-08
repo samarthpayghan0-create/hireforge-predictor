@@ -83,6 +83,8 @@ export default function CodingPage() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [runOutput, setRunOutput] = useState<{ passed: boolean; expected: string; actual: string } | null>(null);
   const [result, setResult] = useState<EvalResult | null>(null);
   const [filter, setFilter] = useState("all");
   const [catFilter, setCatFilter] = useState("all");
