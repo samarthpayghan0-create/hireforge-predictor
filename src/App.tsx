@@ -17,6 +17,7 @@ import ResumePage from "@/pages/ResumePage";
 import CodingPage from "@/pages/CodingPage";
 import CareerPage from "@/pages/CareerPage";
 import AdminPage from "@/pages/AdminPage";
+import AiRoadmapPage from "@/pages/AiRoadmapPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
