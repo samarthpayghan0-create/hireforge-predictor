@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, Users, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
+import { Shield, Users, TrendingUp, TrendingDown, RefreshCw, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+
+const ADMIN_PASSWORD = "sam@2005";
 
 interface StudentRecord {
   id: string;
@@ -28,14 +32,27 @@ function calcPlacement(s: StudentRecord) {
     s.aptitude_score * 0.15 +
     projectNorm * 0.1 +
     internshipNorm * 0.1 +
-    50 * 0.15 + // default quiz
+    50 * 0.15 +
     commNorm * 0.15;
   return Math.min(99, Math.max(5, Math.round(prob)));
 }
 
 export default function AdminPage() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [students, setStudents] = useState<StudentRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+      toast.success("Access granted!");
+    } else {
+      toast.error("Incorrect password");
+    }
+  };
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -57,9 +74,44 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (authenticated) fetchStudents();
+  }, [authenticated]);
 
+  // ========== LOGIN SCREEN ==========
+  if (!authenticated) {
+    return (
+      <div className="container mx-auto px-4 py-20 max-w-md">
+        <div className="bg-card rounded-xl border border-border p-8 space-y-6 animate-fade-in">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-full gradient-warm flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <h1 className="text-2xl font-display font-bold text-foreground">Admin Access</h1>
+            <p className="text-sm text-muted-foreground mt-1">Enter password to access the admin panel</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter admin password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <Button type="submit" className="w-full gradient-primary text-primary-foreground">
+              <Shield className="w-4 h-4 mr-2" /> Login
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // ========== ADMIN DASHBOARD ==========
   const placedCount = students.filter((s) => (s.placement_probability ?? 0) >= 60).length;
 
   return (
@@ -74,10 +126,15 @@ export default function AdminPage() {
             <p className="text-sm text-muted-foreground">All students who checked placement prediction</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchStudents} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={fetchStudents} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setAuthenticated(false)}>
+            Logout
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
