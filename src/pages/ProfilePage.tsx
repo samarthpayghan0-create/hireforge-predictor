@@ -331,23 +331,21 @@ function SkillSelector({ label, options, selected, customValue, setCustomValue, 
     <div className="space-y-3">
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">
+        {/* Preset options */}
         {options.slice(0, 15).map((s) => (
           <button key={s} type="button" onClick={() => onToggle(s)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               selected.includes(s) ? `${gradient} text-primary-foreground` : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}>{s}</button>
         ))}
+        {/* Custom skills shown inline */}
+        {customSkills.map((s) => (
+          <span key={s} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${gradient} text-primary-foreground flex items-center gap-1`}>
+            {s}
+            <button type="button" onClick={() => onRemove(s)}><X className="w-3 h-3" /></button>
+          </span>
+        ))}
       </div>
-      {customSkills.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {customSkills.map((s) => (
-            <span key={s} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${gradient} text-primary-foreground flex items-center gap-1`}>
-              {s}
-              <button type="button" onClick={() => onRemove(s)}><X className="w-3 h-3" /></button>
-            </span>
-          ))}
-        </div>
-      )}
       <div className="relative" ref={containerRef}>
         <div className="flex gap-2">
           <Input
