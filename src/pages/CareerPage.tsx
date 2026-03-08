@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import {
   Compass, Loader2, Code, Database, Globe, Cloud, BarChart3, Shield,
   Cpu, Smartphone, Brain, Layers, TrendingUp, CheckCircle2, ArrowRight,
-  Map, Clock, BookOpen, ExternalLink, RefreshCw, AlertTriangle
+  Map, Clock, BookOpen, ExternalLink, RefreshCw, AlertTriangle, ChevronLeft
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {

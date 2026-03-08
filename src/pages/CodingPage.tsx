@@ -59,7 +59,7 @@ export default function CodingPage() {
 
   useEffect(() => {
     supabase.from("coding_problems").select("*").order("difficulty").then(({ data }) => {
-      setProblems(data || []);
+      setProblems((data as any) || []);
       setLoading(false);
     });
   }, []);
