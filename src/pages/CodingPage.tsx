@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
 import {
   Code, Play, CheckCircle2, XCircle, Loader2, ChevronLeft,
-  Zap, Trophy, Medal, Crown, Star, Timer, ArrowRight, Users
+  Zap, Trophy, Medal, Crown, Star, Timer, ArrowRight, Users, Lock
 } from "lucide-react";
 
 interface Problem {
@@ -446,19 +446,28 @@ export default function CodingPage() {
               </div>
             )}
 
-            {/* View Solution - unlocked after 2 failed attempts */}
-            {selectedProblem && (failedAttempts[selectedProblem.id] || 0) >= 2 && (
-              <div className="mt-4 animate-fade-in">
-                {!showSolution ? (
+            {/* View Solution - locked/unlocked state */}
+            {selectedProblem && (
+              <div className="mt-4">
+                {(failedAttempts[selectedProblem.id] || 0) < 2 ? (
+                  <Button
+                    variant="outline"
+                    disabled
+                    className="w-full rounded-xl gap-2 border-muted/40 text-muted-foreground cursor-not-allowed opacity-60"
+                  >
+                    <Lock className="w-4 h-4" /> 🔒 View Solution
+                    <span className="ml-1 text-xs">({2 - (failedAttempts[selectedProblem.id] || 0)} failed attempt{(2 - (failedAttempts[selectedProblem.id] || 0)) !== 1 ? 's' : ''} to unlock)</span>
+                  </Button>
+                ) : !showSolution ? (
                   <Button
                     variant="outline"
                     onClick={() => setShowSolution(true)}
-                    className="w-full rounded-xl gap-2 border-warning/30 text-warning hover:bg-warning/10"
+                    className="w-full rounded-xl gap-2 border-warning/30 text-warning hover:bg-warning/10 animate-fade-in"
                   >
                     <Zap className="w-4 h-4" /> 🔓 View Solution
                   </Button>
                 ) : (
-                  <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-3">
+                  <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-3 animate-fade-in">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold text-warning flex items-center gap-2">
                         <Zap className="w-4 h-4" /> Reference Solution ({LANGUAGES.find(l => l.id === language)?.label})
