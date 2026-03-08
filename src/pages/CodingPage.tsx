@@ -216,6 +216,13 @@ export default function CodingPage() {
 
   const remainingTime = Math.max(0, TIME_LIMIT_SECONDS - elapsedTime);
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+  const showNextProblem = (result?.is_correct) || timeExpired;
+
+  const goToNextProblem = () => {
+    const currentIdx = filtered.findIndex((p) => p.id === selectedProblem?.id);
+    const nextIdx = (currentIdx + 1) % filtered.length;
+    selectProblem(filtered[nextIdx]);
+  };
 
   const categories = [...new Set(problems.map((p) => p.category))];
   const filtered = problems
@@ -541,9 +548,14 @@ export default function CodingPage() {
 
             {/* Action bar */}
             <div className="p-3 border-t border-border bg-secondary/20 flex items-center gap-3">
-              <Button onClick={submitCode} disabled={evaluating || !code.trim()} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
+              <Button onClick={submitCode} disabled={evaluating || !code.trim() || timeExpired} className="flex-1 gradient-accent text-accent-foreground h-11 rounded-xl font-semibold">
                 {evaluating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Evaluating...</> : <><Play className="w-4 h-4 mr-2" /> Submit Solution</>}
               </Button>
+              {showNextProblem && (
+                <Button onClick={goToNextProblem} className="gradient-primary text-primary-foreground h-11 rounded-xl font-semibold animate-fade-in">
+                  Next Problem <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
