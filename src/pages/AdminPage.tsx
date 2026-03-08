@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, Users, TrendingUp, TrendingDown, RefreshCw, Lock, Eye, EyeOff, LogOut, UserCheck, Mail, Clock, BarChart3 } from "lucide-react";
+import { Shield, Users, TrendingUp, TrendingDown, RefreshCw, Lock, Eye, EyeOff, LogOut, UserCheck, Mail, Clock, BarChart3, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const ADMIN_PASSWORD = "admin@2005";
@@ -109,6 +110,17 @@ export default function AdminPage() {
     setLoading(true);
     await Promise.all([fetchStudents(), fetchAuthUsers()]);
     setLoading(false);
+  };
+
+  const deleteProfile = async (profileId: string, name: string) => {
+    try {
+      const { error } = await supabase.from("student_profiles").delete().eq("id", profileId);
+      if (error) throw error;
+      toast.success(`Deleted profile: ${name}`);
+      fetchAll();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete profile");
+    }
   };
 
   useEffect(() => {
@@ -243,6 +255,7 @@ export default function AdminPage() {
                       <th className="text-center p-4 font-semibold text-foreground">Last Sign In</th>
                       <th className="text-center p-4 font-semibold text-foreground">Profile</th>
                       <th className="text-center p-4 font-semibold text-foreground">Prediction</th>
+                      <th className="text-center p-4 font-semibold text-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -299,12 +312,37 @@ export default function AdminPage() {
                               <span className="text-muted-foreground">—</span>
                             )}
                           </td>
+                          <td className="p-4 text-center">
+                            {profile && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Profile</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete <strong>{profile.name}</strong>'s profile? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => deleteProfile(profile.id, profile.name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </td>
                         </tr>
                       );
                     })}
                     {authUsers.length === 0 && !loading && (
                       <tr>
-                        <td colSpan={7} className="p-12 text-center text-muted-foreground">
+                        <td colSpan={8} className="p-12 text-center text-muted-foreground">
                           No registered users yet.
                         </td>
                       </tr>
@@ -331,6 +369,7 @@ export default function AdminPage() {
                       <th className="text-center p-4 font-semibold text-foreground">Internships</th>
                       <th className="text-center p-4 font-semibold text-foreground">Prediction</th>
                       <th className="text-center p-4 font-semibold text-foreground">Status</th>
+                      <th className="text-center p-4 font-semibold text-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -357,12 +396,35 @@ export default function AdminPage() {
                               {placed ? "Likely Placed" : "Needs Work"}
                             </span>
                           </td>
+                          <td className="p-4 text-center">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Profile</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete <strong>{s.name}</strong>'s profile? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteProfile(s.id, s.name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </td>
                         </tr>
                       );
                     })}
                     {students.length === 0 && !loading && (
                       <tr>
-                        <td colSpan={9} className="p-12 text-center text-muted-foreground">
+                        <td colSpan={10} className="p-12 text-center text-muted-foreground">
                           No students have checked their placement yet.
                         </td>
                       </tr>
