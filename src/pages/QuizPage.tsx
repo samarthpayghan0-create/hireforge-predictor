@@ -62,7 +62,7 @@ export default function QuizPage() {
   const q = sectionQuestions[idx];
 
   const sectionAnsweredCount = (key: SectionKey) => grouped[key].filter(q => answers[q.id] !== undefined).length;
-  const allAnswered = allQuestions.length > 0 && allQuestions.every(q => answers[q.id] !== undefined);
+  const answeredCount = allQuestions.filter(q => answers[q.id] !== undefined).length;
 
   const finishQuiz = async () => {
     const categories = [...new Set(allQuestions.map(q => q.category))];
