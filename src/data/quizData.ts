@@ -35,9 +35,15 @@ export function getShuffledQuestionsForSection(
   categories: string[],
   difficulty: "medium" | "hard" | "mixed",
   count: number,
-  seed?: number
+  seed?: number,
+  language?: ProgrammingLanguage
 ): QuizQuestion[] {
   let pool = quizQuestions.filter(q => categories.includes(q.category));
+
+  // Filter by programming language if specified
+  if (language && language !== "General") {
+    pool = pool.filter(q => !q.language || q.language === language || q.language === "General");
+  }
 
   if (difficulty === "medium") {
     pool = pool.filter(q => q.difficulty === "medium");
