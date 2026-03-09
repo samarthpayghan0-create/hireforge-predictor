@@ -317,12 +317,14 @@ export default function QuizPage() {
 }
 
 // ========== SETUP COMPONENT ==========
-function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, onStart, onBack }: {
+function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, programmingLanguage, setProgrammingLanguage, onStart, onBack }: {
   difficulty: Difficulty; setDifficulty: (d: Difficulty) => void;
   sectionCounts: Record<SectionKey, QuestionCount>;
   setSectionCounts: (c: Record<SectionKey, QuestionCount>) => void;
   selectedSections: Set<SectionKey>;
   setSelectedSections: (s: Set<SectionKey>) => void;
+  programmingLanguage: ProgrammingLanguage;
+  setProgrammingLanguage: (l: ProgrammingLanguage) => void;
   onStart: () => void;
   onBack: () => void;
 }) {
