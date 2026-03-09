@@ -56,8 +56,9 @@ export default function QuizPage() {
     const result: Record<string, QuizQuestion[]> = {};
     SECTIONS.forEach((s, i) => {
       if (selectedSections.has(s.key)) {
+        const lang = s.key === "Programming" ? programmingLanguage : undefined;
         result[s.key] = getShuffledQuestionsForSection(
-          [...s.categories], difficulty, sectionCounts[s.key], baseSeed + i * 1000
+          [...s.categories], difficulty, sectionCounts[s.key], baseSeed + i * 1000, lang
         );
       } else {
         result[s.key] = [];
