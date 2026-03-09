@@ -2,11 +2,11 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
-import { getShuffledQuestionsForSection, QuizQuestion } from "@/data/quizData";
+import { getShuffledQuestionsForSection, QuizQuestion, ProgrammingLanguage } from "@/data/quizData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { BookOpen, ChevronRight, ChevronLeft, CheckCircle2, Settings2, Brain, Code, Database, Cpu, Trophy, Target, Zap } from "lucide-react";
+import { BookOpen, ChevronRight, ChevronLeft, CheckCircle2, Settings2, Brain, Code, Database, Cpu, Trophy, Target, Zap, Languages } from "lucide-react";
 
 type Difficulty = "medium" | "hard" | "mixed";
 type QuestionCount = 20 | 30 | 50;
@@ -40,6 +40,7 @@ export default function QuizPage() {
   const [sectionCounts, setSectionCounts] = useState<Record<SectionKey, QuestionCount>>({
     "Aptitude": 20, "Programming": 20, "Data Structures": 20, "Core Subjects": 20,
   });
+  const [programmingLanguage, setProgrammingLanguage] = useState<ProgrammingLanguage>("General");
 
   const activeSections = SECTIONS.filter(s => selectedSections.has(s.key));
   const [activeSection, setActiveSection] = useState<SectionKey>("Aptitude");
@@ -55,15 +56,16 @@ export default function QuizPage() {
     const result: Record<string, QuizQuestion[]> = {};
     SECTIONS.forEach((s, i) => {
       if (selectedSections.has(s.key)) {
+        const lang = s.key === "Programming" ? programmingLanguage : undefined;
         result[s.key] = getShuffledQuestionsForSection(
-          [...s.categories], difficulty, sectionCounts[s.key], baseSeed + i * 1000
+          [...s.categories], difficulty, sectionCounts[s.key], baseSeed + i * 1000, lang
         );
       } else {
         result[s.key] = [];
       }
     });
     return result as Record<SectionKey, QuizQuestion[]>;
-  }, [started, difficulty, sectionCounts, profileId, selectedSections]);
+  }, [started, difficulty, sectionCounts, profileId, selectedSections, programmingLanguage]);
 
   const allQuestions = useMemo(() => activeSections.flatMap(s => grouped[s.key]), [grouped, activeSections]);
 
@@ -116,6 +118,7 @@ export default function QuizPage() {
         difficulty={difficulty} setDifficulty={setDifficulty}
         sectionCounts={sectionCounts} setSectionCounts={setSectionCounts}
         selectedSections={selectedSections} setSelectedSections={setSelectedSections}
+        programmingLanguage={programmingLanguage} setProgrammingLanguage={setProgrammingLanguage}
         onStart={handleStart}
         onBack={() => navigate("/profile")}
       />
@@ -314,12 +317,14 @@ export default function QuizPage() {
 }
 
 // ========== SETUP COMPONENT ==========
-function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, onStart, onBack }: {
+function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts, selectedSections, setSelectedSections, programmingLanguage, setProgrammingLanguage, onStart, onBack }: {
   difficulty: Difficulty; setDifficulty: (d: Difficulty) => void;
   sectionCounts: Record<SectionKey, QuestionCount>;
   setSectionCounts: (c: Record<SectionKey, QuestionCount>) => void;
   selectedSections: Set<SectionKey>;
   setSelectedSections: (s: Set<SectionKey>) => void;
+  programmingLanguage: ProgrammingLanguage;
+  setProgrammingLanguage: (l: ProgrammingLanguage) => void;
   onStart: () => void;
   onBack: () => void;
 }) {
@@ -382,8 +387,41 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                       <div>
                         <p className={`font-semibold ${isSelected ? "text-primary" : "text-foreground"}`}>{section.label}</p>
                         <p className="text-xs text-muted-foreground">{isSelected ? "✓ Selected" : "Tap to add"}</p>
-                      </div>
-                    </div>
+            </div>
+          </div>
+
+          {/* Programming Language Selection */}
+          {selectedSections.has("Programming") && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Languages className="w-5 h-5 text-accent" />
+                <label className="text-base font-semibold text-foreground">Programming Language</label>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {(["General", "Python", "Java", "C/C++", "JavaScript"] as ProgrammingLanguage[]).map(lang => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setProgrammingLanguage(lang)}
+                    className={`p-3 rounded-xl border-2 text-center transition-all duration-200 ${
+                      programmingLanguage === lang
+                        ? "border-primary bg-primary/5 shadow-glow"
+                        : "border-border hover:border-primary/40 bg-card"
+                    }`}
+                  >
+                    <p className={`text-sm font-semibold ${programmingLanguage === lang ? "text-primary" : "text-foreground"}`}>
+                      {lang === "General" ? "All" : lang}
+                    </p>
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {programmingLanguage === "General" 
+                  ? "All programming questions will be included" 
+                  : `Only ${programmingLanguage} + general questions will be shown`}
+              </p>
+            </div>
+          )}
                   </button>
                 );
               })}
