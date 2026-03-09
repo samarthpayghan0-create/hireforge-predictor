@@ -118,6 +118,7 @@ export default function QuizPage() {
         difficulty={difficulty} setDifficulty={setDifficulty}
         sectionCounts={sectionCounts} setSectionCounts={setSectionCounts}
         selectedSections={selectedSections} setSelectedSections={setSelectedSections}
+        programmingLanguage={programmingLanguage} setProgrammingLanguage={setProgrammingLanguage}
         onStart={handleStart}
         onBack={() => navigate("/profile")}
       />
