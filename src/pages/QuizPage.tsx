@@ -40,6 +40,7 @@ export default function QuizPage() {
   const [sectionCounts, setSectionCounts] = useState<Record<SectionKey, QuestionCount>>({
     "Aptitude": 20, "Programming": 20, "Data Structures": 20, "Core Subjects": 20,
   });
+  const [programmingLanguage, setProgrammingLanguage] = useState<ProgrammingLanguage>("General");
 
   const activeSections = SECTIONS.filter(s => selectedSections.has(s.key));
   const [activeSection, setActiveSection] = useState<SectionKey>("Aptitude");
