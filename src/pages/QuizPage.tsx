@@ -65,7 +65,7 @@ export default function QuizPage() {
       }
     });
     return result as Record<SectionKey, QuizQuestion[]>;
-  }, [started, difficulty, sectionCounts, profileId, selectedSections]);
+  }, [started, difficulty, sectionCounts, profileId, selectedSections, programmingLanguage]);
 
   const allQuestions = useMemo(() => activeSections.flatMap(s => grouped[s.key]), [grouped, activeSections]);
 
