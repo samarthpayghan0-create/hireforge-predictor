@@ -3,6 +3,8 @@ import { programmingQuestions } from "./questions/programming";
 import { dataStructuresQuestions } from "./questions/dataStructures";
 import { coreSubjectsQuestions } from "./questions/coreSubjects";
 
+export type ProgrammingLanguage = "Python" | "Java" | "C/C++" | "JavaScript" | "General";
+
 export interface QuizQuestion {
   id: number;
   question: string;
@@ -10,6 +12,7 @@ export interface QuizQuestion {
   correctAnswer: number;
   category: string;
   difficulty: "medium" | "hard";
+  language?: ProgrammingLanguage;
 }
 
 // Combine all question banks into one pool
