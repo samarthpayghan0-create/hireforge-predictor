@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
-import { getShuffledQuestionsForSection, QuizQuestion } from "@/data/quizData";
+import { getShuffledQuestionsForSection, QuizQuestion, ProgrammingLanguage } from "@/data/quizData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
