@@ -46,6 +46,7 @@ const App = () => {
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
+                  <Route path="/predictor" element={<PredictorPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AppProvider>
