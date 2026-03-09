@@ -20,7 +20,8 @@ const navItems = [
   { path: "/coding", label: "Coding Challenge", icon: Code },
   { path: "/career", label: "Career Paths", icon: Compass },
   { path: "/quiz", label: "Quiz Setup", icon: Map },
-  { path: "/profile", label: "Predictor", icon: TrendingUp },
+  { path: "/profile", label: "Profile", icon: User },
+  { path: "/predictor", label: "Predictor", icon: TrendingUp },
   { path: "/dashboard", label: "Progress Dashboard", icon: Brain },
 ];
 
