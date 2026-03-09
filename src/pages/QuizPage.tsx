@@ -387,8 +387,41 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                       <div>
                         <p className={`font-semibold ${isSelected ? "text-primary" : "text-foreground"}`}>{section.label}</p>
                         <p className="text-xs text-muted-foreground">{isSelected ? "✓ Selected" : "Tap to add"}</p>
-                      </div>
-                    </div>
+            </div>
+          </div>
+
+          {/* Programming Language Selection */}
+          {selectedSections.has("Programming") && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Languages className="w-5 h-5 text-accent" />
+                <label className="text-base font-semibold text-foreground">Programming Language</label>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {(["General", "Python", "Java", "C/C++", "JavaScript"] as ProgrammingLanguage[]).map(lang => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setProgrammingLanguage(lang)}
+                    className={`p-3 rounded-xl border-2 text-center transition-all duration-200 ${
+                      programmingLanguage === lang
+                        ? "border-primary bg-primary/5 shadow-glow"
+                        : "border-border hover:border-primary/40 bg-card"
+                    }`}
+                  >
+                    <p className={`text-sm font-semibold ${programmingLanguage === lang ? "text-primary" : "text-foreground"}`}>
+                      {lang === "General" ? "All" : lang}
+                    </p>
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {programmingLanguage === "General" 
+                  ? "All programming questions will be included" 
+                  : `Only ${programmingLanguage} + general questions will be shown`}
+              </p>
+            </div>
+          )}
                   </button>
                 );
               })}
