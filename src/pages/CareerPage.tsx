@@ -11,6 +11,7 @@ import {
   Cpu, Smartphone, Brain, Layers, TrendingUp, CheckCircle2, ArrowRight,
   Map, Clock, BookOpen, ExternalLink, RefreshCw, AlertTriangle, ChevronLeft
 } from "lucide-react";
+import RoadmapVisual from "@/components/RoadmapVisual";
 
 const ICON_MAP: Record<string, any> = {
   code: Code, database: Database, globe: Globe, cloud: Cloud,
@@ -243,11 +244,9 @@ export default function CareerPage() {
   }
 
   // ROADMAP
-  const progress = roadmap?.roadmap?.length ? Math.round((completedSteps.size / roadmap.roadmap.length) * 100) : 0;
-
   return (
     <div className="min-h-screen bg-pattern">
-      <div className="container mx-auto px-4 lg:px-8 py-10 max-w-3xl">
+      <div className="container mx-auto px-4 lg:px-8 py-10 max-w-4xl">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-14 h-14 rounded-2xl gradient-accent shadow-glow-accent flex items-center justify-center">
             <Map className="w-7 h-7 text-white" />
@@ -258,73 +257,7 @@ export default function CareerPage() {
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="card-elevated p-5 mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-foreground">Progress</span>
-            <span className="text-sm text-muted-foreground">{completedSteps.size}/{roadmap?.roadmap?.length || 0} steps • {roadmap?.estimated_total_time}</span>
-          </div>
-          <Progress value={progress} className="h-3" />
-        </div>
-
-        {/* Timeline */}
-        <div className="space-y-0 animate-fade-in">
-          {roadmap?.roadmap?.map((step, i) => {
-            const done = completedSteps.has(step.step);
-            return (
-              <div key={i} className="relative pl-10">
-                {/* Timeline line */}
-                {i < (roadmap.roadmap.length - 1) && (
-                  <div className={`absolute left-[18px] top-10 w-0.5 h-full ${done ? "bg-success" : "bg-border"}`} />
-                )}
-                {/* Timeline dot */}
-                <button
-                  onClick={() => toggleStep(step.step)}
-                  className={`absolute left-2 top-3 w-5 h-5 rounded-full border-2 transition-all ${
-                    done ? "bg-success border-success" : "bg-background border-primary"
-                  }`}
-                >
-                  {done && <CheckCircle2 className="w-3 h-3 text-white absolute top-0.5 left-0.5" />}
-                </button>
-
-                <div className={`card-elevated p-5 mb-4 transition-all ${done ? "opacity-60" : ""}`}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full inline-block mb-2 ${
-                        step.priority === "high" ? "bg-destructive/10 text-destructive" : step.priority === "medium" ? "bg-warning/10 text-warning" : "bg-info/10 text-info"
-                      }`}>Step {step.step} • {step.priority}</p>
-                      <h3 className={`font-display font-bold text-lg ${done ? "line-through text-muted-foreground" : "text-foreground"}`}>{step.title}</h3>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-                      <Clock className="w-3.5 h-3.5" /> {step.timeline}
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">{step.description}</p>
-
-                  {step.topics?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {step.topics.map((t) => (
-                        <span key={t} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">{t}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  {step.resources?.length > 0 && (
-                    <div className="mt-3 space-y-1.5">
-                      {step.resources.map((r, ri) => (
-                        <a key={ri} href={r.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          {r.name}
-                          <span className="text-xs text-muted-foreground">({r.type})</span>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {roadmap && <RoadmapVisual roadmap={roadmap} careerGoal={selectedCareer} />}
 
         <div className="flex gap-3 mt-6 justify-center">
           <Button onClick={() => setPhase("recommendations")} variant="outline" className="rounded-xl">
