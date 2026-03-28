@@ -11,6 +11,7 @@ import {
   Cpu, Smartphone, Brain, Layers, TrendingUp, CheckCircle2, ArrowRight,
   Map, Clock, BookOpen, ExternalLink, RefreshCw, AlertTriangle, ChevronLeft
 } from "lucide-react";
+import RoadmapVisual from "@/components/RoadmapVisual";
 
 const ICON_MAP: Record<string, any> = {
   code: Code, database: Database, globe: Globe, cloud: Cloud,
