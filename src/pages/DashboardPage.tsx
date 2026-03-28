@@ -296,45 +296,119 @@ export default function DashboardPage() {
         {/* Skill Gap Analysis */}
         {gaps.length > 0 && (
           <div className="mt-8 card-elevated p-6 md:p-8 animate-fade-in">
-            <div className="flex items-center gap-2 mb-6">
-              <Lightbulb className="w-5 h-5 text-warning" />
-              <h2 className="font-display font-semibold text-lg text-foreground">Skill Gap Analysis & Recommendations</h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              {gaps.map((gap, i) => (
-                <div key={i} className={`rounded-2xl p-5 border-2 ${
-                  gap.severity === "high" ? "bg-destructive/5 border-destructive/20" :
-                  gap.severity === "medium" ? "bg-warning/5 border-warning/20" :
-                  "bg-info/5 border-info/20"
-                }`}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full ${
-                        gap.severity === "high" ? "bg-destructive/10 text-destructive" :
-                        gap.severity === "medium" ? "bg-warning/10 text-warning" :
-                        "bg-info/10 text-info"
-                      }`}>{gap.severity} priority</span>
-                      <h3 className="font-semibold text-foreground mt-2">{gap.skill}</h3>
-                    </div>
-                    <span className="text-sm font-mono text-muted-foreground bg-secondary px-2 py-1 rounded-lg">{gap.level}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">💡 {gap.suggestion}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {gap.resources.map((r) => (
-                      <span key={r} className="text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-lg font-medium">{r}</span>
-                    ))}
-                  </div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <Lightbulb className="w-5 h-5 text-warning" />
                 </div>
-              ))}
+                <div>
+                  <h2 className="font-display font-semibold text-lg text-foreground">Skill Gap Analysis</h2>
+                  <p className="text-xs text-muted-foreground">{gaps.length} area{gaps.length > 1 ? "s" : ""} to improve</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-xs">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-destructive" /> Critical</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-warning" /> Medium</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-info" /> Low</span>
+              </div>
+            </div>
+
+            {/* Overall gap score bar */}
+            <div className="mt-4 mb-6 p-4 rounded-xl bg-secondary/40 border border-border">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-foreground">Readiness Score</span>
+                <span className="text-sm font-bold text-foreground">{Math.max(0, 100 - gaps.reduce((a, g) => a + (g.severity === "high" ? 20 : g.severity === "medium" ? 10 : 5), 0))}%</span>
+              </div>
+              <Progress value={Math.max(0, 100 - gaps.reduce((a, g) => a + (g.severity === "high" ? 20 : g.severity === "medium" ? 10 : 5), 0))} className="h-2.5" />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {gaps.map((gap, i) => {
+                const severityConfig = {
+                  high: { bg: "bg-destructive/5", border: "border-destructive/20", badge: "bg-destructive/10 text-destructive", icon: "🔴", barColor: "bg-destructive" },
+                  medium: { bg: "bg-warning/5", border: "border-warning/20", badge: "bg-warning/10 text-warning", icon: "🟡", barColor: "bg-warning" },
+                  low: { bg: "bg-info/5", border: "border-info/20", badge: "bg-info/10 text-info", icon: "🟢", barColor: "bg-info" },
+                }[gap.severity];
+
+                // Extract numeric value for progress bar
+                const numMatch = gap.level.match(/(\d+)/);
+                const numValue = numMatch ? parseInt(numMatch[1]) : 0;
+                const maxValue = gap.level.includes("/10") ? 100 : 100;
+                const progressValue = gap.level.includes("/10") ? numValue * 10 : numValue;
+
+                return (
+                  <div key={i} className={`group rounded-2xl p-5 border-2 transition-all duration-200 hover:shadow-md hover:scale-[1.01] ${severityConfig.bg} ${severityConfig.border}`}>
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start gap-3">
+                        <span className="text-lg mt-0.5">{severityConfig.icon}</span>
+                        <div>
+                          <h3 className="font-display font-semibold text-foreground leading-tight">{gap.skill}</h3>
+                          <span className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full mt-1.5 ${severityConfig.badge}`}>
+                            {gap.severity} priority
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-sm font-mono text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-lg border border-border whitespace-nowrap">
+                        {gap.level}
+                      </span>
+                    </div>
+
+                    {/* Mini progress bar */}
+                    {progressValue > 0 && (
+                      <div className="mb-3">
+                        <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all ${severityConfig.barColor}`} style={{ width: `${Math.min(progressValue, 100)}%` }} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Suggestion */}
+                    <div className="flex items-start gap-2 mb-4 p-3 rounded-xl bg-background/50 border border-border/50">
+                      <Lightbulb className="w-3.5 h-3.5 text-warning mt-0.5 shrink-0" />
+                      <p className="text-sm text-muted-foreground leading-relaxed">{gap.suggestion}</p>
+                    </div>
+
+                    {/* Resources */}
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">Recommended Resources</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {gap.resources.map((r) => (
+                          <span key={r} className="text-xs bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-1.5 rounded-lg font-medium border border-border/50 transition-colors cursor-default flex items-center gap-1">
+                            <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Action CTA */}
+            <div className="mt-6 flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/10">
+              <div className="flex items-center gap-3">
+                <Rocket className="w-5 h-5 text-primary" />
+                <p className="text-sm text-foreground font-medium">Get a personalized roadmap to fix your skill gaps</p>
+              </div>
+              <Button asChild size="sm" className="gradient-primary text-primary-foreground rounded-xl">
+                <Link to="/career">View Roadmap <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link>
+              </Button>
             </div>
           </div>
         )}
 
         {gaps.length === 0 && (
           <div className="mt-8 card-elevated bg-success/5 border-success/20 p-8 text-center animate-fade-in">
-            <CheckCircle2 className="w-16 h-16 text-success mx-auto mb-4" />
+            <div className="w-16 h-16 rounded-2xl bg-success/10 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-success" />
+            </div>
             <h2 className="font-display font-semibold text-xl text-foreground">Excellent Profile!</h2>
-            <p className="text-muted-foreground mt-2">No major skill gaps detected. Keep up the great work!</p>
+            <p className="text-muted-foreground mt-2 max-w-md mx-auto">No major skill gaps detected. You're well-prepared for placement. Keep up the great work!</p>
+            <Button asChild variant="outline" size="sm" className="mt-4 rounded-xl">
+              <Link to="/career">Explore Career Paths <ArrowRight className="w-3.5 h-3.5 ml-1" /></Link>
+            </Button>
           </div>
         )}
 
