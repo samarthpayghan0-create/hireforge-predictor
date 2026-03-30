@@ -128,6 +128,8 @@ export default function AiRoadmapPage() {
         {/* Loading State */}
         {loading && <RoadmapLoadingState />}
 
+        {/* Suggested roles also visible below loading */}
+
         {/* Results */}
         {result && (
           <div className="space-y-6 animate-fade-in">

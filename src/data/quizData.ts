@@ -10,6 +10,7 @@ export interface QuizQuestion {
   correctAnswer: number;
   category: string;
   difficulty: "medium" | "hard";
+  explanation?: string;
 }
 
 // Combine all question banks into one pool
