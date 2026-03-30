@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Route, BookOpen, Clock, Star, ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const LOADING_MESSAGES = [
+  "Analysing the role...",
+  "Mapping required skills...",
+  "Curating learning resources...",
+  "Building your personalised roadmap...",
+  "Finding the best courses & tutorials...",
+  "Almost there...",
+];
+
+const SUGGESTED_ROLES = [
+  "Full Stack Developer", "Data Scientist", "DevOps Engineer",
+  "Machine Learning Engineer", "Android Developer", "Cloud Architect",
+  "Cybersecurity Analyst", "UI/UX Designer", "Backend Developer",
+  "Blockchain Developer", "QA Engineer", "Product Manager",
+];
 
 interface RoadmapStep {
   step: number;
