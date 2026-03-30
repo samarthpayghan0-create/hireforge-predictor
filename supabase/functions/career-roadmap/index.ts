@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     }
   ]
 }
-Use these icon names only: code, database, globe, cloud, bar-chart, shield, cpu, smartphone, brain, layers` },
+Use these icon names only: code, database, globe, cloud, bar-chart, shield, cpu, smartphone, brain, layers. IMPORTANT: All salary ranges MUST be in Indian Rupees (INR) using LPA format. Example: "₹4–8 LPA (fresher) · ₹12–25 LPA (3+ yrs)". Never use USD.` },
             { role: "user", content: `Student Profile:\nSkills: ${profileData.programming_skills?.join(", ")}\nTechnical: ${profileData.technical_skills?.join(", ")}\nCGPA: ${profileData.cgpa}\nDSA Score: ${profileData.dsa_score}\nAptitude: ${profileData.aptitude_score}\nProjects: ${profileData.num_projects}\nInternships: ${profileData.internship_experience}\nCommunication: ${profileData.communication_rating}/10\nQuiz Scores: ${JSON.stringify(profileData.quiz_scores || [])}\nCoding Score: ${profileData.coding_score || "N/A"}` },
           ],
           temperature: 0.4,

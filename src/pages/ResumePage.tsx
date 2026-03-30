@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
   FileText, Upload, CheckCircle2, AlertTriangle, TrendingUp, Code,
-  BookOpen, Briefcase, Award, Lightbulb, RefreshCw, X, Loader2
+  BookOpen, Briefcase, Award, Lightbulb, RefreshCw, X, Loader2, Shield
 } from "lucide-react";
 
 interface AnalysisResult {

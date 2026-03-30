@@ -107,13 +107,26 @@ export default function AiRoadmapPage() {
           </Button>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-16 space-y-4 animate-pulse">
-            <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-            <p className="text-muted-foreground text-lg">Crafting your personalized roadmap...</p>
+        {/* Suggested roles (show when no result and not loading) */}
+        {!loading && !result && (
+          <div className="max-w-2xl mx-auto mb-12">
+            <p className="text-sm font-medium text-muted-foreground mb-3 text-center">Popular roles — click to get started</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {SUGGESTED_ROLES.map((role) => (
+                <button
+                  key={role}
+                  onClick={() => { setCareer(role); }}
+                  className="px-4 py-2 rounded-full text-sm font-medium bg-secondary hover:bg-primary/10 hover:text-primary border border-border hover:border-primary/30 transition-all text-foreground"
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Loading State */}
+        {loading && <RoadmapLoadingState />}
 
         {/* Results */}
         {result && (

@@ -491,12 +491,19 @@ function QuizResult({ questions, answers, totalCorrect, difficulty, grouped, act
   questions: QuizQuestion[]; answers: Record<number, number>; totalCorrect: number; difficulty: string;
   grouped: Record<SectionKey, QuizQuestion[]>; activeSections: typeof SECTIONS[number][]; onRetake: () => void; onDashboard: () => void;
 }) {
+  const [showReview, setShowReview] = useState(false);
   const percentage = Math.round((totalCorrect / questions.length) * 100);
   const isGood = percentage >= 60;
 
+  const encouragement = percentage >= 70
+    ? "🎉 Excellent! You're well-prepared — share this score on your dashboard!"
+    : percentage >= 40
+    ? "💪 Good progress! You're on track. Review the answers below to improve further."
+    : "📖 This is just the baseline. Review the answers below and retake when ready — most students improve significantly on their second attempt.";
+
   return (
     <div className="min-h-screen bg-pattern">
-      <div className="container mx-auto px-4 lg:px-8 py-10 max-w-2xl">
+      <div className="container mx-auto px-4 lg:px-8 py-10 max-w-3xl">
         <div className="card-elevated p-8 md:p-10 text-center space-y-8 animate-fade-in">
           {/* Trophy */}
           <div className={`w-24 h-24 rounded-full mx-auto flex items-center justify-center ${isGood ? "gradient-accent shadow-glow-accent" : "gradient-warm"}`}>
@@ -511,6 +518,15 @@ function QuizResult({ questions, answers, totalCorrect, difficulty, grouped, act
 
           <div className={`text-6xl md:text-7xl font-display font-bold ${isGood ? "text-gradient-accent" : "text-gradient"}`}>
             {percentage}%
+          </div>
+
+          {/* Encouragement message */}
+          <div className={`rounded-2xl p-4 border text-sm font-medium text-left ${
+            percentage >= 70 ? "bg-success/10 border-success/20 text-success" :
+            percentage >= 40 ? "bg-warning/10 border-warning/20 text-warning" :
+            "bg-primary/10 border-primary/20 text-primary"
+          }`}>
+            {encouragement}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -550,11 +566,79 @@ function QuizResult({ questions, answers, totalCorrect, difficulty, grouped, act
             <Button variant="outline" onClick={onRetake} className="flex-1 h-12 rounded-xl">
               Retake Quiz
             </Button>
+            <Button onClick={() => setShowReview(!showReview)} variant="outline" className="flex-1 h-12 rounded-xl border-primary text-primary">
+              <BookOpen className="w-4 h-4 mr-1" /> {showReview ? "Hide" : "Review"} Answers
+            </Button>
             <Button onClick={onDashboard} className="flex-1 gradient-primary text-primary-foreground h-12 rounded-xl shadow-glow">
-              View Dashboard <ChevronRight className="w-4 h-4 ml-1" />
+              Dashboard <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
         </div>
+
+        {/* Answer Review Section */}
+        {showReview && (
+          <div className="mt-8 space-y-4 animate-fade-in">
+            <h2 className="text-xl font-display font-bold text-foreground">Answer Review</h2>
+            {activeSections.map(section => {
+              const secQs = grouped[section.key];
+              if (secQs.length === 0) return null;
+              return (
+                <div key={section.key} className="space-y-3">
+                  <div className="flex items-center gap-2 mt-6 mb-2">
+                    <section.icon className="w-5 h-5 text-primary" />
+                    <h3 className="font-display font-semibold text-foreground">{section.label}</h3>
+                  </div>
+                  {secQs.map((q, qi) => {
+                    const userAnswer = answers[q.id];
+                    const isCorrect = userAnswer === q.correctAnswer;
+                    const wasSkipped = userAnswer === undefined;
+                    return (
+                      <div key={q.id} className={`card-elevated p-5 border-l-4 ${
+                        isCorrect ? "border-l-success" : "border-l-destructive"
+                      }`}>
+                        <div className="flex items-start gap-3 mb-3">
+                          <span className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                            isCorrect ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                          }`}>
+                            {isCorrect ? "✓" : "✗"}
+                          </span>
+                          <p className="text-sm font-medium text-foreground leading-relaxed">
+                            <span className="text-muted-foreground mr-1">Q{qi + 1}.</span> {q.question}
+                          </p>
+                        </div>
+                        <div className="space-y-1.5 ml-10">
+                          {q.options.map((opt, oi) => {
+                            const isUserChoice = userAnswer === oi;
+                            const isCorrectOpt = q.correctAnswer === oi;
+                            let style = "bg-secondary/30 text-muted-foreground";
+                            if (isCorrectOpt) style = "bg-success/10 text-success border border-success/30 font-medium";
+                            else if (isUserChoice && !isCorrect) style = "bg-destructive/10 text-destructive border border-destructive/30 line-through";
+                            return (
+                              <div key={oi} className={`px-3 py-2 rounded-lg text-sm ${style}`}>
+                                <span className="font-bold mr-2">{String.fromCharCode(65 + oi)}.</span>
+                                {opt}
+                                {isCorrectOpt && <span className="ml-2 text-xs">✓ Correct</span>}
+                                {isUserChoice && !isCorrect && <span className="ml-2 text-xs">← Your answer</span>}
+                              </div>
+                            );
+                          })}
+                          {wasSkipped && (
+                            <p className="text-xs text-muted-foreground italic mt-1">⚠ You skipped this question</p>
+                          )}
+                          {q.explanation && (
+                            <p className="text-xs text-muted-foreground mt-2 p-2 bg-primary/5 rounded-lg border border-primary/10">
+                              💡 {q.explanation}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
