@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Route, BookOpen, Clock, Star, ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const LOADING_MESSAGES = [
+  "Analysing the role...",
+  "Mapping required skills...",
+  "Curating learning resources...",
+  "Building your personalised roadmap...",
+  "Finding the best courses & tutorials...",
+  "Almost there...",
+];
+
+const SUGGESTED_ROLES = [
+  "Full Stack Developer", "Data Scientist", "DevOps Engineer",
+  "Machine Learning Engineer", "Android Developer", "Cloud Architect",
+  "Cybersecurity Analyst", "UI/UX Designer", "Backend Developer",
+  "Blockchain Developer", "QA Engineer", "Product Manager",
+];
 
 interface RoadmapStep {
   step: number;
@@ -21,6 +37,36 @@ interface RoadmapResult {
   roadmap: RoadmapStep[];
   estimated_total_time: string;
   career_goal: string;
+}
+
+function RoadmapLoadingState() {
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="text-center py-16 space-y-6">
+      <div className="relative w-20 h-20 mx-auto">
+        <div className="absolute inset-0 rounded-full border-4 border-secondary" />
+        <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-primary" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-lg font-medium text-foreground transition-all duration-300">{LOADING_MESSAGES[msgIndex]}</p>
+        <p className="text-sm text-muted-foreground">This usually takes 10–15 seconds</p>
+      </div>
+      <div className="flex justify-center gap-1.5">
+        {LOADING_MESSAGES.map((_, i) => (
+          <div key={i} className={`w-2 h-2 rounded-full transition-all duration-300 ${i === msgIndex ? "bg-primary scale-125" : "bg-secondary"}`} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function AiRoadmapPage() {
@@ -91,13 +137,28 @@ export default function AiRoadmapPage() {
           </Button>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-16 space-y-4 animate-pulse">
-            <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-            <p className="text-muted-foreground text-lg">Crafting your personalized roadmap...</p>
+        {/* Suggested roles (show when no result and not loading) */}
+        {!loading && !result && (
+          <div className="max-w-2xl mx-auto mb-12">
+            <p className="text-sm font-medium text-muted-foreground mb-3 text-center">Popular roles — click to get started</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {SUGGESTED_ROLES.map((role) => (
+                <button
+                  key={role}
+                  onClick={() => { setCareer(role); }}
+                  className="px-4 py-2 rounded-full text-sm font-medium bg-secondary hover:bg-primary/10 hover:text-primary border border-border hover:border-primary/30 transition-all text-foreground"
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Loading State */}
+        {loading && <RoadmapLoadingState />}
+
+        {/* Suggested roles also visible below loading */}
 
         {/* Results */}
         {result && (
