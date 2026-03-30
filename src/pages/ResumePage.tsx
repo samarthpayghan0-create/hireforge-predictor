@@ -197,10 +197,18 @@ export default function ResumePage() {
               )}
             </div>
 
+            {/* Privacy note */}
+            <div className="flex items-start gap-2.5 mt-5 p-3 rounded-xl bg-success/5 border border-success/15">
+              <Shield className="w-4 h-4 text-success shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Your resume is analysed privately and <strong className="text-foreground">never stored or shared</strong> with third parties. All processing happens securely via AI.
+              </p>
+            </div>
+
             <Button
               onClick={analyzeResume}
               disabled={!file || loading}
-              className="w-full mt-6 gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow"
+              className="w-full mt-4 gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow"
             >
               {loading ? (
                 <>
