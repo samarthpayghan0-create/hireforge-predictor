@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       "icon": "code",
       "explanation": "Why this career suits them",
       "key_skills": ["skill1", "skill2"],
-      "salary_range": "$70k-$120k",
+      "salary_range": "₹5–12 LPA (fresher) · ₹15–30 LPA (3+ yrs)",
       "growth": "High"
     }
   ]
