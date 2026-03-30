@@ -39,7 +39,37 @@ interface RoadmapResult {
   career_goal: string;
 }
 
-export default function AiRoadmapPage() {
+function RoadmapLoadingState() {
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="text-center py-16 space-y-6">
+      <div className="relative w-20 h-20 mx-auto">
+        <div className="absolute inset-0 rounded-full border-4 border-secondary" />
+        <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-primary" />
+      </div>
+      <div className="space-y-2">
+        <p className="text-lg font-medium text-foreground transition-all duration-300">{LOADING_MESSAGES[msgIndex]}</p>
+        <p className="text-sm text-muted-foreground">This usually takes 10–15 seconds</p>
+      </div>
+      <div className="flex justify-center gap-1.5">
+        {LOADING_MESSAGES.map((_, i) => (
+          <div key={i} className={`w-2 h-2 rounded-full transition-all duration-300 ${i === msgIndex ? "bg-primary scale-125" : "bg-secondary"}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
   const [career, setCareer] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RoadmapResult | null>(null);
