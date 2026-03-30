@@ -69,7 +69,7 @@ function RoadmapLoadingState() {
   );
 }
 
-
+export default function AiRoadmapPage() {
   const [career, setCareer] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RoadmapResult | null>(null);
