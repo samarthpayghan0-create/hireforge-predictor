@@ -68,10 +68,10 @@ export default function HomePage() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const stats = [
-    { value: "90%", label: "Prediction Accuracy" },
-    { value: `${userCount}`, label: "Registered Users" },
-    { value: `${studentCount}+`, label: "Students Analyzed" },
+  const highlights = [
+    { value: "8+", label: "AI-Powered Tools" },
+    { value: "Free", label: "Forever · No Paywalls" },
+    { value: "🇮🇳", label: "Built for Indian Students" },
     { value: avgRating ? `${avgRating}★` : "—", label: "User Rating" },
   ];
 
