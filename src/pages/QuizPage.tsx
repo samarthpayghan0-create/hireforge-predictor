@@ -304,7 +304,7 @@ export default function QuizPage() {
                 finishQuiz();
               }
             }} 
-            disabled={answeredCount === 0} 
+             
             className="w-full gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow"
           >
             <Trophy className="w-5 h-5 mr-2" />
