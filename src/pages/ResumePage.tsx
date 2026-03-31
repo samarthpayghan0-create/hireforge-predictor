@@ -157,79 +157,126 @@ export default function ResumePage() {
 
         {/* Upload Section */}
         {!result && (
-          <div className="card-elevated p-6 md:p-8 animate-fade-in">
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer ${
-                dragOver ? "border-primary bg-primary/5 scale-[1.01]" : file ? "border-success/50 bg-success/5" : "border-border hover:border-primary/50 hover:bg-primary/5"
-              }`}
-              onClick={() => document.getElementById("resume-input")?.click()}
-            >
-              <input
-                id="resume-input"
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              {file ? (
-                <div className="space-y-3">
-                  <CheckCircle2 className="w-12 h-12 text-success mx-auto" />
-                  <p className="font-semibold text-foreground">{file.name}</p>
-                  <p className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <X className="w-4 h-4 mr-1" /> Remove
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <Upload className="w-12 h-12 text-muted-foreground/50 mx-auto" />
-                  <p className="font-semibold text-foreground">Drop your resume here</p>
-                  <p className="text-sm text-muted-foreground">or click to browse • PDF only • Max 20MB</p>
-                </div>
-              )}
-            </div>
-
-            {/* Privacy note */}
-            <div className="flex items-start gap-2.5 mt-5 p-3 rounded-xl bg-success/5 border border-success/15">
-              <Shield className="w-4 h-4 text-success shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Your resume is analysed privately and <strong className="text-foreground">never stored or shared</strong> with third parties. All processing happens securely via AI.
-              </p>
-            </div>
-
-            <Button
-              onClick={analyzeResume}
-              disabled={!file || loading}
-              className="w-full mt-4 gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analyzing with AI...
-                </>
-              ) : (
-                <>
-                  <TrendingUp className="w-5 h-5 mr-2" /> Analyze Resume
-                </>
-              )}
-            </Button>
-
-            {loading && (
-              <div className="mt-6 space-y-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Extracting text and analyzing with AI...</span>
-                </div>
-                <Progress value={undefined} className="h-2" />
+          <div className="space-y-6 animate-fade-in">
+            <div className="card-elevated p-6 md:p-8">
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer ${
+                  dragOver ? "border-primary bg-primary/5 scale-[1.01]" : file ? "border-success/50 bg-success/5" : "border-border hover:border-primary/50 hover:bg-primary/5"
+                }`}
+                onClick={() => document.getElementById("resume-input")?.click()}
+              >
+                <input
+                  id="resume-input"
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                {file ? (
+                  <div className="space-y-3">
+                    <CheckCircle2 className="w-12 h-12 text-success mx-auto" />
+                    <p className="font-semibold text-foreground">{file.name}</p>
+                    <p className="text-sm text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <X className="w-4 h-4 mr-1" /> Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Upload className="w-12 h-12 text-muted-foreground/50 mx-auto" />
+                    <p className="font-semibold text-foreground">Drop your resume here</p>
+                    <p className="text-sm text-muted-foreground">or click to browse • PDF only • Max 20MB</p>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Privacy note */}
+              <div className="flex items-start gap-2.5 mt-5 p-3 rounded-xl bg-success/5 border border-success/15">
+                <Shield className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Your resume is analysed privately and <strong className="text-foreground">never stored or shared</strong> with third parties. All processing happens securely via AI.
+                </p>
+              </div>
+
+              <Button
+                onClick={analyzeResume}
+                disabled={!file || loading}
+                className="w-full mt-4 gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analyzing with AI...
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp className="w-5 h-5 mr-2" /> Analyze Resume
+                  </>
+                )}
+              </Button>
+
+              {loading && (
+                <div className="mt-6 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Extracting text and analyzing with AI...</span>
+                  </div>
+                  <Progress value={undefined} className="h-2" />
+                </div>
+              )}
+            </div>
+
+            {/* What You'll Get preview section */}
+            <div className="card-elevated p-6 md:p-8">
+              <h2 className="font-display font-semibold text-lg text-foreground mb-5 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-warning" /> What You'll Get
+              </h2>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { icon: TrendingUp, label: "Overall Score", desc: "ATS-friendly score out of 100", color: "primary" },
+                  { icon: Code, label: "Skill Detection", desc: "Skills found & missing from your resume", color: "accent" },
+                  { icon: Briefcase, label: "Experience Review", desc: "Projects & work experience breakdown", color: "warning" },
+                  { icon: Award, label: "Suggestions", desc: "Actionable tips to improve your resume", color: "success" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-xl border border-border bg-secondary/30 p-4 text-center space-y-2">
+                    <div className={`w-10 h-10 rounded-xl bg-${item.color}/10 border border-${item.color}/20 mx-auto flex items-center justify-center`}>
+                      <item.icon className={`w-5 h-5 text-${item.color}`} />
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tips for a better resume */}
+            <div className="card-elevated p-6 md:p-8">
+              <h2 className="font-display font-semibold text-lg text-foreground mb-4 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" /> Tips for a Stronger Resume
+              </h2>
+              <div className="grid md:grid-cols-2 gap-3">
+                {[
+                  "Use action verbs like 'Built', 'Led', 'Designed' to describe achievements",
+                  "Include measurable outcomes (e.g. 'Reduced load time by 40%')",
+                  "List relevant technical skills and tools prominently",
+                  "Keep it to 1–2 pages — recruiters spend ~7 seconds scanning",
+                  "Add links to GitHub, LinkedIn, or portfolio projects",
+                  "Tailor your resume keywords to the job description",
+                ].map((tip, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10">
+                    <span className="text-primary font-bold text-sm shrink-0">{i + 1}</span>
+                    <p className="text-sm text-muted-foreground">{tip}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

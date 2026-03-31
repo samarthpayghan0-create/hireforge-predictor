@@ -104,17 +104,17 @@ export default function AiRoadmapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+    <div className="min-h-screen bg-pattern">
+      <div className="container mx-auto px-4 lg:px-8 py-10 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-2">
-            <Sparkles className="w-4 h-4" /> AI-Powered
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-2xl gradient-primary shadow-glow flex items-center justify-center">
+            <Route className="w-7 h-7 text-primary-foreground" />
           </div>
-          <h1 className="text-4xl font-bold text-foreground">Career Roadmap Generator</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Enter your dream career or job role and get a personalized learning roadmap with skills, resources, and timelines.
-          </p>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Career Roadmap Generator</h1>
+            <p className="text-muted-foreground">AI-powered learning paths with skills, resources & timelines</p>
+          </div>
         </div>
 
         {/* Input */}
