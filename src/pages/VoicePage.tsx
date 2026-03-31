@@ -506,6 +506,17 @@ export default function MockInterviewPage() {
         </div>
 
         <div className="space-y-6 animate-fade-in">
+          {/* Encouragement banner for low scores */}
+          {(result?.overall_score || 0) < 5 && (
+            <div className="rounded-2xl p-5 bg-primary/5 border border-primary/15">
+              <p className="text-sm font-medium text-foreground mb-1">🌟 Great job taking the first step!</p>
+              <p className="text-sm text-muted-foreground">
+                Mock interviews are about practice, not perfection. Most candidates score low on their first attempt — 
+                what matters is that you showed up. Review the feedback below and try again — you'll see noticeable improvement!
+              </p>
+            </div>
+          )}
+
           {/* Score Cards */}
           <div className="grid grid-cols-2 gap-4">
             <div className={`rounded-2xl border border-border bg-card p-6 text-center`}>
@@ -513,6 +524,9 @@ export default function MockInterviewPage() {
               <p className={`text-5xl font-display font-bold ${getScoreColor(result?.overall_score || 0)}`}>
                 {result?.overall_score || 0}<span className="text-xl text-muted-foreground">/10</span>
               </p>
+              {(result?.overall_score || 0) < 5 && (
+                <p className="text-xs text-muted-foreground mt-2">Room to grow — that's exciting!</p>
+              )}
             </div>
             {commAnalysis && (
               <div className={`rounded-2xl border border-border bg-card p-6 text-center`}>
@@ -520,6 +534,9 @@ export default function MockInterviewPage() {
                 <p className={`text-5xl font-display font-bold ${getScoreColor(commAnalysis.overall_communication_score)}`}>
                   {commAnalysis.overall_communication_score}<span className="text-xl text-muted-foreground">/10</span>
                 </p>
+                {commAnalysis.overall_communication_score < 5 && (
+                  <p className="text-xs text-muted-foreground mt-2">Speaking improves with practice!</p>
+                )}
               </div>
             )}
           </div>

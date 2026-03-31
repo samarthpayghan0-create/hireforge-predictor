@@ -702,9 +702,19 @@ function LeaderboardPanel({ leaderboard, userId, onClose }: { leaderboard: Leade
       </div>
 
       {leaderboard.length === 0 ? (
-        <div className="text-center py-10">
-          <Trophy className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-muted-foreground">No entries yet. Be the first!</p>
+        <div className="text-center py-14 space-y-4">
+          <div className="w-20 h-20 rounded-2xl bg-warning/10 border border-warning/20 mx-auto flex items-center justify-center">
+            <Trophy className="w-10 h-10 text-warning/40" />
+          </div>
+          <div>
+            <p className="text-lg font-display font-semibold text-foreground">No one on the board yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Solve a coding problem to claim the #1 spot!</p>
+          </div>
+          <div className="flex justify-center">
+            <Button onClick={onClose} className="gradient-primary text-primary-foreground rounded-xl shadow-glow">
+              Start Solving <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">

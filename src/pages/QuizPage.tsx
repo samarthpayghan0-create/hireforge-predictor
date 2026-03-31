@@ -6,7 +6,7 @@ import { getShuffledQuestionsForSection, QuizQuestion } from "@/data/quizData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { BookOpen, ChevronRight, ChevronLeft, CheckCircle2, Settings2, Brain, Code, Database, Cpu, Trophy, Target, Zap } from "lucide-react";
+import { BookOpen, ChevronRight, ChevronLeft, CheckCircle2, Settings2, Brain, Code, Database, Cpu, Trophy, Target, Zap, AlertTriangle } from "lucide-react";
 
 type Difficulty = "medium" | "hard" | "mixed";
 type QuestionCount = 20 | 30 | 50;
@@ -73,6 +73,8 @@ export default function QuizPage() {
 
   const sectionAnsweredCount = (key: SectionKey) => grouped[key].filter(q => answers[q.id] !== undefined).length;
   const answeredCount = allQuestions.filter(q => answers[q.id] !== undefined).length;
+
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
 
   const finishQuiz = async () => {
     const categories = [...new Set(allQuestions.map(q => q.category))];
@@ -295,7 +297,13 @@ export default function QuizPage() {
             <ChevronLeft className="w-4 h-4 mr-1" /> Back to Setup
           </Button>
           <Button 
-            onClick={finishQuiz} 
+            onClick={() => {
+              if (answeredCount < allQuestions.length) {
+                setShowFinishConfirm(true);
+              } else {
+                finishQuiz();
+              }
+            }} 
             disabled={answeredCount === 0} 
             className="w-full gradient-primary text-primary-foreground h-14 text-lg rounded-xl shadow-glow"
           >
@@ -306,6 +314,32 @@ export default function QuizPage() {
             <p className="text-xs text-muted-foreground text-center">
               You can skip questions — unanswered ones will be marked incorrect
             </p>
+          )}
+
+          {/* Finish confirmation dialog */}
+          {showFinishConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in">
+              <div className="bg-card border border-border rounded-2xl p-6 md:p-8 max-w-md mx-4 space-y-4 shadow-xl">
+                <div className="text-center space-y-2">
+                  <div className="w-14 h-14 rounded-2xl bg-warning/10 border border-warning/20 mx-auto flex items-center justify-center">
+                    <AlertTriangle className="w-7 h-7 text-warning" />
+                  </div>
+                  <h3 className="text-lg font-display font-bold text-foreground">Submit with unanswered questions?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    You've answered <strong className="text-foreground">{answeredCount}</strong> out of <strong className="text-foreground">{allQuestions.length}</strong> questions. 
+                    The remaining <strong className="text-destructive">{allQuestions.length - answeredCount}</strong> will be marked incorrect.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setShowFinishConfirm(false)} className="flex-1 h-12 rounded-xl">
+                    Go Back
+                  </Button>
+                  <Button onClick={() => { setShowFinishConfirm(false); finishQuiz(); }} className="flex-1 gradient-primary text-primary-foreground h-12 rounded-xl shadow-glow">
+                    Submit Anyway
+                  </Button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
