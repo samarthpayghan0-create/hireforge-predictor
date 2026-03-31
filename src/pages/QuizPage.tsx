@@ -74,6 +74,8 @@ export default function QuizPage() {
   const sectionAnsweredCount = (key: SectionKey) => grouped[key].filter(q => answers[q.id] !== undefined).length;
   const answeredCount = allQuestions.filter(q => answers[q.id] !== undefined).length;
 
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+
   const finishQuiz = async () => {
     const categories = [...new Set(allQuestions.map(q => q.category))];
     const scores = categories.map(cat => {
