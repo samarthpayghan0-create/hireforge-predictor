@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { BookOpen, ChevronRight, ChevronLeft, CheckCircle2, Settings2, Brain, Code, Database, Cpu, Trophy, Target, Zap, AlertTriangle } from "lucide-react";
+import { useStreak } from "@/hooks/useStreak";
 
 type Difficulty = "medium" | "hard" | "mixed";
 type QuestionCount = 20 | 30 | 50;
