@@ -33,6 +33,7 @@ function hashCode(str: string) {
 
 export default function QuizPage() {
   const { profileId, setQuizScores } = useAppContext();
+  const { recordActivity } = useStreak();
   const navigate = useNavigate();
 
   const [started, setStarted] = useState(false);
