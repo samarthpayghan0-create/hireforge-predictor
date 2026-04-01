@@ -9,6 +9,9 @@ import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import DailyStreak from "@/components/DailyStreak";
+import ProgressCharts from "@/components/ProgressCharts";
+import ShareableResultCard from "@/components/ShareableResultCard";
 
 interface AIRecommendation {
   summary: string;
