@@ -254,6 +254,23 @@ export default function DashboardPage() {
           <StatCard title="Projects" value={profile.num_projects} subtitle={`${profile.internship_experience} internships`} icon={<Target className="w-5 h-5" />} />
         </div>
 
+        {/* Streak + Shareable Card */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <DailyStreak />
+          <ShareableResultCard
+            name={profile.name}
+            placementProb={placementProb}
+            cgpa={profile.cgpa}
+            quizPct={totalQuizPct}
+            commScore={commScore}
+          />
+        </div>
+
+        {/* Progress Charts */}
+        <div className="mb-8">
+          <ProgressCharts profileId={profileId} />
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Skill Levels */}
           <div className="card-elevated p-6 animate-fade-in">
