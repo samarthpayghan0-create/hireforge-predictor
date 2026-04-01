@@ -9,6 +9,9 @@ import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import DailyStreak from "@/components/DailyStreak";
+import ProgressCharts from "@/components/ProgressCharts";
+import ShareableResultCard from "@/components/ShareableResultCard";
 
 interface AIRecommendation {
   summary: string;
@@ -249,6 +252,23 @@ export default function DashboardPage() {
           <StatCard title="Quiz Score" value={quizScores.length > 0 ? `${totalQuizPct}%` : "—"} subtitle={quizScores.length > 0 ? `${quizScores.length} categories` : "Not taken"} icon={<BookOpen className="w-5 h-5" />} variant="accent" />
           <StatCard title="Communication" value={`${commScore}%`} icon={<Mic className="w-5 h-5" />} variant="warning" />
           <StatCard title="Projects" value={profile.num_projects} subtitle={`${profile.internship_experience} internships`} icon={<Target className="w-5 h-5" />} />
+        </div>
+
+        {/* Streak + Shareable Card */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <DailyStreak />
+          <ShareableResultCard
+            name={profile.name}
+            placementProb={placementProb}
+            cgpa={profile.cgpa}
+            quizPct={totalQuizPct}
+            commScore={commScore}
+          />
+        </div>
+
+        {/* Progress Charts */}
+        <div className="mb-8">
+          <ProgressCharts profileId={profileId} />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
