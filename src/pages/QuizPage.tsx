@@ -88,6 +88,7 @@ export default function QuizPage() {
 
     setQuizScores(scores);
     setShowResult(true);
+    recordActivity();
 
     if (profileId) {
       for (const s of scores) {
