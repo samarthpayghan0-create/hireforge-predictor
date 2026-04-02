@@ -66,32 +66,23 @@ export default function ResumePage() {
   };
 
   const extractTextFromPDF = async (pdfFile: File): Promise<string> => {
+    const pdfjsLib = await import("pdfjs-dist");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
     const buffer = await pdfFile.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    let text = "";
-    const rawStr = new TextDecoder("latin1").decode(bytes);
-    const textMatches = rawStr.match(/BT[\s\S]*?ET/g) || [];
-    for (const block of textMatches) {
-      const tdMatches = block.match(/\(([^)]*)\)/g) || [];
-      for (const m of tdMatches) {
-        const inner = m.slice(1, -1);
-        if (inner.trim()) text += inner + " ";
-      }
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    const textParts: string[] = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items
+        .map((item: any) => item.str)
+        .join(" ");
+      if (pageText.trim()) textParts.push(pageText);
     }
-    const streamMatches = rawStr.match(/stream\r?\n([\s\S]*?)\r?\nendstream/g) || [];
-    for (const stream of streamMatches) {
-      const printable = stream.replace(/[^\x20-\x7E\n\r]/g, " ").replace(/\s+/g, " ").trim();
-      if (printable.length > 20) {
-        const words = printable.match(/[A-Za-z]{2,}/g) || [];
-        if (words.length > 5) text += " " + words.join(" ");
-      }
-    }
-    if (text.trim().length < 50) {
-      const printable = rawStr.replace(/[^\x20-\x7E\n\r]/g, " ").replace(/\s+/g, " ");
-      const words = printable.match(/[A-Za-z@.\-]{2,}/g) || [];
-      text = words.join(" ");
-    }
-    return text.trim();
+
+    return textParts.join("\n").trim();
   };
 
   const analyzeResume = async () => {
