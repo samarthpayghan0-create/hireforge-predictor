@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/context/AuthContext";
 import { AppProvider } from "@/context/AppContext";
 import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import HomePage from "@/pages/HomePage";
 import AuthPage from "@/pages/AuthPage";
 import ProfilePage from "@/pages/ProfilePage";
@@ -34,17 +35,17 @@ const App = () => {
               <AppProvider>
                 <Navbar />
                 <Routes>
-                  <Route path="/" element={<HomePage />} />
                   <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/quiz" element={<QuizPage />} />
-                  <Route path="/voice" element={<VoicePage />} />
-                  <Route path="/resume" element={<ResumePage />} />
-                  <Route path="/coding" element={<CodingPage />} />
-                  <Route path="/career" element={<CareerPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
-                  <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
+                  <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                  <Route path="/quiz" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
+                  <Route path="/voice" element={<ProtectedRoute><VoicePage /></ProtectedRoute>} />
+                  <Route path="/resume" element={<ProtectedRoute><ResumePage /></ProtectedRoute>} />
+                  <Route path="/coding" element={<ProtectedRoute><CodingPage /></ProtectedRoute>} />
+                  <Route path="/career" element={<ProtectedRoute><CareerPage /></ProtectedRoute>} />
+                  <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                  <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+                  <Route path="/ai-roadmap" element={<ProtectedRoute><AiRoadmapPage /></ProtectedRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AppProvider>
