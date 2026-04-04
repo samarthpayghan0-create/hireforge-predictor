@@ -110,13 +110,16 @@ function calculateATSScores(resumeText: string, aiParsed: any) {
   const sectionScore = Math.round((sections.found.length / REQUIRED_SECTIONS.length) * 100);
 
   // 2. SKILLS MATCH (25% weight) — keyword matching against JD / industry skills
-  const matchedIndustry = INDUSTRY_SKILLS.filter(
-    (s) =>
-      lower.includes(s.toLowerCase()) ||
-      (aiParsed.detected_skills || []).some(
-        (d: string) => d.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(d.toLowerCase())
-      )
-  );
+  const matchedIndustry = INDUSTRY_SKILLS.filter((s) => {
+    const escaped = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const wordRegex = new RegExp(`\\b${escaped}\\b`, "i");
+    // Match against resume text using word boundaries
+    if (wordRegex.test(text)) return true;
+    // Also check AI-detected skills for exact matches (case-insensitive)
+    return (aiParsed.detected_skills || []).some(
+      (d: string) => d.toLowerCase() === s.toLowerCase()
+    );
+  });
   // Weighted: first 10 skills = high value, next 10 = diminishing returns
   const rawSkillRatio = matchedIndustry.length / 15; // 15 relevant skills = 100%
   const skillsScore = Math.min(100, Math.round(rawSkillRatio * 100));
