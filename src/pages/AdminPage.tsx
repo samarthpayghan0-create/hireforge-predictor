@@ -79,19 +79,21 @@ export default function AdminPage() {
   };
 
   const fetchStudents = async () => {
-    const { data } = await supabase
-      .from("student_profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (data) {
-      setStudents(
-        data.map((s) => ({
-          ...s,
-          programming_skills: s.programming_skills ?? [],
-          placement_probability: calcPlacement(s as StudentRecord),
-        }))
-      );
+    try {
+      const { data, error } = await supabase.functions.invoke("list-profiles");
+      if (error) throw error;
+      if (data) {
+        setStudents(
+          data.map((s: any) => ({
+            ...s,
+            programming_skills: s.programming_skills ?? [],
+            placement_probability: calcPlacement(s as StudentRecord),
+          }))
+        );
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch profiles:", err);
+      toast.error("Failed to load student profiles");
     }
   };
 
