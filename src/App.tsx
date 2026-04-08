@@ -18,6 +18,7 @@ import CodingPage from "@/pages/CodingPage";
 import CareerPage from "@/pages/CareerPage";
 import AdminPage from "@/pages/AdminPage";
 import AiRoadmapPage from "@/pages/AiRoadmapPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +47,7 @@ const App = () => {
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/ai-roadmap" element={<AiRoadmapPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
