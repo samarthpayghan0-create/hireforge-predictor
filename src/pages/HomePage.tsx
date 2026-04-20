@@ -70,8 +70,6 @@ export default function HomePage() {
 
   const highlights = [
     { value: "8+", label: "AI-Powered Tools" },
-    { value: "Free", label: "Forever · No Paywalls" },
-    { value: "🇮🇳", label: "Built for Indian Students" },
     { value: avgRating ? `${avgRating}★` : "—", label: "User Rating" },
   ];
 
