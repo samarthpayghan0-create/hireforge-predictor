@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare, BookOpen, Sparkles, Camera, ImageIcon } from "lucide-react";
+import { User, Save, Plus, X, Brain, Code, Cpu, ChevronRight, ChevronLeft, GraduationCap, Briefcase, MessageSquare, BookOpen, Camera, ImageIcon } from "lucide-react";
 
 const programmingOptions = [
   "Python", "Java", "C++", "C", "JavaScript", "TypeScript", "React", "Angular", "Vue.js",
@@ -263,7 +263,7 @@ export default function ProfilePage() {
               </div>
               <div className="bg-primary/5 rounded-2xl p-5 border border-primary/10">
                 <div className="flex items-start gap-3">
-                  <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <Cpu className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <p className="text-sm text-muted-foreground">
                     <strong className="text-foreground">Tip:</strong> Include all projects — personal, academic, and professional. Quality matters more than quantity!
                   </p>

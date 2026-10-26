@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Mail, Sparkles, ArrowLeft, CheckCircle2, RefreshCw } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle2, RefreshCw } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl gradient-primary shadow-glow flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-8 h-8 text-primary-foreground" />
+            <Mail className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground">Forgot Password?</h1>
           <p className="text-muted-foreground mt-2">

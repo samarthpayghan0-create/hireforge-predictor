@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
-import { Download, Clock, BookOpen, Target, Rocket, Star, ArrowDown, GraduationCap, Sparkles } from "lucide-react";
+import { Download, Clock, BookOpen, Target, Rocket, Star, ArrowDown, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
 interface RoadmapStep {
@@ -104,7 +104,7 @@ export default function RoadmapVisual({ roadmap, careerGoal }: { roadmap: Roadma
               fontSize: "12px", color: "#a5b4fc", fontWeight: 600, letterSpacing: "0.5px",
               textTransform: "uppercase",
             }}>
-              <Sparkles style={{ width: 13, height: 13 }} /> AI-Generated Roadmap
+              <Rocket style={{ width: 13, height: 13 }} /> Roadmap
             </div>
             
             <h2 style={{

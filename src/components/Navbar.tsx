@@ -16,7 +16,7 @@ import { toast } from "sonner";
 const navItems = [
   { path: "/", label: "Home", icon: BarChart3 },
   { path: "/resume", label: "Resume Analyzer", icon: FileText },
-  { path: "/voice", label: "AI Mock Interview", icon: Mic },
+  { path: "/voice", label: "Mock Interview", icon: Mic },
   { path: "/coding", label: "Coding Challenge", icon: Code },
   { path: "/career", label: "Career Paths", icon: Compass },
   { path: "/quiz", label: "Quiz Setup", icon: Map },
@@ -123,7 +123,7 @@ export default function Navbar() {
                className="rounded-xl border-primary/50 bg-primary/10 hover:bg-primary/20 gap-1.5 font-bold text-primary"
              >
                <Link to="/ai-roadmap">
-                 <Route className="w-4 h-4" /> <span className="hidden sm:inline">AI Career Roadmap</span>
+                 <Route className="w-4 h-4" /> <span className="hidden sm:inline">Career Roadmap</span>
                </Link>
              </Button>
            </div>
@@ -170,25 +170,25 @@ export default function Navbar() {
                 {user ? (
                   <div className="gradient-primary p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                      <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center overflow-hidden">
                         {avatarUrl ? (
                           <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
-                          <User className="w-5 h-5 text-white" />
+                          <User className="w-5 h-5 text-primary-foreground" />
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">
+                        <p className="text-sm font-semibold text-primary-foreground truncate">
                           {profileName || user.user_metadata?.full_name || "Student"}
                         </p>
-                        <p className="text-xs text-white/70 truncate">{user.email}</p>
+                        <p className="text-xs text-primary-foreground/70 truncate">{user.email}</p>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="gradient-primary p-4">
-                    <p className="text-sm font-semibold text-white">Settings</p>
-                    <p className="text-xs text-white/70">Customize your experience</p>
+                    <p className="text-sm font-semibold text-primary-foreground">Settings</p>
+                    <p className="text-xs text-primary-foreground/70">Customize your experience</p>
                   </div>
                 )}
 
