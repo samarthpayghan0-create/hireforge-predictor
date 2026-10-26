@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogIn, UserPlus, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
+import { LogIn, UserPlus, Mail, Lock, User, ArrowRight } from "lucide-react";
 
 export default function AuthPage() {
   const { signIn, signUp } = useAuth();
@@ -48,15 +48,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-pattern flex items-center justify-center px-4">
-      {/* Background effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-
       <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl gradient-primary shadow-glow flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 rounded-lg gradient-primary flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground">
             {isLogin ? "Welcome Back" : "Join HireForge"}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight, Star, Sparkles, Loader2, Calendar, Rocket, ExternalLink } from "lucide-react";
+import { Brain, BookOpen, Mic, TrendingUp, AlertTriangle, CheckCircle2, Lightbulb, Target, Zap, ArrowRight, Star, Loader2, Calendar, Rocket, ExternalLink } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import SkillBar from "@/components/SkillBar";
 import { Button } from "@/components/ui/button";
@@ -436,7 +436,7 @@ export default function DashboardPage() {
         <div className="mt-8 card-elevated p-6 md:p-8 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Target className="w-5 h-5 text-primary" />
               <h2 className="font-display font-semibold text-lg text-foreground">AI Skill Recommendations</h2>
             </div>
             <Button
@@ -445,7 +445,7 @@ export default function DashboardPage() {
               className="gradient-primary text-primary-foreground rounded-xl shadow-glow"
               size="sm"
             >
-              {loadingRecs ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing...</> : <><Sparkles className="w-4 h-4 mr-2" /> {aiRecs ? "Refresh" : "Get AI Recommendations"}</>}
+              {loadingRecs ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing...</> : <><Target className="w-4 h-4 mr-2" /> {aiRecs ? "Refresh" : "Get AI Recommendations"}</>}
             </Button>
           </div>
 

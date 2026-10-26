@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, BookOpen, Clock, Star, ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { Route, BookOpen, Clock, Star, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +54,7 @@ function RoadmapLoadingState() {
       <div className="relative w-20 h-20 mx-auto">
         <div className="absolute inset-0 rounded-full border-4 border-secondary" />
         <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-        <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-primary" />
+        <Route className="absolute inset-0 m-auto w-8 h-8 text-primary" />
       </div>
       <div className="space-y-2">
         <p className="text-lg font-medium text-foreground transition-all duration-300">{LOADING_MESSAGES[msgIndex]}</p>

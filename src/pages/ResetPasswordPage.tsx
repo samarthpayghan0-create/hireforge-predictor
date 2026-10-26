@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Sparkles, CheckCircle, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Lock, CheckCircle, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 function getPasswordStrength(password: string) {
@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl gradient-primary shadow-glow flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-8 h-8 text-primary-foreground" />
+            <ShieldCheck className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground">Set New Password</h1>
           <p className="text-muted-foreground mt-2">Enter your new password below</p>
