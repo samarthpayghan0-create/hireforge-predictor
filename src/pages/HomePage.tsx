@@ -129,7 +129,6 @@ export default function HomePage() {
             {highlights.map((item, i) => (
               <div key={i} className="text-center animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
                 <p className="text-3xl md:text-4xl font-display font-bold text-foreground">{item.value}</p>
-                <p className="text-sm text-muted-foreground mt-2 font-medium">{item.label}</p>
               </div>
             ))}
           </div>
