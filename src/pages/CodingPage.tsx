@@ -284,7 +284,7 @@ export default function CodingPage() {
               <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Coding Challenge Game</h1>
               <p className="text-muted-foreground">Solve MAANG-style problems and climb the leaderboard</p>
             </div>
-            <Button variant="outline" onClick={() => setShowLeaderboard(!showLeaderboard)} className="rounded-xl gap-2">
+            <Button variant="outline" onClick={() => setShowLeaderboard(!showLeaderboard)} className="rounded-xl gap-2 px-2.5 sm:px-4 text-xs sm:text-sm">
               <Trophy className="w-4 h-4" /> Leaderboard
             </Button>
           </div>

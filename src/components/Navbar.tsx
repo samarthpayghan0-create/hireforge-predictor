@@ -71,8 +71,8 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 glass-strong border-b border-border/30">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="container mx-auto px-2 sm:px-4 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-1">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative">
@@ -85,7 +85,7 @@ export default function Navbar() {
           </Link>
 
            {/* Quick Actions: Home & Back */}
-           <div className="flex items-center gap-1.5 ml-2">
+           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
              <Button
                variant="outline"
                size="sm"
@@ -154,7 +154,7 @@ export default function Navbar() {
           </div>
 
           {/* Right side: Settings + Mobile hamburger */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Settings Popover */}
             <Popover>
               <PopoverTrigger asChild>

@@ -396,7 +396,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
               <Target className="w-5 h-5 text-primary" />
               <label className="text-base font-semibold text-foreground">Select Sections</label>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
               {SECTIONS.map(section => {
                 const isSelected = selectedSections.has(section.key);
                 return (
@@ -404,7 +404,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                     key={section.key} 
                     type="button" 
                     onClick={() => toggleSection(section.key)}
-                    className={`p-5 rounded-2xl border-2 text-left transition-all duration-200 ${
+                    className={`p-3 sm:p-5 rounded-2xl border-2 text-left transition-all duration-200 ${
                       isSelected 
                         ? "border-primary bg-primary/5 shadow-glow" 
                         : "border-border hover:border-primary/40 bg-card"
@@ -443,7 +443,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                   key={val} 
                   type="button" 
                   onClick={() => setDifficulty(val)}
-                  className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 text-center transition-all duration-200 ${
                     difficulty === val 
                       ? "border-primary bg-primary/5 shadow-glow" 
                       : "border-border hover:border-primary/40 bg-card"
@@ -472,7 +472,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                         key={count} 
                         type="button" 
                         onClick={() => updateCount(section.key, count)}
-                        className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
+                        className={`p-2.5 sm:p-4 rounded-xl border-2 text-center transition-all duration-200 ${
                           sectionCounts[section.key] === count 
                             ? "border-primary bg-primary/5" 
                             : "border-border hover:border-primary/40 bg-card"
@@ -481,7 +481,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                         <p className={`text-2xl font-bold ${sectionCounts[section.key] === count ? "text-primary" : "text-foreground"}`}>
                           {count}
                         </p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">questions</p>
+                        <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">questions</p>
                       </button>
                     ))}
                   </div>
