@@ -85,7 +85,7 @@ export default function Navbar() {
           </Link>
 
            {/* Quick Actions: Home & Back */}
-           <div className="flex items-center gap-1.5 ml-2">
+           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
              <Button
                variant="outline"
                size="sm"
