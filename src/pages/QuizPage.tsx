@@ -443,7 +443,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                   key={val} 
                   type="button" 
                   onClick={() => setDifficulty(val)}
-                  className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 text-center transition-all duration-200 ${
                     difficulty === val 
                       ? "border-primary bg-primary/5 shadow-glow" 
                       : "border-border hover:border-primary/40 bg-card"
@@ -472,7 +472,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                         key={count} 
                         type="button" 
                         onClick={() => updateCount(section.key, count)}
-                        className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
+                        className={`p-2.5 sm:p-4 rounded-xl border-2 text-center transition-all duration-200 ${
                           sectionCounts[section.key] === count 
                             ? "border-primary bg-primary/5" 
                             : "border-border hover:border-primary/40 bg-card"
@@ -481,7 +481,7 @@ function QuizSetup({ difficulty, setDifficulty, sectionCounts, setSectionCounts,
                         <p className={`text-2xl font-bold ${sectionCounts[section.key] === count ? "text-primary" : "text-foreground"}`}>
                           {count}
                         </p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">questions</p>
+                        <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wide">questions</p>
                       </button>
                     ))}
                   </div>
