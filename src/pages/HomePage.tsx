@@ -83,19 +83,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="py-12 bg-secondary/50 border-b border-border">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {highlights.map((item, i) => (
-              <div key={i} className="text-center animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                <p className="text-3xl md:text-4xl font-display font-bold text-foreground">{item.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section className="py-24 md:py-32">
         <div className="container mx-auto px-4 lg:px-8">
