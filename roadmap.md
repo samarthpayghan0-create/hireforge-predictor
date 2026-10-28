@@ -1,0 +1,1 @@
+- Remove "Assessment Tools" and "User Rating" labels from home page stats
